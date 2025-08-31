@@ -6,52 +6,58 @@
 <title>Aula Digital — Consulta para familias</title>
 <style>
   :root{
-    --bg:#f7f9ff; --card:#ffffff; --text:#0b1020; --muted:#516072; --accent:#2b6bff;
+    --bg:#f7f9ff; --card:#ffffff; --text:#0b1020; --muted:#526072; --accent:#2b6bff;
     --bd:#d9e3ff; --ok:#0ea371; --warn:#f0b429; --bad:#ef4444;
+    --barbg: color-mix(in oklab, var(--card) 80%, transparent);
   }
   [data-theme="dark"]{
     --bg:#0c1220; --card:#101a34; --text:#eaf3ff; --muted:#93a6bc; --accent:#6aa9ff;
-    --bd:#223056; --ok:#1ec48d; --warn:#ffce3a; --bad:#ff7a7a;
+    --bd:#223056; --ok:#1ec48d; --warn:#ffce3a; --bad:#ff7a7a; --barbg:#0a1330;
   }
   *{box-sizing:border-box}
   body{margin:0;font-family:system-ui, -apple-system, Segoe UI, Inter, Roboto, Arial;background:var(--bg);color:var(--text)}
-  header{position:sticky;top:0;background:color-mix(in oklab, var(--card) 90%, transparent);backdrop-filter:blur(6px);
-    border-bottom:1px solid var(--bd); padding:14px 16px; display:flex; gap:12px; align-items:center}
+  header{position:sticky;top:0;z-index:10;background:color-mix(in oklab, var(--card) 90%, transparent);
+    backdrop-filter:blur(6px); border-bottom:1px solid var(--bd); padding:14px 16px; display:flex; gap:12px; align-items:center}
   header h1{font-size:18px;margin:0}
   header .right{margin-left:auto;display:flex;gap:8px;align-items:center}
-  .btn{border:0;border-radius:12px;padding:10px 14px;font-weight:700;cursor:pointer}
+  .btn{border:0;border-radius:12px;padding:12px 16px;font-weight:700;cursor:pointer;touch-action:manipulation}
   .btn.primary{background:var(--accent);color:white}
   .btn.ghost{background:transparent;border:1px solid var(--bd);color:var(--text)}
   .btn.small{padding:8px 10px;border-radius:10px}
   main{max-width:960px;margin:auto;padding:18px}
   .card{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:16px}
-  .hero{display:grid;gap:10px}
+  .hero{display:grid;gap:12px}
   .input{display:grid;grid-template-columns:1fr auto auto;gap:8px}
   @media (max-width:640px){.input{grid-template-columns:1fr;}}
-  .input input{padding:12px 14px;border:1px solid var(--bd);border-radius:12px;background:white}
+  .input input{padding:14px 16px;border:1px solid var(--bd);border-radius:12px;background:white;font-size:16px}
   [data-theme="dark"] .input input{background:#0d152b;color:var(--text)}
   .hint{color:var(--muted);font-size:13px}
-  h2{margin:10px 0 8px 0}
-  h3{margin:12px 0 8px 0}
-  .pill{display:inline-block;padding:6px 10px;border-radius:999px;font-weight:800;font-size:12px;border:1px solid var(--bd);margin-right:6px}
-  .pill.bad{background:color-mix(in oklab, #fff 50%, var(--bad)); color:#5a0b0b; border-color:color-mix(in oklab, var(--bad), #fff 60%)}
-  .pill.warn{background:color-mix(in oklab, #fff 50%, var(--warn)); color:#694b00; border-color:color-mix(in oklab, var(--warn), #fff 60%)}
-  .pill.ok{background:color-mix(in oklab, #fff 50%, var(--ok)); color:#0b3e30; border-color:color-mix(in oklab, var(--ok), #fff 60%)}
-  [data-theme="dark"] .pill.bad{color:#ffd0d0} [data-theme="dark"] .pill.warn{color:#ffeaa7} [data-theme="dark"] .pill.ok{color:#c6ffe8}
+  h2{margin:8px 0 6px 0}
+  h3{margin:10px 0 8px 0}
   .grid2{display:grid;grid-template-columns:1fr;gap:12px}
   @media (min-width:840px){.grid2{grid-template-columns:1fr 1fr}}
   .list{display:grid;gap:8px}
   details{border:1px solid var(--bd);border-radius:12px;padding:8px 10px;background:color-mix(in oklab, var(--card) 94%, transparent)}
   summary{cursor:pointer;font-weight:700}
-  .stat{display:grid;grid-template-columns:repeat(2,minmax(120px,1fr));gap:10px}
+  .stat{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media (max-width:640px){.stat{grid-template-columns:1fr}}
   .k{color:var(--muted);font-size:14px}
   .v{font-weight:900;font-size:20px}
-  .chips{display:flex;gap:8px;flex-wrap:wrap}
-  .chip{border:1px solid var(--bd);background:transparent;border-radius:999px;padding:8px 12px;cursor:pointer}
+  .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
+  .chip{border:1px solid var(--bd);background:transparent;border-radius:999px;padding:10px 14px;font-weight:700;cursor:pointer}
   .chip.active{background:var(--accent);color:#fff;border-color:var(--accent)}
   .topbar{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap}
   .badgeb{display:inline-flex;gap:6px;align-items:center;border:1px solid var(--bd);border-radius:999px;padding:6px 10px;font-size:12px}
   .footer-note{margin-top:12px;font-size:12px;color:var(--muted)}
+  /* --- Chart --- */
+  .chart{display:grid;gap:10px;margin-top:14px}
+  .bar{position:relative;border-radius:12px;border:1px solid var(--bd);background:var(--barbg);height:44px;display:flex;align-items:center;overflow:hidden}
+  .bar::before{content:"";position:absolute;inset:0;transform-origin:left center;transform:scaleX(var(--pct,0));}
+  .bar.fal::before{background:linear-gradient(90deg, var(--bad), #ff9b9b)}
+  .bar.tar::before{background:linear-gradient(90deg, var(--warn), #ffe08a)}
+  .bar.ati::before{background:linear-gradient(90deg, var(--ok), #a7efd5)}
+  .bar .lbl{position:relative;z-index:1;padding-left:12px;font-weight:800}
+  .bar .val{position:absolute;right:10px;z-index:1;font-weight:900}
 </style>
 </head>
 <body>
@@ -70,7 +76,7 @@
       <p class="hint">Escriba el <b>ID escolar</b> que le proporcionó la escuela para consultar tareas y asistencia.</p>
     </div>
     <div class="input">
-      <input id="idInput" autocomplete="off" placeholder="Pegue aquí el ID entregado por la escuela">
+      <input id="idInput" autocomplete="off" placeholder="Pegue aquí el ID entregado por la escuela" inputmode="latin-name">
       <button id="goBtn" class="btn primary">Buscar alumno</button>
       <button id="saveBtn" class="btn ghost">Recordar ID en este dispositivo</button>
     </div>
@@ -105,6 +111,13 @@
         <div><div class="k">Asistencia — 30 días</div><div class="v" id="stat-as30">–</div></div>
         <div><div class="k">Asistencia total (histórica)</div><div class="v" id="stat-asHist">–</div></div>
         <div><div class="k">Faltas (históricas)</div><div class="v" id="stat-faltHist">–</div></div>
+      </div>
+
+      <!-- Gráfico de barras -->
+      <div class="chart" aria-label="Resumen visual del trimestre">
+        <div class="bar fal" id="bar-fal" role="img" aria-label="Faltantes"><span class="lbl">⏳ Faltantes</span><span class="val" id="val-fal">0</span></div>
+        <div class="bar tar" id="bar-tar" role="img" aria-label="Entregados tarde"><span class="lbl">🕒 Tarde</span><span class="val" id="val-tar">0</span></div>
+        <div class="bar ati" id="bar-ati" role="img" aria-label="Entregados a tiempo"><span class="lbl">✅ A tiempo</span><span class="val" id="val-ati">0</span></div>
       </div>
 
       <p class="footer-note" style="margin-top:10px">
@@ -277,13 +290,33 @@ function updateTriSubtitle(){
   $('#tri-subtitle').textContent = 'Resumen de ' + (map[TRI] || 'Todo');
 }
 function byTri(list){ if(TRI==='ALL') return list; return list.filter(x=>String(x.momento||'').toUpperCase()===TRI); }
+function pct(n,d){return d?Math.round(n/d*100):0}
+
+/* === Gráfico de barras (responsive, sin librerías) === */
+function renderBarChart({faltantes, tarde, atiempo}){
+  const max = Math.max(faltantes, tarde, atiempo, 1);
+  const wF = faltantes/max, wT = tarde/max, wA = atiempo/max;
+
+  const setBar = (id,val,p) => {
+    const el = $(id);
+    el.style.setProperty('--pct', p.toFixed(3));
+    el.querySelector('.val').textContent = val;
+  };
+  setBar('#bar-fal', faltantes, wF);
+  setBar('#bar-tar', tarde,     wT);
+  setBar('#bar-ati', atiempo,   wA);
+}
+
 function renderLists(){
   const falt=byTri(ALL.faltantes), tar=byTri(ALL.tarde), ati=byTri(ALL.atiempo);
   const totalTri = byTri(ALL.presets).length;
   const hechosTri = tar.length + ati.length;
+
   $('#stat-cump-tri').textContent = totalTri? `${Math.round(hechosTri/totalTri*100)}%` : '–';
-  // Cambiado "Presets" -> "Trabajos totales"
   $('#stat-tot-tri').textContent  = `Faltantes ${falt.length} · Tarde ${tar.length} · A tiempo ${ati.length} · Trabajos totales ${totalTri}`;
+
+  // actualizar gráfico
+  renderBarChart({faltantes:falt.length, tarde:tar.length, atiempo:ati.length});
 
   const renderItem = (t) => {
     const mom = t.momento ? ` · ${t.momento}` : '';
@@ -364,7 +397,7 @@ async function cargarAlumnoPorID(id){
   $('#stat-asHist').textContent = ah.total  ? `${Math.round(ah.present/ah.total*100)}%  (${ah.present}/${ah.total})` : '–';
   $('#stat-faltHist').textContent = ah.total ? `${ah.total - ah.present}` : '–';
 
-  // 8) Selector y listas por trimestre
+  // 8) Selector, listas y gráfico por trimestre
   TRI='ALL'; setTriChips(); renderLists();
 
   // 9) Mostrar
@@ -380,8 +413,8 @@ themeBtn.onclick=()=>applyTheme(document.documentElement.getAttribute('data-them
 
 $('#saveBtn').onclick=()=>{const v=$('#idInput').value.trim(); if(!v){alert('Escriba el ID escolar.'); return;} localStorage.setItem('familias_id',v); alert('Listo. Guardado en este dispositivo.');};
 $('#goBtn').onclick=async()=>{
-  const id=$('#idInput').value.trim();
-  if(!/^ID[A-Z0-9]{6,}$/i.test(id)){ alert('ID no válido. Revise que no tenga espacios ni letras minúsculas.'); return; }
+  const id=$('#idInput').value.trim().toUpperCase();
+  if(!/^ID[A-Z0-9]{6,}$/.test(id)){ alert('ID no válido. Revise que no tenga espacios ni letras minúsculas.'); return; }
   try{ await cargarAlumnoPorID(id); } catch(e){ alert('No fue posible leer los datos: '+e.message); }
 };
 $('#idInput').addEventListener('keydown',e=>{ if(e.key==='Enter'){ $('#goBtn').click(); }});
