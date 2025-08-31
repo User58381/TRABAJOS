@@ -26,8 +26,9 @@
   main{max-width:960px;margin:auto;padding:18px}
   .card{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:16px}
   .hero{display:grid;gap:10px}
-  .input{display:flex;gap:8px;flex-wrap:wrap}
-  .input input{flex:1;min-width:260px;padding:12px 14px;border:1px solid var(--bd);border-radius:12px;background:white}
+  .input{display:grid;grid-template-columns:1fr auto auto;gap:8px}
+  @media (max-width:640px){.input{grid-template-columns:1fr;}}
+  .input input{padding:12px 14px;border:1px solid var(--bd);border-radius:12px;background:white}
   [data-theme="dark"] .input input{background:#0d152b;color:var(--text)}
   .hint{color:var(--muted);font-size:13px}
   h2{margin:10px 0 8px 0}
@@ -45,7 +46,6 @@
   .stat{display:grid;grid-template-columns:repeat(2,minmax(120px,1fr));gap:10px}
   .k{color:var(--muted);font-size:12px}
   .v{font-weight:900;font-size:18px}
-  .kbd{font-family:ui-monospace,Consolas,monospace;border:1px solid var(--bd);padding:2px 6px;border-radius:6px;background:color-mix(in oklab, var(--card) 80%, transparent)}
   .chips{display:flex;gap:8px;flex-wrap:wrap}
   .chip{border:1px solid var(--bd);background:transparent;border-radius:999px;padding:8px 12px;cursor:pointer}
   .chip.active{background:var(--accent);color:#fff;border-color:var(--accent)}
@@ -61,40 +61,44 @@
 </header>
 
 <main>
-  <!-- Bloque de acceso (SOLO ID) -->
+  <!-- Paso 1: Acceso (SOLO ID) -->
   <section class="card hero" id="search-card">
     <div>
-      <h2>Escribe el ID del alumno</h2>
-      <p class="hint">Ejemplo: <span class="kbd">IDEF2F55BB</span>. Por privacidad, esta página sólo acepta <b>ID</b> (no muestra listados de nombres).</p>
+      <h2>1) Ingrese el ID del alumno</h2>
+      <p class="hint">Por privacidad, esta página sólo acepta <b>ID de alumno</b>. El colegio le proporcionó este identificador.</p>
     </div>
     <div class="input">
-      <input id="idInput" placeholder="Pega aquí el ID del alumno…">
+      <input id="idInput" autocomplete="off" placeholder="Escriba aquí el ID del alumno…">
       <button id="goBtn" class="btn primary">Ver resultados</button>
-      <button id="saveBtn" class="btn ghost">Recordar este ID</button>
+      <button id="saveBtn" class="btn ghost">Recordar ID en este dispositivo</button>
     </div>
-    <div class="hint">Este sitio <u>solo lee</u> los datos para mostrar el resumen. Nada se modifica.</div>
+    <div class="hint">Este sitio <u>solo lee</u> los datos para mostrar el resumen. Nada se modifica en la libreta.</div>
   </section>
 
-  <!-- Vista alumno -->
+  <!-- Paso 2: Resultados -->
   <section id="student-view" style="display:none; margin-top:14px">
     <div class="card">
       <h2 id="alumno-nombre">Alumno</h2>
       <div class="hint" id="alumno-id"></div>
 
-      <div class="chips" id="tri-chips" style="margin-top:10px">
-        <!-- Selector por trimestre -->
+      <!-- Selector por trimestre -->
+      <div style="margin-top:8px">
+        <div class="chips" id="tri-chips"></div>
+        <div class="hint">Puede ver <b>Todo</b> o sólo un trimestre: <b>Trimestre 1</b> (M1), <b>Trimestre 2</b> (M2), <b>Trimestre 3</b> (M3).</div>
       </div>
 
-      <div class="stat" style="margin-top:8px">
+      <div class="stat" style="margin-top:10px">
         <div><div class="k">Cumplimiento (trimestre elegido)</div><div class="v" id="stat-cump-tri">–</div></div>
-        <div><div class="k">Totales (trimestre)</div><div class="v" id="stat-tot-tri">–</div></div>
+        <div><div class="k">Totales — Trimestre</div><div class="v" id="stat-tot-tri">–</div></div>
         <div><div class="k">Asistencia — semana</div><div class="v" id="stat-aswk">–</div></div>
         <div><div class="k">Asistencia — 30 días</div><div class="v" id="stat-as30">–</div></div>
         <div><div class="k">Asistencia total (histórica)</div><div class="v" id="stat-asHist">–</div></div>
         <div><div class="k">Faltas (históricas)</div><div class="v" id="stat-faltHist">–</div></div>
       </div>
 
-      <p class="footer-note" style="margin-top:10px">Nota: si alguna falta fue <b>justificada</b>, no se preocupe; aunque aparezca aquí como falta, la escuela la revisa y no afecta indebidamente.</p>
+      <p class="footer-note" style="margin-top:10px">
+        Importante: si alguna inasistencia fue <b>justificada</b>, no se preocupe; aunque aparezca aquí como falta, la escuela la revisa y no afecta indebidamente.
+      </p>
     </div>
 
     <div class="grid2" style="margin-top:12px">
@@ -111,6 +115,10 @@
     <div class="card" style="margin-top:12px">
       <h3>Entregados (a tiempo)</h3>
       <div id="atiempo" class="list"></div>
+    </div>
+
+    <div style="display:flex;gap:8px;margin-top:12px">
+      <button id="backBtn" class="btn ghost">Cambiar de alumno</button>
     </div>
 
     <p class="footer-note">Si detecta algún dato que no coincide, contacte a la escuela para verificar la libreta digital.</p>
@@ -224,7 +232,7 @@ function asistenciaAlumno(cols,rows,ref,start,end){
   if(!row) return {present:0,total:0};
   const dateCols=getDateCols(cols).filter(i=>{const d=normDate(cols[i]); return d && d>=start && d<=end;});
   let present=0,total=0; for(const i of dateCols){const v=row[i]; if(v!==null&&v!==''){ total++; if(isPresent(v)) present++; } }
-  return {present,total};
+  return {present,total,row};
 }
 function asistenciaHistorica(cols,rows,ref){
   const iId=cols.findIndex(c=>/^(id|matric)/i.test(c));
@@ -256,14 +264,12 @@ function setTriChips(){
   for(const b of host.querySelectorAll('.chip')) b.onclick=()=>{TRI=b.getAttribute('data-v'); setTriChips(); renderLists();};
 }
 function byTri(list){ if(TRI==='ALL') return list; return list.filter(x=>String(x.momento||'').toUpperCase()===TRI); }
-function pct(n,d){return d?`${Math.round(n/d*100)}%`:'–';}
-
 function renderLists(){
   const falt=byTri(ALL.faltantes), tar=byTri(ALL.tarde), ati=byTri(ALL.atiempo);
   const totalTri = byTri(ALL.presets).length;
   const hechosTri = tar.length + ati.length;
   $('#stat-cump-tri').textContent = totalTri? `${Math.round(hechosTri/totalTri*100)}%` : '–';
-  $('#stat-tot-tri').textContent = `Faltantes ${falt.length} · Tarde ${tar.length} · A tiempo ${ati.length} · Presets ${totalTri}`;
+  $('#stat-tot-tri').textContent  = `Faltantes ${falt.length} · Tarde ${tar.length} · A tiempo ${ati.length} · Presets ${totalTri}`;
 
   const renderItem = (t) => {
     const mom = t.momento ? ` · ${t.momento}` : '';
@@ -285,7 +291,7 @@ async function cargarAlumnoPorID(id){
   // 1) Lee bloques
   const [asis, reg, pre] = await Promise.all([loadBlock('asistencia'), loadBlock('registro'), loadBlock('presets')]);
 
-  // 2) Parseo y seleccion del alumno
+  // 2) Parseo y selección del alumno
   const entregas=parseRegistro(reg.cols, reg.rows);
   const presets=parsePresets(pre.cols, pre.rows);
   let entAlumno=entregas.filter(t=>norm(t.id)===norm(ref.id));
@@ -307,25 +313,29 @@ async function cargarAlumnoPorID(id){
   }
   ALL={faltantes,tarde,atiempo,presets};
 
-  // 4) Nombre (si se puede inferir) y ID
-  const iId=asis.cols.findIndex(c=>/^(id|matric)/i.test(c));
+  // 4) Nombre (desde Asistencia) e ID
+  const aw = asistenciaAlumno(asis.cols, asis.rows, ref, ...weekRange(new Date()));
   const iNom=asis.cols.findIndex(c=>/^nombre/i.test(c));
   let nombre='';
-  if(iId>=0 && iNom>=0){
+  if(aw.row && iNom>=0) nombre=String(aw.row[iNom]||'');
+  if(!nombre){
+    const iId=asis.cols.findIndex(c=>/^(id|matric)/i.test(c));
     const r=asis.rows.find(r=>norm(r[iId])===norm(id));
-    if(r) nombre=String(r[iNom]||'');
+    if(r && iNom>=0) nombre=String(r[iNom]||'');
   }
-  $('#alumno-nombre').textContent = nombre || 'Alumno';
+  if(!nombre){ alert('No encontramos ese ID. Verifique con la escuela.'); return; }
+
+  $('#alumno-nombre').textContent = nombre;
   $('#alumno-id').textContent = 'ID: ' + id;
 
   // 5) Asistencia: semana, 30 días y total histórica
   const hoy=new Date(); const [w0,w1]=weekRange(hoy);
-  const aw=asistenciaAlumno(asis.cols, asis.rows, ref, w0, w1);
   const a30=asistenciaAlumno(asis.cols, asis.rows, ref, ymd(new Date(hoy.getFullYear(),hoy.getMonth(),hoy.getDate()-30)), ymd(hoy));
   const ah=asistenciaHistorica(asis.cols, asis.rows, ref);
-  $('#stat-aswk').textContent = aw.total ? `${Math.round(aw.present/aw.total*100)}%  (${aw.present}/${aw.total})` : '–';
-  $('#stat-as30').textContent = a30.total ? `${Math.round(a30.present/a30.total*100)}%  (${a30.present}/${a30.total})` : '–';
-  $('#stat-asHist').textContent = ah.total ? `${Math.round(ah.present/ah.total*100)}%  (${ah.present}/${ah.total})` : '–';
+
+  $('#stat-aswk').textContent  = aw.total ? `${Math.round(aw.present/aw.total*100)}%  (${aw.present}/${aw.total})` : '–';
+  $('#stat-as30').textContent  = a30.total ? `${Math.round(a30.present/a30.total*100)}%  (${a30.present}/${a30.total})` : '–';
+  $('#stat-asHist').textContent= ah.total ? `${Math.round(ah.present/ah.total*100)}%  (${ah.present}/${ah.total})` : '–';
   $('#stat-faltHist').textContent = ah.total ? `${ah.total - ah.present}` : '–';
 
   // 6) Selector y listas por trimestre
@@ -342,14 +352,15 @@ function applyTheme(t){document.documentElement.setAttribute('data-theme', t); t
 applyTheme(localStorage.getItem('familias_theme')||'light');
 themeBtn.onclick=()=>applyTheme(document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark');
 
-$('#saveBtn').onclick=()=>{const v=$('#idInput').value.trim(); if(!v){alert('Escribe el ID.'); return;} localStorage.setItem('familias_id',v); alert('Listo. Guardado en este dispositivo.');};
+$('#saveBtn').onclick=()=>{const v=$('#idInput').value.trim(); if(!v){alert('Escriba el ID.'); return;} localStorage.setItem('familias_id',v); alert('Listo. Guardado en este dispositivo.');};
 $('#goBtn').onclick=async()=>{
   const id=$('#idInput').value.trim();
-  if(!/^ID[A-Z0-9]{6,}$/i.test(id)){ alert('Por privacidad, escribe un ID válido (ej. IDEF2F55BB).'); return; }
+  if(!/^ID[A-Z0-9]{6,}$/i.test(id)){ alert('Por privacidad, escriba un ID válido de alumno.'); return; }
   try{ await cargarAlumnoPorID(id); } catch(e){ alert('No fue posible leer los datos: '+e.message); }
 };
 $('#idInput').addEventListener('keydown',e=>{ if(e.key==='Enter'){ $('#goBtn').click(); }});
 const saved=localStorage.getItem('familias_id'); if(saved) $('#idInput').value=saved;
+$('#backBtn')?.addEventListener('click',()=>{ $('#student-view').style.display='none'; window.scrollTo({top:0,behavior:'smooth'}); });
 </script>
 </body>
 </html>
