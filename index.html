@@ -46,6 +46,9 @@
   .k{color:var(--muted);font-size:12px}
   .v{font-weight:900;font-size:18px}
   .kbd{font-family:ui-monospace,Consolas,monospace;border:1px solid var(--bd);padding:2px 6px;border-radius:6px;background:color-mix(in oklab, var(--card) 80%, transparent)}
+  .chips{display:flex;gap:8px;flex-wrap:wrap}
+  .chip{border:1px solid var(--bd);background:transparent;border-radius:999px;padding:8px 12px;cursor:pointer}
+  .chip.active{background:var(--accent);color:#fff;border-color:var(--accent)}
   .footer-note{margin-top:12px;font-size:12px;color:var(--muted)}
 </style>
 </head>
@@ -58,19 +61,18 @@
 </header>
 
 <main>
-  <!-- Bloque de búsqueda -->
+  <!-- Bloque de acceso (SOLO ID) -->
   <section class="card hero" id="search-card">
     <div>
-      <h2>Busca a tu hijo(a)</h2>
-      <p class="hint">Escribe el <b>ID de alumno</b> (por ejemplo <span class="kbd">IDEF2F55BB</span>). Si no lo conoces, empieza a escribir su nombre y selecciónalo.</p>
+      <h2>Escribe el ID del alumno</h2>
+      <p class="hint">Ejemplo: <span class="kbd">IDEF2F55BB</span>. Por privacidad, esta página sólo acepta <b>ID</b> (no muestra listados de nombres).</p>
     </div>
     <div class="input">
-      <input id="idInput" list="alumnos" placeholder="Escribe el ID o nombre del alumno…">
-      <datalist id="alumnos"></datalist>
+      <input id="idInput" placeholder="Pega aquí el ID del alumno…">
       <button id="goBtn" class="btn primary">Ver resultados</button>
       <button id="saveBtn" class="btn ghost">Recordar este ID</button>
     </div>
-    <div class="hint">Este sitio <u>solo lee</u> los datos de la escuela para mostrar un resumen. Nada se modifica en la libreta.</div>
+    <div class="hint">Este sitio <u>solo lee</u> los datos para mostrar el resumen. Nada se modifica.</div>
   </section>
 
   <!-- Vista alumno -->
@@ -78,24 +80,21 @@
     <div class="card">
       <h2 id="alumno-nombre">Alumno</h2>
       <div class="hint" id="alumno-id"></div>
-      <div class="stat" style="margin-top:8px">
-        <div><div class="k">Cumplimiento general</div><div class="v" id="stat-cump">–</div></div>
-        <div><div class="k">Asistencia — 30 días</div><div class="v" id="stat-as30">–</div></div>
-        <div><div class="k">Asistencia — semana</div><div class="v" id="stat-aswk">–</div></div>
-        <div><div class="k">Entregas tarde</div><div class="v" id="stat-tarde">–</div></div>
-      </div>
-    </div>
 
-    <div class="grid2" style="margin-top:12px">
-      <div class="card">
-        <h3>Resumen por trimestres</h3>
-        <div id="pills" style="margin-bottom:8px"></div>
-        <div class="hint">M1 = Trimestre 1 · M2 = Trimestre 2 · M3 = Trimestre 3</div>
+      <div class="chips" id="tri-chips" style="margin-top:10px">
+        <!-- Selector por trimestre -->
       </div>
-      <div class="card">
-        <h3>Totales generales</h3>
-        <div id="totales"></div>
+
+      <div class="stat" style="margin-top:8px">
+        <div><div class="k">Cumplimiento (trimestre elegido)</div><div class="v" id="stat-cump-tri">–</div></div>
+        <div><div class="k">Totales (trimestre)</div><div class="v" id="stat-tot-tri">–</div></div>
+        <div><div class="k">Asistencia — semana</div><div class="v" id="stat-aswk">–</div></div>
+        <div><div class="k">Asistencia — 30 días</div><div class="v" id="stat-as30">–</div></div>
+        <div><div class="k">Asistencia total (histórica)</div><div class="v" id="stat-asHist">–</div></div>
+        <div><div class="k">Faltas (históricas)</div><div class="v" id="stat-faltHist">–</div></div>
       </div>
+
+      <p class="footer-note" style="margin-top:10px">Nota: si alguna falta fue <b>justificada</b>, no se preocupe; aunque aparezca aquí como falta, la escuela la revisa y no afecta indebidamente.</p>
     </div>
 
     <div class="grid2" style="margin-top:12px">
@@ -114,7 +113,7 @@
       <div id="atiempo" class="list"></div>
     </div>
 
-    <p class="footer-note">Si detectas algún dato que no coincide, contacta a la escuela para verificar la captura en la libreta digital.</p>
+    <p class="footer-note">Si detecta algún dato que no coincide, contacte a la escuela para verificar la libreta digital.</p>
   </section>
 </main>
 
@@ -122,41 +121,6 @@
 /* ====== CONFIG DE TU HOJA ====== */
 const SHEET_ID = '1SWtGmXlf7WbNvUlJBDktXpDcq5OfJkHE75bH5nkxurk';
 const GIDS = { puntos:'0', asistencia:'280572348', registro:'1343140445', presets:'104702199' };
-
-/* Sugerencias (nombre → id) */
-const SUGERENCIAS = [
-  ["ANDRADE RIVERA LUIS EDUARDO","IDEF2F55BB"],
-  ["ANTONIO MUÑOZ OBED","ID5FC1305D"],
-  ["ANTONIO RUIZ EDWIN ELIAS","ID0F9AE021"],
-  ["BARRON ARREDONDO ALLISON VALENTINA","ID94C011EA"],
-  ["CAZARES VARGAS DANIELA MONSERRATH","IDCD6D4580"],
-  ["CRUZ MENDEZ EDGAR PORFIRIO","ID63E4D152"],
-  ["GARCIA GUERRA JOSE ALEXIS","ID1B0647ED"],
-  ["GONZALEZ MORENO ALONDRA ELIZABETH","ID1E3C3F1A"],
-  ["GUERRERO DURAN CESAR EDUARDO","ID2D96DDE0"],
-  ["HERNANDEZ FERNANDO ARIADNA AISLINN","ID2187B000"],
-  ["IBARRA DE LA CRUZ JUAN AARON","ID9C56C4D5"],
-  ["JEREZ NOE JOSE EDUARDO","ID4AE49AF3"],
-  ["JUAREZ GALLEGOS FRANCISCO DANIEL","IDB8AA6898"],
-  ["JUAREZ GALLEGOS MARCELA","ID0DF59CD6"],
-  ["LOPEZ MARTINEZ TADEO GONZALO","IDD6FC391A"],
-  ["LOPEZ NUÑEZ KENDRA LIZET","IDFB481355"],
-  ["MARQUEZ RODRIGUEZ MELISSA","ID0B35387B"],
-  ["MARTINEZ HERNANDEZ DYLAN ALEXANDRO","ID0733503E"],
-  ["MARTINEZ MARTINEZ IVAN JACOB","ID6A68A01A"],
-  ["MARTINEZ OROZCO ALBA ALMA CAROLINA","ID83E38E53"],
-  ["MEDRANO CARRANCO ABIGAIL","ID709BA531"],
-  ["NORBERTO LOPEZ JAQUELINE","ID49D77559"],
-  ["ONTIVEROS MEDINA SOFIA ABIGAIL","IDF2FA1ED5"],
-  ["RAMIREZ LOPEZ GABRIEL ALBERTO","IDE2EFAE55"],
-  ["RAZO CASTILLO MARIO FERNANDO","ID59F92594"],
-  ["RENTERIA ESPINO ZURY ALEXANDRA","ID870FDC06"],
-  ["RODRIGUEZ GARZA ZOE DAYANA","ID30148E08"],
-  ["ROMERO TORRES DALEYZA YAMILETH","ID57B6BE62"],
-  ["SAENZ KENDRA NICOLE","ID9BE2CA42"],
-  ["SALAZAR BARRIOS DEREK ALEJANDRO","ID5C1635B2"],
-  ["TORRES PUENTE NAOMI YAMILETH","IDD8214F73"],
-];
 
 /* ====== UTIL ====== */
 const $=s=>document.querySelector(s);
@@ -208,7 +172,6 @@ function parseCSV(t){
 
 /* ====== PARSERS ====== */
 function parseRegistro(cols,rows){
-  const idx=n=>cols.findIndex(c=>norm(c)===norm(n));
   const iUID=cols.findIndex(c=>/uid[_ ]?preset/i.test(c));
   const iF=cols.findIndex(c=>/^fecha$/i.test(c));
   const iFO=cols.findIndex(c=>/fecha.*objetivo/i.test(c));
@@ -263,37 +226,69 @@ function asistenciaAlumno(cols,rows,ref,start,end){
   let present=0,total=0; for(const i of dateCols){const v=row[i]; if(v!==null&&v!==''){ total++; if(isPresent(v)) present++; } }
   return {present,total};
 }
+function asistenciaHistorica(cols,rows,ref){
+  const iId=cols.findIndex(c=>/^(id|matric)/i.test(c));
+  const iNom=cols.findIndex(c=>/^nombre/i.test(c));
+  let row=null; if(iId>=0 && ref.id) row=rows.find(r=>norm(r[iId])===norm(ref.id));
+  if(!row && iNom>=0 && ref.nombre) row=rows.find(r=>norm(r[iNom])===norm(ref.nombre));
+  if(!row) return {present:0,total:0};
+  const dateCols=getDateCols(cols);
+  let present=0,total=0; for(const i of dateCols){const v=row[i]; if(v!==null&&v!==''){ total++; if(isPresent(v)) present++; } }
+  return {present,total};
+}
 function weekRange(d){const day=d.getDay(); const diff=(day===0?-6:1-day); const mon=new Date(d); mon.setDate(d.getDate()+diff); mon.setHours(0,0,0,0);
   const fri=new Date(mon); fri.setDate(mon.getDate()+4); return [ymd(mon), ymd(fri)]; }
 
 /* ====== CARGA Y RENDER ====== */
 async function loadBlock(name){
-  const sheetNames = {
-    asistencia: 'Asistencia',
-    registro: 'Registro de trabajos',
-    presets: 'Presets'
-  };
+  const sheetNames = {asistencia:'Asistencia', registro:'Registro de trabajos', presets:'Presets'};
   try{ return await fetchGViz(SHEET_ID, sheetNames[name]); }
   catch{ return await fetchCSVByGid(SHEET_ID, GIDS[name]); }
 }
-async function cargarAlumno(ref){
+
+let ALL = {faltantes:[], tarde:[], atiempo:[], presets:[]};
+let TRI='ALL';
+
+function setTriChips(){
+  const host=$('#tri-chips');
+  const opts=[['ALL','Todo'],['M1','Trimestre 1'],['M2','Trimestre 2'],['M3','Trimestre 3']];
+  host.innerHTML=opts.map(([v,l])=>`<button class="chip ${TRI===v?'active':''}" data-v="${v}">${l}</button>`).join('');
+  for(const b of host.querySelectorAll('.chip')) b.onclick=()=>{TRI=b.getAttribute('data-v'); setTriChips(); renderLists();};
+}
+function byTri(list){ if(TRI==='ALL') return list; return list.filter(x=>String(x.momento||'').toUpperCase()===TRI); }
+function pct(n,d){return d?`${Math.round(n/d*100)}%`:'–';}
+
+function renderLists(){
+  const falt=byTri(ALL.faltantes), tar=byTri(ALL.tarde), ati=byTri(ALL.atiempo);
+  const totalTri = byTri(ALL.presets).length;
+  const hechosTri = tar.length + ati.length;
+  $('#stat-cump-tri').textContent = totalTri? `${Math.round(hechosTri/totalTri*100)}%` : '–';
+  $('#stat-tot-tri').textContent = `Faltantes ${falt.length} · Tarde ${tar.length} · A tiempo ${ati.length} · Presets ${totalTri}`;
+
+  const renderItem = (t) => {
+    const mom = t.momento ? ` · ${t.momento}` : '';
+    const fecha = t.fechaObjetivo ? ` · ${normDate(t.fechaObjetivo)}` : '';
+    const nom = t.nombreTrabajo ? ` · <i>${t.nombreTrabajo}</i>` : '';
+    return `<details><summary><b>${t.materia||'–'}</b> — ${t.numero||'–'} (${t.origen||'–'}${t.pagina?' · p.'+t.pagina:''})${nom}${fecha}${mom}</summary></details>`;
+  };
+  $('#faltantes').innerHTML = falt.length ? falt.map(renderItem).join('') : '<div class="hint">No hay trabajos faltantes 💙</div>';
+  $('#tarde').innerHTML     = tar.length   ? tar.map(renderItem).join('')   : '<div class="hint">No hay entregas tarde</div>';
+  $('#atiempo').innerHTML   = ati.length   ? ati.map(renderItem).join('')   : '<div class="hint">Aún no hay entregas registradas</div>';
+}
+
+async function cargarAlumnoPorID(id){
   $('#student-view').style.display='none';
-  const loaderText='Cargando…';
-  $('#alumno-nombre').textContent=loaderText; $('#alumno-id').textContent='';
+  $('#alumno-nombre').textContent='Cargando…'; $('#alumno-id').textContent='';
+
+  const ref={id};
 
   // 1) Lee bloques
-  const [asis, reg, pre] = await Promise.all([
-    loadBlock('asistencia'),
-    loadBlock('registro'),
-    loadBlock('presets')
-  ]);
+  const [asis, reg, pre] = await Promise.all([loadBlock('asistencia'), loadBlock('registro'), loadBlock('presets')]);
 
-  // 2) Parseo y filtrado
+  // 2) Parseo y seleccion del alumno
   const entregas=parseRegistro(reg.cols, reg.rows);
   const presets=parsePresets(pre.cols, pre.rows);
-
   let entAlumno=entregas.filter(t=>norm(t.id)===norm(ref.id));
-  if(!entAlumno.length && ref.nombre){entAlumno=entregas.filter(t=>norm(t.nombre)===norm(ref.nombre));}
 
   // 3) Cruce Presets vs Entregas
   const uids=new Map(entAlumno.filter(t=>t.uidPreset).map(t=>[t.uidPreset,t]));
@@ -310,89 +305,51 @@ async function cargarAlumno(ref){
     }
     if(e){ (e.atrasoDias>0 ? tarde : atiempo).push(p); } else { faltantes.push(p); }
   }
+  ALL={faltantes,tarde,atiempo,presets};
 
-  // 4) Nombre/ID visible
-  const guess = entAlumno[0]?.nombre ||
-    (asis.rows.find(r=>norm(r[asis.cols.findIndex(c=>/^id/i.test(c))])===norm(ref.id))?.[asis.cols.findIndex(c=>/^nombre/i.test(c))]) || '';
-  $('#alumno-nombre').textContent = guess || (ref.nombre || 'Alumno');
-  $('#alumno-id').textContent = 'ID: ' + (ref.id || '(desconocido)');
+  // 4) Nombre (si se puede inferir) y ID
+  const iId=asis.cols.findIndex(c=>/^(id|matric)/i.test(c));
+  const iNom=asis.cols.findIndex(c=>/^nombre/i.test(c));
+  let nombre='';
+  if(iId>=0 && iNom>=0){
+    const r=asis.rows.find(r=>norm(r[iId])===norm(id));
+    if(r) nombre=String(r[iNom]||'');
+  }
+  $('#alumno-nombre').textContent = nombre || 'Alumno';
+  $('#alumno-id').textContent = 'ID: ' + id;
 
-  // 5) Asistencia (semana y 30 días)
+  // 5) Asistencia: semana, 30 días y total histórica
   const hoy=new Date(); const [w0,w1]=weekRange(hoy);
   const aw=asistenciaAlumno(asis.cols, asis.rows, ref, w0, w1);
   const a30=asistenciaAlumno(asis.cols, asis.rows, ref, ymd(new Date(hoy.getFullYear(),hoy.getMonth(),hoy.getDate()-30)), ymd(hoy));
-
-  // 6) Totales y % cumplimiento
-  const total=presets.length, hechos=atiempo.length + tarde.length;
-  const pct = total ? Math.round((hechos/total)*100) : 0;
-
-  // 7) Píldoras por trimestre
-  const byM = m => (list)=>list.filter(x=>String(x.momento||'').toUpperCase()===m).length;
-  const pillsHTML = ['M1','M2','M3'].map(m=>{
-    const tot = presets.filter(p=>String(p.momento||'').toUpperCase()===m).length;
-    const done = atiempo.filter(p=>String(p.momento||'').toUpperCase()===m).length + tarde.filter(p=>String(p.momento||'').toUpperCase()===m).length;
-    const miss = faltantes.filter(p=>String(p.momento||'').toUpperCase()===m).length;
-    const pctM = tot ? Math.round((done/tot)*100) : 0;
-    return `<span class="pill ${miss? 'bad':'ok'}">${m}: ${done}/${tot} (${pctM}%) · faltantes ${miss}</span>`;
-  }).join('');
-  $('#pills').innerHTML = pillsHTML || '<span class="hint">No hay trimestres definidos.</span>';
-
-  // 8) Totales
-  $('#stat-cump').textContent = total ? `${pct}%  (${hechos}/${total})` : '–';
-  $('#stat-as30').textContent = a30.total ? `${Math.round(a30.present/a30.total*100)}%  (${a30.present}/${a30.total})` : '–';
+  const ah=asistenciaHistorica(asis.cols, asis.rows, ref);
   $('#stat-aswk').textContent = aw.total ? `${Math.round(aw.present/aw.total*100)}%  (${aw.present}/${aw.total})` : '–';
-  $('#stat-tarde').textContent = String(tarde.length);
-  $('#totales').innerHTML = `
-    <span class="pill bad">Faltantes: ${faltantes.length}</span>
-    <span class="pill warn">Tarde: ${tarde.length}</span>
-    <span class="pill ok">A tiempo: ${atiempo.length}</span>
-  `;
+  $('#stat-as30').textContent = a30.total ? `${Math.round(a30.present/a30.total*100)}%  (${a30.present}/${a30.total})` : '–';
+  $('#stat-asHist').textContent = ah.total ? `${Math.round(ah.present/ah.total*100)}%  (${ah.present}/${ah.total})` : '–';
+  $('#stat-faltHist').textContent = ah.total ? `${ah.total - ah.present}` : '–';
 
-  // 9) Listas
-  const renderItem = (t) => {
-    const mom = t.momento ? ` · ${t.momento}` : '';
-    const fecha = t.fechaObjetivo ? ` · ${normDate(t.fechaObjetivo)}` : '';
-    const nom = t.nombreTrabajo ? ` · <i>${t.nombreTrabajo}</i>` : '';
-    return `<details><summary><b>${t.materia||'–'}</b> — ${t.numero||'–'} (${t.origen||'–'}${t.pagina?' · p.'+t.pagina:''})${nom}${fecha}${mom}</summary></details>`;
-  };
-  $('#faltantes').innerHTML = faltantes.length ? faltantes.map(renderItem).join('') : '<div class="hint">No hay trabajos faltantes 💙</div>';
-  $('#tarde').innerHTML     = tarde.length     ? tarde.map(renderItem).join('')     : '<div class="hint">No hay entregas tarde</div>';
-  $('#atiempo').innerHTML   = atiempo.length   ? atiempo.map(renderItem).join('')   : '<div class="hint">Aún no hay entregas registradas</div>';
+  // 6) Selector y listas por trimestre
+  TRI='ALL'; setTriChips(); renderLists();
 
-  // 10) Mostrar
+  // 7) Mostrar
   $('#student-view').style.display='block';
   window.scrollTo({top:document.body.offsetTop, behavior:'smooth'});
 }
 
 /* ====== UI ====== */
-function fillSugerencias(){
-  const d=$('#alumnos'); d.innerHTML='';
-  for(const [n,id] of SUGERENCIAS){ const o=document.createElement('option'); o.value=id; o.label=n; d.appendChild(o); }
-}
-function inferRefFromInput(v){
-  const val=String(v||'').trim();
-  const enSug=SUGERENCIAS.find(([n,id])=>id.toLowerCase()===val.toLowerCase() || n.toLowerCase()===val.toLowerCase());
-  if(enSug) return {id:enSug[1], nombre:enSug[0]};
-  // si parece ID (IDXXXXX…)
-  if(/^ID[A-Z0-9]{6,}$/i.test(val) || /^I[A-Z0-9]{8,}$/i.test(val)) return {id:val};
-  // si parece nombre
-  return {id:'', nombre:val};
-}
-
-/* Tema */
 const themeBtn=$('#themeBtn');
 function applyTheme(t){document.documentElement.setAttribute('data-theme', t); themeBtn.textContent=(t==='dark'?'☀️ Claro':'🌙 Oscuro'); localStorage.setItem('familias_theme',t);}
 applyTheme(localStorage.getItem('familias_theme')||'light');
 themeBtn.onclick=()=>applyTheme(document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark');
 
-/* Eventos */
-fillSugerencias();
-const saved=localStorage.getItem('familias_id'); if(saved) $('#idInput').value=saved;
-$('#saveBtn').onclick=()=>{const v=$('#idInput').value.trim(); if(!v){alert('Escribe un ID o nombre.'); return;} localStorage.setItem('familias_id',v); alert('Listo. Guardado en este dispositivo.');};
-$('#goBtn').onclick=async()=>{const ref=inferRefFromInput($('#idInput').value); if(!ref.id && !ref.nombre){alert('Escribe un ID o nombre.'); return;}
-  try{await cargarAlumno(ref);}catch(e){alert('No fue posible leer los datos: '+e.message);}
+$('#saveBtn').onclick=()=>{const v=$('#idInput').value.trim(); if(!v){alert('Escribe el ID.'); return;} localStorage.setItem('familias_id',v); alert('Listo. Guardado en este dispositivo.');};
+$('#goBtn').onclick=async()=>{
+  const id=$('#idInput').value.trim();
+  if(!/^ID[A-Z0-9]{6,}$/i.test(id)){ alert('Por privacidad, escribe un ID válido (ej. IDEF2F55BB).'); return; }
+  try{ await cargarAlumnoPorID(id); } catch(e){ alert('No fue posible leer los datos: '+e.message); }
 };
 $('#idInput').addEventListener('keydown',e=>{ if(e.key==='Enter'){ $('#goBtn').click(); }});
+const saved=localStorage.getItem('familias_id'); if(saved) $('#idInput').value=saved;
 </script>
 </body>
 </html>
