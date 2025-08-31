@@ -67,7 +67,7 @@
   <section class="card hero" id="search-card">
     <div>
       <h2>Encuentre el progreso de su hijo(a)</h2>
-      <p class="hint">Escriba el <b>ID escolar</b> que le proporcionó la escuela para consultar calificaciones, tareas y asistencia.</p>
+      <p class="hint">Escriba el <b>ID escolar</b> que le proporcionó la escuela para consultar tareas y asistencia.</p>
     </div>
     <div class="input">
       <input id="idInput" autocomplete="off" placeholder="Pegue aquí el ID entregado por la escuela">
@@ -136,7 +136,7 @@
 /* ====== CONFIG DE TU HOJA ====== */
 const SHEET_ID = '1SWtGmXlf7WbNvUlJBDktXpDcq5OfJkHE75bH5nkxurk';
 const GIDS = { puntos:'0', asistencia:'280572348', registro:'1343140445', presets:'104702199' };
-const GROUP_LABEL = '4to A'; // Se muestra fijo para esta página
+const GROUP_LABEL = '4to A'; // Fijo para esta página
 
 /* ====== UTIL ====== */
 const $=s=>document.querySelector(s);
@@ -282,7 +282,8 @@ function renderLists(){
   const totalTri = byTri(ALL.presets).length;
   const hechosTri = tar.length + ati.length;
   $('#stat-cump-tri').textContent = totalTri? `${Math.round(hechosTri/totalTri*100)}%` : '–';
-  $('#stat-tot-tri').textContent  = `Faltantes ${falt.length} · Tarde ${tar.length} · A tiempo ${ati.length} · Presets ${totalTri}`;
+  // Cambiado "Presets" -> "Trabajos totales"
+  $('#stat-tot-tri').textContent  = `Faltantes ${falt.length} · Tarde ${tar.length} · A tiempo ${ati.length} · Trabajos totales ${totalTri}`;
 
   const renderItem = (t) => {
     const mom = t.momento ? ` · ${t.momento}` : '';
