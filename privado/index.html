@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="es" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aula Digital — Panel privado de enlaces</title>
+<style>
+  :root{
+    --bg:#f7f9ff; --card:#ffffff; --text:#0b1020; --muted:#526072; --accent:#2b6bff;
+    --bd:#d9e3ff; --ok:#0ea371; --warn:#f0b429; --bad:#ef4444;
+  }
+  [data-theme="dark"]{
+    --bg:#0c1220; --card:#101a34; --text:#eaf3ff; --muted:#93a6bc; --accent:#6aa9ff; --bd:#223056;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial;background:var(--bg);color:var(--text)}
+  header{position:sticky;top:0;z-index:10;background:color-mix(in oklab, var(--card) 90%, transparent);backdrop-filter:blur(6px);
+    border-bottom:1px solid var(--bd);padding:14px 16px;display:flex;gap:12px;align-items:center}
+  header h1{font-size:18px;margin:0}
+  header .right{margin-left:auto;display:flex;gap:8px;align-items:center}
+  .btn{border:1px solid var(--bd);background:#fff;border-radius:12px;padding:10px 14px;font-weight:700;cursor:pointer}
+  [data-theme="dark"] .btn{background:#0d152b;color:var(--text)}
+  .btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .btn.small{padding:8px 10px;border-radius:10px}
+  main{max-width:1080px;margin:auto;padding:16px}
+  .card{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:16px}
+  .row{display:grid;grid-template-columns:1fr;gap:10px;border:1px dashed var(--bd);border-radius:12px;padding:12px;background:color-mix(in oklab,var(--card) 94%, transparent)}
+  .grid{display:grid;grid-template-columns:1fr;gap:10px}
+  @media(min-width:900px){.grid{grid-template-columns:1fr 1fr}}
+  .hint{color:var(--muted);font-size:12px}
+  .chips{display:flex;gap:8px;flex-wrap:wrap}
+  .chip{border:1px solid var(--bd);background:transparent;border-radius:999px;padding:8px 12px;font-weight:700;cursor:pointer}
+  .chip.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+  input[type="text"]{width:100%;padding:10px 12px;border:1px solid var(--bd);border-radius:10px}
+  .item{border:1px solid var(--bd);border-radius:12px;padding:10px}
+  .item h4{margin:0 0 6px 0}
+  .flex{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .url-pill{display:flex;gap:6px;align-items:center;border:1px solid var(--bd);padding:6px 8px;border-radius:999px}
+  .k{color:var(--muted);font-size:12px}
+  .toolbar{display:flex;gap:8px;flex-wrap:wrap}
+  .file{display:none}
+  .sep{height:1px;background:var(--bd);margin:10px 0}
+</style>
+</head>
+<body>
+<header>
+  <h1>🔒 Panel privado — Enlaces de evidencia</h1>
+  <div class="right">
+    <button id="themeBtn" class="btn small">🌙 Oscuro</button>
+  </div>
+</header>
+
+<main>
+  <div class="card">
+    <div class="grid">
+      <div>
+        <h3>Fuente (constantes)</h3>
+        <div class="hint">Esta página lee tus <b>Presets</b> desde tu Google Sheet de 4°A (solo lectura).</div>
+        <ul class="hint">
+          <li><b>Sheet</b>: 1SWtGmXlf7WbNvUlJBDktXpDcq5OfJkHE75bH5nkxurk</li>
+          <li><b>GIDs</b> — Puntos: 0 · Asistencia: 280572348 · Registro: 1343140445 · Presets: 104702199</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Exportación</h3>
+        <div class="toolbar">
+          <button id="saveLocal" class="btn">💾 Guardar local</button>
+          <button id="download"  class="btn">⬇️ Descargar JSON</button>
+          <button id="copyJson"  class="btn">📋 Copiar JSON</button>
+          <label class="btn">⬆️ Cargar JSON<input id="fileIn" class="file" type="file" accept="application/json"></label>
+        </div>
+        <p class="hint">Sube el archivo descargado a tu repo, carpeta <code>/data/links_4A.json</code>.
+          La página de familias lo leerá automáticamente.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:12px">
+    <div class="flex" style="justify-content:space-between">
+      <div class="chips" id="tri-chips"></div>
+      <div class="flex">
+        <span class="k">Buscar:</span>
+        <input id="q" type="text" placeholder="Materia, nombre de trabajo, Nº, origen…">
+      </div>
+    </div>
+    <div class="sep"></div>
+    <div id="list"></div>
+  </div>
+</main>
+
+<script>
+/* === Config (mismas hojas que familias) === */
+const SHEET_ID = '1SWtGmXlf7WbNvUlJBDktXpDcq5OfJkHE75bH5nkxurk';
+const GIDS = { puntos:'0', asistencia:'280572348', registro:'1343140445', presets:'104702199' };
+const GROUP = '4A';
+const LS_KEY = 'adm_links_'+GROUP;         // localStorage
+const JSON_PATH_ON_SITE = '../data/links_4A.json'; // para intentar precargar si existe
+
+/* === Tema === */
+const themeBtn=document.getElementById('themeBtn');
+function applyTheme(t){document.documentElement.setAttribute('data-theme',t); themeBtn.textContent=(t==='dark'?'☀️ Claro':'🌙 Oscuro'); localStorage.setItem('adm_theme',t);}
+applyTheme(localStorage.getItem('adm_theme')||'light');
+themeBtn.onclick=()=>applyTheme(document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark');
+
+/* === Util === */
+const $=s=>document.querySelector(s);
+const strip=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+const norm=s=>strip(String(s||'').toLowerCase()).replace(/\s+/g,' ').trim();
+function normDate(s){const t=String(s||'').trim(); if(!t)return''; const a=/^(\d{4}-\d{2}-\d{2})/.exec(t); if(a) return a[1];
+  const b=/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/.exec(t); if(b){const d=new Date(+b[3],b[2]-1,+b[1]); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
+  return '';}
+
+/* === Lectores (GViz + CSV fallback) === */
+let _cb=0;
+function fetchGViz(sheetId, sheetName){
+  return new Promise((resolve,reject)=>{
+    const cb=`__cb_${Date.now()}_${++_cb}`;
+    const url=`https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?headers=1&tqx=out:json;responseHandler:${cb}&sheet=${encodeURIComponent(sheetName)}&ts=${Date.now()}`;
+    const sc=document.createElement('script');
+    const timeout=setTimeout(()=>{cleanup();reject(new Error('Timeout'))},12000);
+    function cleanup(){clearTimeout(timeout); delete window[cb]; if(sc.parentNode) sc.parentNode.removeChild(sc);}
+    window[cb]=(json)=>{cleanup(); try{
+      let cols=(json.table?.cols||[]).map(c=>String(c.label||'').trim());
+      let rows=(json.table?.rows||[]).map(r=>(r.c||[]).map(c=>c?.v ?? ''));
+      const empty=cols.filter(c=>!c||/^[A-Z]$/.test(c)).length;
+      if(empty>=Math.ceil(cols.length*0.5)&&rows.length){cols=rows[0].map(v=>String(v??'')); rows=rows.slice(1);}
+      resolve({cols,rows});
+    }catch(e){reject(e)} };
+    sc.onerror=()=>{cleanup();reject(new Error('Error GViz'))};
+    sc.src=url; document.head.appendChild(sc);
+  });
+}
+async function fetchCSVByGid(sheetId,gid){
+  const url=`https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}&ts=${Date.now()}`;
+  const res=await fetch(url,{cache:'no-store'}); if(!res.ok) throw new Error('CSV '+gid);
+  const t=await res.text(); const rows=parseCSV(t); const cols=(rows.shift()||[]).map(v=>String(v??'')); return {cols,rows};
+}
+function parseCSV(t){
+  const rows=[]; let row=[], cur='', q=false;
+  for(let i=0;i<t.length;i++){const ch=t[i],nx=t[i+1];
+    if(q){ if(ch==='"'&&nx==='"'){cur+='"';i++;} else if(ch==='"'){q=false;} else cur+=ch; }
+    else { if(ch==='"'){q=true;} else if(ch===','){row.push(cur);cur='';}
+      else if(ch==='\n'||ch==='\r'){ if(cur!==''||row.length){row.push(cur);rows.push(row);row=[];cur='';} }
+      else cur+=ch; } }
+  if(cur!==''||row.length){row.push(cur);rows.push(row);} return rows;
+}
+
+/* === Parse de PRESETS === */
+function parsePresets(cols,rows){
+  const iUID=cols.findIndex(c=>/uid[_ ]?preset/i.test(c));
+  const iFO=cols.findIndex(c=>/fecha.*objetivo/i.test(c));
+  const iMom=cols.findIndex(c=>/^momento$/i.test(c));
+  const iMat=cols.findIndex(c=>/^materia$/i.test(c));
+  const iNum=cols.findIndex(c=>/n.?trabajo|n.? ?°/i.test(c));
+  const iOri=cols.findIndex(c=>/^origen$/i.test(c));
+  const iPag=cols.findIndex(c=>/^p[aá]gina/i.test(c));
+  const iNom=cols.findIndex(c=>/nombre.*trabajo/i.test(c));
+  return rows.map(r=>({uid:String((iUID>=0?r[iUID]:'')??'').trim(),
+    fechaObjetivo:String((iFO>=0?r[iFO]:'')??'').trim(), momento:String((iMom>=0?r[iMom]:'')??'').trim(),
+    materia:String((iMat>=0?r[iMat]:'')??'').trim(), numero:String((iNum>=0?r[iNum]:'')??'').trim(),
+    origen:String((iOri>=0?r[iOri]:'')??'').trim(), pagina:String((iPag>=0?r[iPag]:'')??'').trim(),
+    nombreTrabajo:String((iNom>=0?r[iNom]:'')??'').trim()})).filter(p=>p.uid);
+}
+
+/* === Estado === */
+let PRESETS=[], LINKS={items:{}}, TRI='ALL', Q='';
+
+/* === Carga de datos === */
+async function loadPresets(){
+  try{
+    // 1) Intento GViz por nombre de pestaña
+    const r=await fetchGViz(SHEET_ID,'Presets').catch(()=>null);
+    const data = r || await fetchCSVByGid(SHEET_ID, GIDS.presets);
+    PRESETS = parsePresets(data.cols, data.rows);
+  }catch(e){
+    alert('No se pudieron leer los presets: '+e.message);
+  }
+}
+async function tryPreloadJson(){
+  try{
+    const res=await fetch(JSON_PATH_ON_SITE,{cache:'no-store'});
+    if(res.ok){ const j=await res.json(); if(j?.items) LINKS=j; }
+  }catch{}
+  // Mezcla con lo local si existe
+  try{
+    const loc=JSON.parse(localStorage.getItem(LS_KEY)||'{}');
+    if(loc?.items){ LINKS.items = Object.assign({}, LINKS.items, loc.items); }
+  }catch{}
+}
+
+/* === Render === */
+function setTriChips(){
+  const host=document.getElementById('tri-chips');
+  const opts=[['ALL','Todo'],['M1','Trimestre 1'],['M2','Trimestre 2'],['M3','Trimestre 3']];
+  host.innerHTML=opts.map(([v,l])=>`<button class="chip ${TRI===v?'active':''}" data-v="${v}">${l}</button>`).join('');
+  for(const b of host.querySelectorAll('.chip')) b.onclick=()=>{TRI=b.getAttribute('data-v'); renderList();};
+}
+function renderList(){
+  const list=document.getElementById('list');
+  const q=Q;
+  const items = PRESETS
+    .filter(p=>TRI==='ALL' || String(p.momento||'').toUpperCase()===TRI)
+    .filter(p=>{
+      if(!q) return true;
+      const hay = [p.materia,p.numero,p.origen,p.pagina,p.nombreTrabajo,normDate(p.fechaObjetivo)].join(' ').toLowerCase();
+      return hay.includes(q.toLowerCase());
+    })
+    .sort((a,b)=> (a.materia||'').localeCompare(b.materia||'', 'es') || (a.numero||'').localeCompare(b.numero||'', 'es'));
+
+  if(!items.length){ list.innerHTML='<div class="hint">No hay trabajos en este filtro.</div>'; return; }
+
+  list.innerHTML = items.map(p=>{
+    const en = LINKS.items[p.uid] || {urls:[], note:''};
+    const urls = Array.isArray(en.urls) ? en.urls : (en.url?[en.url]:[]);
+    const pills = urls.map((u,i)=>`<span class="url-pill"><a href="${u}" target="_blank">enlace ${i+1}</a><button class="btn small" data-del="${p.uid}|${i}">✖</button></span>`).join('');
+    return `<div class="item" data-uid="${p.uid}">
+      <h4>${p.materia||'–'} — ${p.numero||'–'} <span class="k">(${p.origen||'–'}${p.pagina?' · p.'+p.pagina:''})</span></h4>
+      <div class="k">${p.nombreTrabajo||''}${p.fechaObjetivo?' · '+normDate(p.fechaObjetivo):''}${p.momento?' · '+p.momento:''}</div>
+      <div class="flex" style="margin-top:8px">${pills}</div>
+      <div class="row" style="margin-top:8px">
+        <input type="text" placeholder="Pega aquí un enlace de Drive / imagen" data-url="${p.uid}">
+        <div class="flex">
+          <button class="btn small" data-add="${p.uid}">Agregar enlace</button>
+          <input type="text" placeholder="Nota (opcional)" value="${en.note||''}" data-note="${p.uid}">
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // eventos agregar / borrar / nota
+  list.querySelectorAll('[data-add]').forEach(b=> b.onclick=()=>{
+    const uid=b.getAttribute('data-add');
+    const inp=list.querySelector(`[data-url="${uid}"]`);
+    const val=(inp.value||'').trim();
+    if(!val) return alert('Pega un enlace primero.');
+    const rec=LINKS.items[uid] ||= {urls:[], note:''};
+    (rec.urls ||= []).push(val);
+    inp.value='';
+    renderList();
+  });
+  list.querySelectorAll('[data-del]').forEach(b=> b.onclick=()=>{
+    const [uid,idx]=b.getAttribute('data-del').split('|');
+    const rec=LINKS.items[uid]; if(rec && Array.isArray(rec.urls)){ rec.urls.splice(+idx,1); if(!rec.urls.length) delete rec.urls; }
+    renderList();
+  });
+  list.querySelectorAll('[data-note]').forEach(i=> i.onchange=()=>{
+    const uid=i.getAttribute('data-note'); const rec=LINKS.items[uid] ||= {urls:[], note:''}; rec.note=i.value;
+  });
+}
+
+/* === Guardar / cargar === */
+function buildJson(){
+  return {
+    group: GROUP,
+    sheetId: SHEET_ID,
+    updated: new Date().toISOString(),
+    items: LINKS.items
+  };
+}
+document.getElementById('saveLocal').onclick=()=>{
+  localStorage.setItem(LS_KEY, JSON.stringify(buildJson()));
+  alert('Guardado en este dispositivo.');
+};
+document.getElementById('download').onclick=()=>{
+  const blob = new Blob([JSON.stringify(buildJson(),null,2)], {type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='links_4A.json'; a.click(); URL.revokeObjectURL(a.href);
+};
+document.getElementById('copyJson').onclick=()=>{
+  navigator.clipboard.writeText(JSON.stringify(buildJson(),null,2));
+  alert('JSON copiado al portapapeles.');
+};
+document.getElementById('fileIn').onchange=async(e)=>{
+  const f=e.target.files?.[0]; if(!f) return;
+  try{ const txt=await f.text(); const j=JSON.parse(txt); if(j?.items){ LINKS.items=j.items; renderList(); alert('JSON cargado.'); } }
+  catch{ alert('Archivo inválido.'); }
+};
+
+/* === Búsqueda y filtro === */
+document.getElementById('q').oninput=(e)=>{Q=e.target.value.trim(); renderList();};
+
+/* === Init === */
+(async()=>{
+  TRI='ALL'; setTriChips();
+  await loadPresets();
+  await tryPreloadJson();
+  renderList();
+})();
+</script>
+</body>
+</html>
