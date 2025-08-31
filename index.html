@@ -49,7 +49,6 @@
   .topbar{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap}
   .badgeb{display:inline-flex;gap:6px;align-items:center;border:1px solid var(--bd);border-radius:999px;padding:6px 10px;font-size:12px}
   .footer-note{margin-top:12px;font-size:12px;color:var(--muted)}
-  /* --- Chart --- */
   .chart{display:grid;gap:10px;margin-top:14px}
   .bar{position:relative;border-radius:12px;border:1px solid var(--bd);background:var(--barbg);height:44px;display:flex;align-items:center;overflow:hidden}
   .bar::before{content:"";position:absolute;inset:0;transform-origin:left center;transform:scaleX(var(--pct,0));}
@@ -58,6 +57,7 @@
   .bar.ati::before{background:linear-gradient(90deg, var(--ok), #a7efd5)}
   .bar .lbl{position:relative;z-index:1;padding-left:12px;font-weight:800}
   .bar .val{position:absolute;right:10px;z-index:1;font-weight:900}
+  .linkbtn{display:inline-block;margin-left:8px;border:1px solid var(--bd);padding:4px 8px;border-radius:999px;font-size:12px;text-decoration:none}
 </style>
 </head>
 <body>
@@ -69,7 +69,7 @@
 </header>
 
 <main>
-  <!-- Paso 1: Acceso (SOLO ID) -->
+  <!-- Acceso -->
   <section class="card hero" id="search-card">
     <div>
       <h2>Encuentre el progreso de su hijo(a)</h2>
@@ -83,7 +83,7 @@
     <div class="hint">Este sitio <u>solo lee</u> los datos. No modifica nada en la libreta digital.</div>
   </section>
 
-  <!-- Paso 2: Resultados -->
+  <!-- Resultados -->
   <section id="student-view" style="display:none; margin-top:14px">
     <div class="card">
       <div class="topbar">
@@ -98,7 +98,6 @@
         </div>
       </div>
 
-      <!-- Selector por trimestre -->
       <div style="margin-top:10px">
         <div class="chips" id="tri-chips"></div>
         <div class="hint">Vea <b>Todo</b> o sólo un trimestre: <b>Trimestre 1</b> (M1), <b>Trimestre 2</b> (M2), <b>Trimestre 3</b> (M3).</div>
@@ -113,11 +112,10 @@
         <div><div class="k">Faltas (históricas)</div><div class="v" id="stat-faltHist">–</div></div>
       </div>
 
-      <!-- Gráfico de barras -->
       <div class="chart" aria-label="Resumen visual del trimestre">
-        <div class="bar fal" id="bar-fal" role="img" aria-label="Faltantes"><span class="lbl">⏳ Faltantes</span><span class="val" id="val-fal">0</span></div>
-        <div class="bar tar" id="bar-tar" role="img" aria-label="Entregados tarde"><span class="lbl">🕒 Tarde</span><span class="val" id="val-tar">0</span></div>
-        <div class="bar ati" id="bar-ati" role="img" aria-label="Entregados a tiempo"><span class="lbl">✅ A tiempo</span><span class="val" id="val-ati">0</span></div>
+        <div class="bar fal" id="bar-fal"><span class="lbl">⏳ Faltantes</span><span class="val" id="val-fal">0</span></div>
+        <div class="bar tar" id="bar-tar"><span class="lbl">🕒 Tarde</span><span class="val" id="val-tar">0</span></div>
+        <div class="bar ati" id="bar-ati"><span class="lbl">✅ A tiempo</span><span class="val" id="val-ati">0</span></div>
       </div>
 
       <p class="footer-note" style="margin-top:10px">
@@ -146,10 +144,14 @@
 </main>
 
 <script>
-/* ====== CONFIG DE TU HOJA ====== */
+/* ====== CONFIG ====== */
 const SHEET_ID = '1SWtGmXlf7WbNvUlJBDktXpDcq5OfJkHE75bH5nkxurk';
 const GIDS = { puntos:'0', asistencia:'280572348', registro:'1343140445', presets:'104702199' };
-const GROUP_LABEL = '4to A'; // Fijo para esta página
+const GROUP_LABEL = '4to A'; // fijo en esta página
+
+/* === NUEVO: archivo de enlaces público === */
+const LINKS_JSON = 'data/links_4A.json';   // súbelo desde el panel privado
+let LINKMAP = {};                          // { uid: {urls:[...], note:""} }
 
 /* ====== UTIL ====== */
 const $=s=>document.querySelector(s);
@@ -157,9 +159,7 @@ const strip=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'');
 const norm=s=>strip(String(s||'').toLowerCase()).replace(/\s+/g,' ').trim();
 const pad=n=>String(n).padStart(2,'0'); const ymd=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
 function normDate(s){const t=String(s||'').trim(); if(!t)return''; const a=/^(\d{4}-\d{2}-\d{2})/.exec(t); if(a) return a[1];
-  const b=/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/.exec(t); if(b){const d=new Date(+b[3],b[2]-1,+b[1]); return ymd(d);}
-  const n=Number(t.replace(',','.')); if(!Number.isNaN(n)){const base=new Date(1899,11,30);return ymd(new Date(base.getTime()+n*86400000));}
-  const d=new Date(t); if(!isNaN(+d)) return ymd(d); return'';}
+  const b=/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/.exec(t); if(b){const d=new Date(+b[3],b[2]-1,+b[1]); return ymd(d);} const d=new Date(t); if(!isNaN(+d)) return ymd(d); return'';}
 function isPresent(v){const s=norm(v); if(!s) return false; if(!Number.isNaN(+s)) return (+s)>0; const s2=s.replace(/\s+/g,''); if(/^1\(100%?\)$/.test(s2)) return true;
   return ['x','✓','✔','p','presente','si','sí','s','ok','true','asistio','asistió'].includes(s);}
 function getDateCols(cols){return cols.map((c,i)=>normDate(String(c).trim())?i:-1).filter(i=>i>=0);}
@@ -216,10 +216,8 @@ function parseRegistro(cols,rows){
   const iNomT=cols.findIndex(c=>/nombre.*trabajo/i.test(c));
   return rows.map(r=>{
     const fecha=String(r[iF]??'').trim(); const fo=String((iFO>=0?r[iFO]:'')??'').trim()||fecha;
-    const atraso = (()=>{
-      if(iAtr>=0 && r[iAtr]!=='' && r[iAtr]!=null) return +r[iAtr]||0;
-      const d=new Date(fecha), o=new Date(fo); if(isNaN(+d)||isNaN(+o)) return 0; return Math.max(0, Math.round((d-o)/86400000));
-    })();
+    const atraso = (()=>{ if(iAtr>=0 && r[iAtr]!=='' && r[iAtr]!=null) return +r[iAtr]||0;
+      const d=new Date(fecha), o=new Date(fo); if(isNaN(+d)||isNaN(+o)) return 0; return Math.max(0, Math.round((d-o)/86400000));})();
     return { uidPreset:String((iUID>=0?r[iUID]:'')??'').trim(), fecha, fechaObjetivo:fo, id:String((iID>=0?r[iID]:'')??'').trim(),
       nombre:String((iNom>=0?r[iNom]:'')??'').trim(), materia:String((iMat>=0?r[iMat]:'')??'').trim(),
       numero:String((iNum>=0?r[iNum]:'')??'').trim(), origen:String((iOri>=0?r[iOri]:'')??'').trim(),
@@ -270,9 +268,20 @@ function weekRange(d){const day=d.getDay(); const diff=(day===0?-6:1-day); const
 
 /* ====== CARGA Y RENDER ====== */
 async function loadBlock(name){
-  const sheetNames = {asistencia:'Asistencia', registro:'Registro de trabajos', presets:'Presets'};
-  try{ return await fetchGViz(SHEET_ID, sheetNames[name]); }
+  const names = {asistencia:'Asistencia', registro:'Registro de trabajos', presets:'Presets'};
+  try{ return await fetchGViz(SHEET_ID, names[name]); }
   catch{ return await fetchCSVByGid(SHEET_ID, GIDS[name]); }
+}
+
+/* === NUEVO: cargar JSON de enlaces (opcional) === */
+async function loadLinks(){
+  try{
+    const res=await fetch(LINKS_JSON,{cache:'no-store'});
+    if(res.ok){
+      const j=await res.json();
+      if(j?.items) LINKMAP=j.items;
+    }
+  }catch{ /* si no existe, seguimos sin enlaces */ }
 }
 
 let ALL = {faltantes:[], tarde:[], atiempo:[], presets:[]};
@@ -282,29 +291,23 @@ function setTriChips(){
   const host=$('#tri-chips');
   const opts=[['ALL','Todo'],['M1','Trimestre 1'],['M2','Trimestre 2'],['M3','Trimestre 3']];
   host.innerHTML=opts.map(([v,l])=>`<button class="chip ${TRI===v?'active':''}" data-v="${v}">${l}</button>`).join('');
-  for(const b of host.querySelectorAll('.chip')) b.onclick=()=>{TRI=b.getAttribute('data-v'); setTriChips(); renderLists(); updateTriSubtitle();};
-  updateTriSubtitle();
-}
-function updateTriSubtitle(){
-  const map={ALL:'Todo',M1:'Trimestre 1',M2:'Trimestre 2',M3:'Trimestre 3'};
-  $('#tri-subtitle').textContent = 'Resumen de ' + (map[TRI] || 'Todo');
+  for(const b of host.querySelectorAll('.chip')) b.onclick=()=>{TRI=b.getAttribute('data-v'); setTriChips(); renderLists();};
+  $('#tri-subtitle').textContent='Resumen de '+({ALL:'Todo',M1:'Trimestre 1',M2:'Trimestre 2',M3:'Trimestre 3'}[TRI]);
 }
 function byTri(list){ if(TRI==='ALL') return list; return list.filter(x=>String(x.momento||'').toUpperCase()===TRI); }
-function pct(n,d){return d?Math.round(n/d*100):0}
+function renderBarChart({faltantes,tarde,atiempo}){
+  const max=Math.max(faltantes,tarde,atiempo,1);
+  const set=(id,val)=>{ const el=$(id); el.style.setProperty('--pct',(val/max).toFixed(3)); el.querySelector('.val').textContent=val; };
+  set('#bar-fal',faltantes); set('#bar-tar',tarde); set('#bar-ati',atiempo);
+}
 
-/* === Gráfico de barras (responsive, sin librerías) === */
-function renderBarChart({faltantes, tarde, atiempo}){
-  const max = Math.max(faltantes, tarde, atiempo, 1);
-  const wF = faltantes/max, wT = tarde/max, wA = atiempo/max;
-
-  const setBar = (id,val,p) => {
-    const el = $(id);
-    el.style.setProperty('--pct', p.toFixed(3));
-    el.querySelector('.val').textContent = val;
-  };
-  setBar('#bar-fal', faltantes, wF);
-  setBar('#bar-tar', tarde,     wT);
-  setBar('#bar-ati', atiempo,   wA);
+/* === NUEVO: botón de evidencia en cada trabajo === */
+function linksFor(uid){
+  const rec = LINKMAP?.[uid];
+  if(!rec) return '';
+  const arr = Array.isArray(rec.urls) ? rec.urls : (rec.url?[rec.url]:[]);
+  if(!arr.length) return '';
+  return arr.map((u,i)=>`<a class="linkbtn" href="${u}" target="_blank" rel="noopener">📷 Ver evidencia ${arr.length>1?i+1:''}</a>`).join('');
 }
 
 function renderLists(){
@@ -314,15 +317,16 @@ function renderLists(){
 
   $('#stat-cump-tri').textContent = totalTri? `${Math.round(hechosTri/totalTri*100)}%` : '–';
   $('#stat-tot-tri').textContent  = `Faltantes ${falt.length} · Tarde ${tar.length} · A tiempo ${ati.length} · Trabajos totales ${totalTri}`;
-
-  // actualizar gráfico
   renderBarChart({faltantes:falt.length, tarde:tar.length, atiempo:ati.length});
 
   const renderItem = (t) => {
     const mom = t.momento ? ` · ${t.momento}` : '';
     const fecha = t.fechaObjetivo ? ` · ${normDate(t.fechaObjetivo)}` : '';
     const nom = t.nombreTrabajo ? ` · <i>${t.nombreTrabajo}</i>` : '';
-    return `<details><summary><b>${t.materia||'–'}</b> — ${t.numero||'–'} (${t.origen||'–'}${t.pagina?' · p.'+t.pagina:''})${nom}${fecha}${mom}</summary></details>`;
+    const kLink = linksFor(t.uid);   // <<< NUEVO
+    return `<details>
+      <summary><b>${t.materia||'–'}</b> — ${t.numero||'–'} (${t.origen||'–'}${t.pagina?' · p.'+t.pagina:''})${nom}${fecha}${mom}${kLink? ' ' + kLink : ''}</summary>
+    </details>`;
   };
   $('#faltantes').innerHTML = falt.length ? falt.map(renderItem).join('') : '<div class="hint">No hay trabajos faltantes 💙</div>';
   $('#tarde').innerHTML     = tar.length   ? tar.map(renderItem).join('')   : '<div class="hint">No hay entregas tarde</div>';
@@ -334,21 +338,21 @@ async function cargarAlumnoPorID(id){
   $('#student-view').style.display='none';
   $('#alumno-nombre').textContent='Cargando…'; $('#alumno-id').textContent='';
 
-  // 1) Lee bloques
+  // Cargar enlaces primero (si existen)
+  await loadLinks();
+
+  // 1) Bloques de la hoja
   const [asis, reg, pre] = await Promise.all([loadBlock('asistencia'), loadBlock('registro'), loadBlock('presets')]);
 
-  // 2) Parseo y selección del alumno en REGISTRO (aquí sí hay ID)
+  // 2) Parseo y selección del alumno en REGISTRO
   const entregas = parseRegistro(reg.cols, reg.rows);
   const presets  = parsePresets(pre.cols, pre.rows);
   let entAlumno  = entregas.filter(t => norm(t.id) === norm(id));
 
-  // 3) Tomar nombre desde REGISTRO si existe
+  // 3) Nombre desde REGISTRO
   const nombreDeRegistro = entAlumno.find(e => e.nombre)?.nombre || '';
 
-  // 4) Referencia con ID y (si se pudo) nombre
-  const ref = { id, nombre: nombreDeRegistro || '' };
-
-  // 5) Cruce Presets vs Entregas
+  // 4) Cruce Presets vs Entregas
   const uids   = new Map(entAlumno.filter(t => t.uidPreset).map(t => [t.uidPreset, t]));
   const claves = new Map(entAlumno.filter(t => !t.uidPreset).map(t => [
     [norm(t.materia), norm(String(t.numero).replace(/^trabajo\s*/i,'')),
@@ -367,9 +371,9 @@ async function cargarAlumnoPorID(id){
   }
   ALL={faltantes,tarde,atiempo,presets};
 
-  // 6) Nombre y etiquetas visibles
+  // 5) Nombre visible + etiquetas
   const [w0,w1] = weekRange(new Date());
-  const aw = asistenciaAlumno(asis.cols, asis.rows, ref, w0, w1); // usa ID y/o nombre
+  const aw = asistenciaAlumno(asis.cols, asis.rows, {id, nombre:nombreDeRegistro}, w0, w1);
   const iNom = asis.cols.findIndex(c=>/^nombre/i.test(c));
   let nombre = nombreDeRegistro;
   if (aw.row && iNom>=0) nombre = String(aw.row[iNom]||'');
@@ -386,21 +390,20 @@ async function cargarAlumnoPorID(id){
   $('#alumno-id').textContent     = 'ID: ' + id;
   $('#grupo-label').innerHTML     = `<span class="badgeb">👩‍🏫 Grupo: <b>${GROUP_LABEL}</b></span>`;
 
-  // 7) Asistencia: semana, 30 días e histórica
+  // 6) Asistencias
   const hoy=new Date();
-  const a30 = asistenciaAlumno(asis.cols, asis.rows, ref,
-                ymd(new Date(hoy.getFullYear(),hoy.getMonth(),hoy.getDate()-30)), ymd(hoy));
-  const ah  = asistenciaHistorica(asis.cols, asis.rows, ref);
+  const a30 = asistenciaAlumno(asis.cols, asis.rows, {id, nombre:nombre}, ymd(new Date(hoy.getFullYear(),hoy.getMonth(),hoy.getDate()-30)), ymd(hoy));
+  const ah  = asistenciaHistorica(asis.cols, asis.rows, {id, nombre:nombre});
 
   $('#stat-aswk').textContent   = aw.total  ? `${Math.round(aw.present/aw.total*100)}%  (${aw.present}/${aw.total})` : '–';
   $('#stat-as30').textContent   = a30.total ? `${Math.round(a30.present/a30.total*100)}%  (${a30.present}/${a30.total})` : '–';
   $('#stat-asHist').textContent = ah.total  ? `${Math.round(ah.present/ah.total*100)}%  (${ah.present}/${ah.total})` : '–';
   $('#stat-faltHist').textContent = ah.total ? `${ah.total - ah.present}` : '–';
 
-  // 8) Selector, listas y gráfico por trimestre
+  // 7) Pintar listas y gráfico
   TRI='ALL'; setTriChips(); renderLists();
 
-  // 9) Mostrar
+  // 8) Mostrar
   $('#student-view').style.display='block';
   window.scrollTo({top:document.body.offsetTop, behavior:'smooth'});
 }
