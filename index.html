@@ -148,10 +148,11 @@
 const SHEET_ID = '1SWtGmXlf7WbNvUlJBDktXpDcq5OfJkHE75bH5nkxurk';
 const GIDS = { puntos:'0', asistencia:'280572348', registro:'1343140445', presets:'104702199' };
 const GROUP_LABEL = '4to A'; // fijo en esta página
+const SCHOOL_YEAR_START = '2025-09-01'; // ← empezamos desde 1 de septiembre
 
 /* === NUEVO: archivo de enlaces público === */
-const LINKS_JSON = 'data/links_4A.json';   // súbelo desde el panel privado
-let LINKMAP = {};                          // { uid: {urls:[...], note:""} }
+const LINKS_JSON = 'data/links_4A.json';
+let LINKMAP = {}; // { uid: {urls:[...], note:""} }
 
 /* ====== UTIL ====== */
 const $  = s => document.querySelector(s);
@@ -164,28 +165,31 @@ const MONTHS_ES = {ene:0,feb:1,mar:2,abr:3,may:4,jun:5,jul:6,ago:7,sep:8,sept:8,
 
 // === Serial de Excel/Sheets -> Date local (día exacto)
 function excelSerialToDate(n){
-  const baseUTC = new Date(Date.UTC(1899,11,30)); // 1899-12-30
+  const baseUTC = new Date(Date.UTC(1899,11,30));
   const dUTC = new Date(baseUTC.getTime() + Math.round(Number(n))*86400000);
   return new Date(dUTC.getFullYear(), dUTC.getMonth(), dUTC.getDate());
 }
 
-// Reemplazo robusto de normDate (para valores sueltos también)
+// === Fecha normalizada (para valores sueltos)
 function normDate(s){
-  const t = String(s||'').trim();
+  const t = String(s??'').trim();
   if(!t) return '';
+
+  // Números tipo "45600" o "45600.0" (posible serial)
+  if (/^\d+(\.\d+)?$/.test(t)){
+    const n = +t;
+    if (n >= 35000 && n <= 80000){ const d = excelSerialToDate(n); return ymd(d); }
+  }
 
   // ISO flexible: YYYY-M-D (con o sin hora)
   let m = /^(\d{4})-(\d{1,2})-(\d{1,2})(?:[ T].*)?$/.exec(t);
-  if (m){
-    const d = new Date(+m[1], +m[2]-1, +m[3]);
-    return isNaN(+d) ? '' : ymd(d);
-  }
+  if (m){ const d = new Date(+m[1], +m[2]-1, +m[3]); return isNaN(+d)?'':ymd(d); }
 
-  // D/M/YYYY o M/D/YYYY (elegir por cercanía a hoy)
+  // D/M/YYYY o M/D/YYYY (elige por cercanía a hoy)
   m = /^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})$/.exec(t);
   if (m){
-    const a = new Date(+m[3], +m[2]-1, +m[1]); // D/M
-    const b = new Date(+m[3], +m[1]-1, +m[2]); // M/D
+    const a = new Date(+m[3], +m[2]-1, +m[1]);
+    const b = new Date(+m[3], +m[1]-1, +m[2]);
     const d = (!isNaN(+a) && !isNaN(+b))
       ? (Math.abs(+a - +TODAY) <= Math.abs(+b - +TODAY) ? a : b)
       : (!isNaN(+a)) ? a : (!isNaN(+b)) ? b : null;
@@ -198,19 +202,7 @@ function normDate(s){
     const k = m[2].toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
     const key = k.startsWith('sept') ? 'sept' : k.slice(0,3);
     const mi = MONTHS_ES[key];
-    if (mi!=null){
-      const d = new Date(+m[3], mi, +m[1]);
-      return isNaN(+d) ? '' : ymd(d);
-    }
-  }
-
-  // Serial de Excel/Sheets razonable
-  if (/^\d{4,6}$/.test(t)){
-    const n = +t;
-    if (n >= 35000 && n <= 80000){
-      const d = excelSerialToDate(n);
-      return isNaN(+d) ? '' : ymd(d);
-    }
+    if (mi!=null){ const d = new Date(+m[3], mi, +m[1]); return isNaN(+d)?'':ymd(d); }
   }
 
   // Último intento genérico
@@ -248,51 +240,49 @@ function findIDColumn(cols, rows){
   return -1;
 }
 
-/* ====== Fechas de encabezado robustas (incluye serial) ====== */
+/* ====== Fechas de encabezado robustas (incluye serial y números) ====== */
 function parseHeaderDateLabel(lbl){
-  const tRaw = String(lbl||'').trim();
-  const t = tRaw.replace(/\s+/g,' ');
-
-  // ISO flexible: YYYY-M-D (con o sin hora)
-  let m = /^(\d{4})-(\d{1,2})-(\d{1,2})(?:[ T].*)?$/.exec(t);
-  if (m){
-    const d = new Date(+m[1], +m[2]-1, +m[3]);
-    if (!isNaN(+d)) return { iso: ymd(d), date: d };
+  // 1) Si viene como número (serial real)
+  if (typeof lbl === 'number' && isFinite(lbl)){
+    if (lbl >= 35000 && lbl <= 80000){ const d = excelSerialToDate(lbl); return { iso: ymd(d), date: d }; }
   }
 
-  // D/M/YYYY o M/D/YYYY (elige por cercanía a hoy)
+  const tRaw = String(lbl??'').trim();
+  if (!tRaw) return null;
+
+  // 2) Si es string numérico "45600" o "45600.0"
+  if (/^\d+(\.\d+)?$/.test(tRaw)){
+    const n = +tRaw;
+    if (n >= 35000 && n <= 80000){ const d = excelSerialToDate(n); return { iso: ymd(d), date: d }; }
+  }
+
+  const t = tRaw.replace(/\s+/g,' ');
+
+  // 3) ISO flexible
+  let m = /^(\d{4})-(\d{1,2})-(\d{1,2})(?:[ T].*)?$/.exec(t);
+  if (m){ const d = new Date(+m[1], +m[2]-1, +m[3]); if (!isNaN(+d)) return { iso: ymd(d), date: d }; }
+
+  // 4) D/M/YYYY o M/D/YYYY
   m = /^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})$/.exec(t);
   if (m){
-    const a = new Date(+m[3], +m[2]-1, +m[1]); // D/M
-    const b = new Date(+m[3], +m[1]-1, +m[2]); // M/D
+    const a = new Date(+m[3], +m[2]-1, +m[1]);
+    const b = new Date(+m[3], +m[1]-1, +m[2]);
     const d = (!isNaN(+a) && !isNaN(+b))
       ? (Math.abs(+a - +TODAY) <= Math.abs(+b - +TODAY) ? a : b)
       : (!isNaN(+a)) ? a : (!isNaN(+b)) ? b : null;
     if (d) return { iso: ymd(d), date: d };
   }
 
-  // Español: 1-sep-2025 / 1 sept 2025
+  // 5) Español con mes
   m = /^(\d{1,2})[\s\-\/]([A-Za-záéíóúñ]+)[\s\-\/](\d{4})$/i.exec(t);
   if (m){
     const k = m[2].toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
     const key = k.startsWith('sept') ? 'sept' : k.slice(0,3);
     const mi = MONTHS_ES[key];
-    if (mi!=null){
-      const d = new Date(+m[3], mi, +m[1]);
-      if (!isNaN(+d)) return { iso: ymd(d), date: d };
-    }
+    if (mi!=null){ const d = new Date(+m[3], mi, +m[1]); if (!isNaN(+d)) return { iso: ymd(d), date: d }; }
   }
 
-  // Serial de Excel/Sheets
-  if (/^\d{4,6}$/.test(t)){
-    const n = +t;
-    if (n >= 35000 && n <= 80000){
-      const d = excelSerialToDate(n);
-      if (!isNaN(+d)) return { iso: ymd(d), date: d };
-    }
-  }
-
-  // Último intento genérico
+  // 6) Último intento genérico
   const d = new Date(t);
   return isNaN(+d) ? null : { iso: ymd(d), date: new Date(d.getFullYear(), d.getMonth(), d.getDate()) };
 }
@@ -316,10 +306,12 @@ function fetchGViz(sheetId, sheetName){
     const timeout=setTimeout(()=>{cleanup();reject(new Error('Timeout'))},12000);
     function cleanup(){clearTimeout(timeout); delete window[cb]; if(sc.parentNode) sc.parentNode.removeChild(sc); }
     window[cb]=(json)=>{cleanup(); try{
-      let cols=(json.table?.cols||[]).map(c=>String(c.label||'').trim());
+      let cols=(json.table?.cols||[]).map(c=>c?.label ?? '');
       let rows=(json.table?.rows||[]).map(r=>(r.c||[]).map(c=>c?.v ?? ''));
-      const empty=cols.filter(c=>!c||/^[A-Z]$/.test(c)).length;
-      if(empty>=Math.ceil(cols.length*0.5)&&rows.length){cols=rows[0].map(v=>String(v??'')); rows=rows.slice(1);}
+      // Normaliza encabezados a string (no perder números!)
+      cols = cols.map(v=> (typeof v==='string'||typeof v==='number') ? v : String(v||'').trim());
+      const empty=cols.filter(c=>String(c||'').trim()===''||/^[A-Z]$/.test(String(c))).length;
+      if(empty>=Math.ceil(cols.length*0.5)&&rows.length){cols=rows[0].map(v=>v); rows=rows.slice(1);}
       resolve({cols,rows});
     }catch(e){reject(e)} };
     sc.onerror=()=>{cleanup();reject(new Error('Error GViz'))};
@@ -329,7 +321,7 @@ function fetchGViz(sheetId, sheetName){
 async function fetchCSVByGid(sheetId,gid){
   const url=`https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}&ts=${Date.now()}`;
   const res=await fetch(url,{cache:'no-store'}); if(!res.ok) throw new Error('CSV '+gid);
-  const txt=await res.text(); const rows=parseCSV(txt); const cols=(rows.shift()||[]).map(v=>String(v??'')); return {cols,rows};
+  const txt=await res.text(); const rows=parseCSV(txt); const cols=(rows.shift()||[]).map(v=>v); return {cols,rows};
 }
 function parseCSV(t){
   const rows=[]; let row=[], cur='', q=false;
@@ -343,19 +335,19 @@ function parseCSV(t){
 
 /* ====== PARSERS ====== */
 function parseRegistro(cols,rows){
-  const iUID=cols.findIndex(c=>/uid[_ ]?preset/i.test(c));
-  const iF=cols.findIndex(c=>/^fecha$/i.test(c));
-  const iFO=cols.findIndex(c=>/fecha.*objetivo/i.test(c));
-  const iID=cols.findIndex(c=>/^(id|matric)/i.test(c));
-  const iNom=cols.findIndex(c=>/^nombre/i.test(c));
-  const iMat=cols.findIndex(c=>/^materia$/i.test(c));
-  const iNum=cols.findIndex(c=>/n.?trabajo|n.? ?°/i.test(c));
-  const iOri=cols.findIndex(c=>/^origen$/i.test(c));
-  const iPag=cols.findIndex(c=>/^p[aá]gina/i.test(c));
-  const iPts=cols.findIndex(c=>/^puntos$/i.test(c));
-  const iAtr=cols.findIndex(c=>/atraso/i.test(c));
-  const iMom=cols.findIndex(c=>/^momento$/i.test(c));
-  const iNomT=cols.findIndex(c=>/nombre.*trabajo/i.test(c));
+  const iUID=cols.findIndex(c=>/uid[_ ]?preset/i.test(String(c)));
+  const iF=cols.findIndex(c=>/^fecha$/i.test(String(c)));
+  const iFO=cols.findIndex(c=>/fecha.*objetivo/i.test(String(c)));
+  const iID=cols.findIndex(c=>/^(id|matric)/i.test(String(c)));
+  const iNom=cols.findIndex(c=>/^nombre/i.test(String(c)));
+  const iMat=cols.findIndex(c=>/^materia$/i.test(String(c)));
+  const iNum=cols.findIndex(c=>/n.?trabajo|n.? ?°/i.test(String(c)));
+  const iOri=cols.findIndex(c=>/^origen$/i.test(String(c)));
+  const iPag=cols.findIndex(c=>/^p[aá]gina/i.test(String(c)));
+  const iPts=cols.findIndex(c=>/^puntos$/i.test(String(c)));
+  const iAtr=cols.findIndex(c=>/atraso/i.test(String(c)));
+  const iMom=cols.findIndex(c=>/^momento$/i.test(String(c)));
+  const iNomT=cols.findIndex(c=>/nombre.*trabajo/i.test(String(c)));
   return rows.map(r=>{
     const fecha=String(r[iF]??'').trim(); const fo=String((iFO>=0?r[iFO]:'')??'').trim()||fecha;
     const atraso = (()=>{ if(iAtr>=0 && r[iAtr]!=='' && r[iAtr]!=null) return +r[iAtr]||0;
@@ -369,14 +361,14 @@ function parseRegistro(cols,rows){
   });
 }
 function parsePresets(cols,rows){
-  const iUID=cols.findIndex(c=>/uid[_ ]?preset/i.test(c));
-  const iFO=cols.findIndex(c=>/fecha.*objetivo/i.test(c));
-  const iMom=cols.findIndex(c=>/^momento$/i.test(c));
-  const iMat=cols.findIndex(c=>/^materia$/i.test(c));
-  const iNum=cols.findIndex(c=>/n.?trabajo|n.? ?°/i.test(c));
-  const iOri=cols.findIndex(c=>/^origen$/i.test(c));
-  const iPag=cols.findIndex(c=>/^p[aá]gina/i.test(c));
-  const iNom=cols.findIndex(c=>/nombre.*trabajo/i.test(c));
+  const iUID=cols.findIndex(c=>/uid[_ ]?preset/i.test(String(c)));
+  const iFO=cols.findIndex(c=>/fecha.*objetivo/i.test(String(c)));
+  const iMom=cols.findIndex(c=>/^momento$/i.test(String(c)));
+  const iMat=cols.findIndex(c=>/^materia$/i.test(String(c)));
+  const iNum=cols.findIndex(c=>/n.?trabajo|n.? ?°/i.test(String(c)));
+  const iOri=cols.findIndex(c=>/^origen$/i.test(String(c)));
+  const iPag=cols.findIndex(c=>/^p[aá]gina/i.test(String(c)));
+  const iNom=cols.findIndex(c=>/nombre.*trabajo/i.test(String(c)));
   return rows.map(r=>({uid:String((iUID>=0?r[iUID]:'')??'').trim(),
     fechaObjetivo:String((iFO>=0?r[iFO]:'')??'').trim(), momento:String((iMom>=0?r[iMom]:'')??'').trim(),
     materia:String((iMat>=0?r[iMat]:'')??'').trim(), numero:String((iNum>=0?r[iNum]:'')??'').trim(),
@@ -387,8 +379,7 @@ function parsePresets(cols,rows){
 /* ====== ASISTENCIA (corregida) ====== */
 function asistenciaAlumno(cols,rows,ref,start,end){
   const iId  = findIDColumn(cols, rows);
-  const iNom = cols.findIndex(c=>/^nombre/i.test(String(c||'')));
-
+  const iNom = cols.findIndex(c=>/^nombre/i.test(String(c)));
   let row = null;
   if (iId >= 0 && ref.id) row = rows.find(r => norm(r[iId]) === norm(ref.id));
   if (!row && iNom >= 0 && ref.nombre) row = rows.find(r => norm(r[iNom]) === norm(ref.nombre));
@@ -408,14 +399,14 @@ function asistenciaAlumno(cols,rows,ref,start,end){
 
 function asistenciaHistorica(cols,rows,ref){
   const iId  = findIDColumn(cols, rows);
-  const iNom = cols.findIndex(c=>/^nombre/i.test(String(c||'')));
-
+  const iNom = cols.findIndex(c=>/^nombre/i.test(String(c)));
   let row = null;
   if (iId >= 0 && ref.id) row = rows.find(r => norm(r[iId]) === norm(ref.id));
   if (!row && iNom >= 0 && ref.nombre) row = rows.find(r => norm(r[iNom]) === norm(ref.nombre));
   if (!row) return {present:0,total:0};
 
-  const infos = getDateColInfo(cols);
+  // ← filtra histórico desde inicio de ciclo
+  const infos = getDateColInfo(cols).filter(x => x.iso >= SCHOOL_YEAR_START);
   let present = 0, total = 0;
   for (const info of infos){
     const v = row[info.i];
@@ -441,7 +432,6 @@ async function loadBlock(name){
   catch{ return await fetchCSVByGid(SHEET_ID, GIDS[name]); }
 }
 
-/* === Links (opcional) === */
 async function loadLinks(){
   try{
     const res=await fetch(LINKS_JSON,{cache:'no-store'});
@@ -449,7 +439,7 @@ async function loadLinks(){
       const j=await res.json();
       if(j?.items) LINKMAP=j.items;
     }
-  }catch{ /* si no existe, seguimos sin enlaces */ }
+  }catch{}
 }
 
 let ALL = {faltantes:[], tarde:[], atiempo:[], presets:[]};
@@ -490,11 +480,11 @@ function renderLists(){
 
   const renderItem = (t) => {
     const mom = t.momento ? ` · ${t.momento}` : '';
-    const fecha = t.fechaObjetivo ? ` · ${normDate(t.fechaObjetivo)}` : '';
+    theFecha = t.fechaObjetivo ? ` · ${normDate(t.fechaObjetivo)}` : '';
     const nom = t.nombreTrabajo ? ` · <i>${t.nombreTrabajo}</i>` : '';
     const kLink = linksFor(t.uid);
     return `<details>
-      <summary><b>${t.materia||'–'}</b> — ${t.numero||'–'} (${t.origen||'–'}${t.pagina?' · p.'+t.pagina:''})${nom}${fecha}${mom}${kLink? ' ' + kLink : ''}</summary>
+      <summary><b>${t.materia||'–'}</b> — ${t.numero||'–'} (${t.origen||'–'}${t.pagina?' · p.'+t.pagina:''})${nom}${theFecha}${mom}${kLink? ' ' + kLink : ''}</summary>
     </details>`;
   };
   $('#faltantes').innerHTML = falt.length ? falt.map(renderItem).join('') : '<div class="hint">No hay trabajos faltantes 💙</div>';
@@ -510,6 +500,11 @@ async function cargarAlumnoPorID(id){
   await loadLinks();
 
   const [asis, reg, pre] = await Promise.all([loadBlock('asistencia'), loadBlock('registro'), loadBlock('presets')]);
+
+  // DEBUG: ver encabezados crudos y fechas detectadas
+  const infosAll = getDateColInfo(asis.cols);
+  console.log('[Aula Digital] Encabezados asistencia:', asis.cols);
+  console.table(infosAll.map(x=>({idx:x.i, iso:x.iso})));
 
   const entregas = parseRegistro(reg.cols, reg.rows);
   const presets  = parsePresets(pre.cols, pre.rows);
@@ -538,7 +533,13 @@ async function cargarAlumnoPorID(id){
   const [w0,w1] = weekRange(new Date());
   const aw = asistenciaAlumno(asis.cols, asis.rows, {id, nombre:nombreDeRegistro}, w0, w1);
 
-  const iNom = asis.cols.findIndex(c=>/^nombre/i.test(String(c||'')));
+  // DEBUG: ver qué fechas usa semana y 30 días
+  const hoy = new Date();
+  const d30 = ymd(new Date(hoy.getFullYear(),hoy.getMonth(),hoy.getDate()-30));
+  console.log('[Aula Digital] Fechas semana usadas:', infosAll.filter(x => x.iso >= w0 && x.iso <= w1).map(x=>x.iso));
+  console.log('[Aula Digital] Fechas 30 días usadas:', infosAll.filter(x => x.iso >= d30 && x.iso <= ymd(hoy)).map(x=>x.iso));
+
+  const iNom = asis.cols.findIndex(c=>/^nombre/i.test(String(c)));
   let nombre = nombreDeRegistro;
   if (aw.row && iNom>=0) nombre = String(aw.row[iNom]||'');
   if (!nombre){
@@ -554,8 +555,7 @@ async function cargarAlumnoPorID(id){
   $('#alumno-id').textContent     = 'ID: ' + id;
   $('#grupo-label').innerHTML     = `<span class="badgeb">👩‍🏫 Grupo: <b>${GROUP_LABEL}</b></span>`;
 
-  const hoy=new Date();
-  const a30 = asistenciaAlumno(asis.cols, asis.rows, {id, nombre:nombre}, ymd(new Date(hoy.getFullYear(),hoy.getMonth(),hoy.getDate()-30)), ymd(hoy));
+  const a30 = asistenciaAlumno(asis.cols, asis.rows, {id, nombre:nombre}, d30, ymd(hoy));
   const ah  = asistenciaHistorica(asis.cols, asis.rows, {id, nombre:nombre});
 
   $('#stat-aswk').textContent   = aw.total  ? `${Math.round(aw.present/aw.total*100)}%  (${aw.present}/${aw.total})` : '–';
