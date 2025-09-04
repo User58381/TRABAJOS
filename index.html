@@ -69,6 +69,7 @@
 </header>
 
 <main>
+  <!-- Acceso -->
   <section class="card hero" id="search-card">
     <div>
       <h2>Encuentre el progreso de su hijo(a)</h2>
@@ -82,6 +83,7 @@
     <div class="hint">Este sitio <u>solo lee</u> los datos. No modifica nada en la libreta digital.</div>
   </section>
 
+  <!-- Resultados -->
   <section id="student-view" style="display:none; margin-top:14px">
     <div class="card">
       <div class="topbar">
@@ -160,28 +162,32 @@ const pad   = n => String(n).padStart(2,'0');
 const ymd   = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
 const TODAY = new Date();
 const MONTHS_ES = {ene:0,feb:1,mar:2,abr:3,may:4,jun:5,jul:6,ago:7,sep:8,sept:8,oct:9,nov:10,dic:11};
-const isWeekend = d => [0,6].includes(new Date(d).getDay());
 
-/* ←––––––––– ESTA FUNCIÓN FALTABA –––––––––→ */
+/* Importante: convertir ISO a fecha LOCAL (no UTC) */
+function toLocalDate(value){
+  if (value instanceof Date) return value;
+  const s = String(value||'').trim();
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s);
+  if (m) return new Date(+m[1], +m[2]-1, +m[3]); // LOCAL
+  return new Date(s); // último recurso
+}
+const isWeekend = v => { const d = toLocalDate(v); const k = d.getDay(); return k===0 || k===6; };
+
+/* Detectar columna de ID si cambia el encabezado */
 function findIDColumn(cols, rows){
-  // 1) Encabezado típico
   let idx = cols.findIndex(c => /^(id|matric)/i.test(String(c||'')));
   if (idx >= 0) return idx;
-
-  // 2) Heurística por patrón de valores (IDXXXX…)
-  let best = -1, bestOk = -1;
-  for (let i = 0; i < cols.length; i++){
-    let ok = 0, tot = 0;
-    for (let r = 0; r < Math.min(rows.length, 50); r++){
+  let best=-1, bestOk=-1;
+  for (let i=0;i<cols.length;i++){
+    let ok=0, tot=0;
+    for (let r=0;r<Math.min(rows.length,50);r++){
       const v = String(rows[r]?.[i] ?? '').trim();
-      if (!v) continue;
-      tot++;
-      if (/^ID[A-Z0-9]{6,}$/i.test(v)) ok++;
+      if (!v) continue; tot++; if (/^ID[A-Z0-9]{6,}$/i.test(v)) ok++;
     }
-    if (tot && ok/tot >= 0.5) return i; // suficiente evidencia
-    if (ok > bestOk){ bestOk = ok; best = i; }
+    if (tot && ok/tot>=0.5) return i;
+    if (ok>bestOk){bestOk=ok;best=i;}
   }
-  return best; // quizá -1 si no se detecta nada
+  return best;
 }
 
 function excelSerialToDate(n){
@@ -189,7 +195,6 @@ function excelSerialToDate(n){
   const dUTC = new Date(baseUTC.getTime() + Math.round(Number(n))*86400000);
   return new Date(dUTC.getFullYear(), dUTC.getMonth(), dUTC.getDate());
 }
-
 function normDate(s){
   const t = String(s??'').trim();
   if(!t) return '';
@@ -347,7 +352,6 @@ function parsePresets(cols,rows){
 }
 
 /* ====== ASISTENCIA ====== */
-// opts: { excludeWeekends:boolean }
 function asistenciaAlumno(cols,rows,ref,start,end,opts={}){
   const iId  = findIDColumn(cols, rows);
   const iNom = cols.findIndex(c=>/^nombre/i.test(String(c)));
@@ -362,7 +366,7 @@ function asistenciaAlumno(cols,rows,ref,start,end,opts={}){
   let present = 0, total = 0;
   for (const info of infos){
     const v = row[info.i];
-    total++;               // contamos el día exista o no marca
+    total++;                      // cuenta el día aunque esté vacío
     if (isPresent(v)) present++;
   }
   return {present,total,row};
@@ -388,6 +392,7 @@ function asistenciaHistorica(cols,rows,ref,opts={}){
   return {present,total};
 }
 
+/* Semana actual (lun-vie) */
 function weekRange(d){
   const day=d.getDay(); const diff=(day===0?-6:1-day);
   const mon=new Date(d); mon.setDate(d.getDate()+diff); mon.setHours(0,0,0,0);
@@ -439,11 +444,11 @@ function renderLists(){
 
   const renderItem = (t) => {
     const mom = t.momento ? ` · ${t.momento}` : '';
-    const fecha = t.fechaObjetivo ? ` · ${normDate(t.fechaObjetivo)}` : '';
+    the_fecha = t.fechaObjetivo ? ` · ${normDate(t.fechaObjetivo)}` : '';
     const nom = t.nombreTrabajo ? ` · <i>${t.nombreTrabajo}</i>` : '';
     const kLink = linksFor(t.uid);
     return `<details>
-      <summary><b>${t.materia||'–'}</b> — ${t.numero||'–'} (${t.origen||'–'}${t.pagina?' · p.'+t.pagina:''})${nom}${fecha}${mom}${kLink? ' ' + kLink : ''}</summary>
+      <summary><b>${t.materia||'–'}</b> — ${t.numero||'–'} (${t.origen||'–'}${t.pagina?' · p.'+t.pagina:''})${nom}${the_fecha}${mom}${kLink? ' ' + kLink : ''}</summary>
     </details>`;
   };
   $('#faltantes').innerHTML = falt.length ? falt.map(renderItem).join('') : '<div class="hint">No hay trabajos faltantes 💙</div>';
@@ -459,11 +464,6 @@ async function cargarAlumnoPorID(id){
   await loadLinks();
 
   const [asis, reg, pre] = await Promise.all([loadBlock('asistencia'), loadBlock('registro'), loadBlock('presets')]);
-
-  // DEBUG rápido
-  const infosAll = getDateColInfo(asis.cols);
-  console.log('[Aula Digital] Encabezados asistencia:', asis.cols);
-  console.table(infosAll.map(x=>({index:x.i, iso:x.iso})));
 
   const entregas = parseRegistro(reg.cols, reg.rows);
   const presets  = parsePresets(pre.cols, pre.rows);
@@ -495,6 +495,7 @@ async function cargarAlumnoPorID(id){
   const d30 = ymd(new Date(hoy.getFullYear(),hoy.getMonth(),hoy.getDate()-30));
   const start30 = (d30 < SCHOOL_YEAR_START) ? SCHOOL_YEAR_START : d30;
 
+  const infosAll = getDateColInfo(asis.cols);
   console.log('[Aula Digital] Fechas semana usadas:', infosAll.filter(x => x.iso >= w0 && x.iso <= w1 && !isWeekend(x.iso)).map(x=>x.iso));
   console.log('[Aula Digital] Fechas 30 días usadas:', infosAll.filter(x => x.iso >= start30 && x.iso <= ymd(hoy) && !isWeekend(x.iso)).map(x=>x.iso));
 
