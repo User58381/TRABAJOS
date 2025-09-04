@@ -154,26 +154,74 @@ const LINKS_JSON = 'data/links_4A.json';   // súbelo desde el panel privado
 let LINKMAP = {};                          // { uid: {urls:[...], note:""} }
 
 /* ====== UTIL ====== */
-const $ = s => document.querySelector(s);
+const $  = s => document.querySelector(s);
 const strip = s => String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-const norm = s => strip(String(s||'').toLowerCase()).replace(/\s+/g,' ').trim();
-const pad = n => String(n).padStart(2,'0');
-const ymd = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const norm  = s => strip(String(s||'').toLowerCase()).replace(/\s+/g,' ').trim();
+const pad   = n => String(n).padStart(2,'0');
+const ymd   = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
 const TODAY = new Date();
+const MONTHS_ES = {ene:0,feb:1,mar:2,abr:3,may:4,jun:5,jul:6,ago:7,sep:8,sept:8,oct:9,nov:10,dic:11};
 
+// === Serial de Excel/Sheets -> Date local (día exacto)
+function excelSerialToDate(n){
+  const baseUTC = new Date(Date.UTC(1899,11,30)); // 1899-12-30
+  const dUTC = new Date(baseUTC.getTime() + Math.round(Number(n))*86400000);
+  return new Date(dUTC.getFullYear(), dUTC.getMonth(), dUTC.getDate());
+}
+
+// Reemplazo robusto de normDate (para valores sueltos también)
 function normDate(s){
-  const t = String(s||'').trim(); if(!t) return '';
-  const a = /^(\d{4}-\d{2}-\d{2})/.exec(t); if (a) return a[1];
-  const b = /^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/.exec(t);
-  if (b){ const d = new Date(+b[3], b[2]-1, +b[1]); return ymd(d); }
-  const d = new Date(t); if(!isNaN(+d)) return ymd(d);
-  return '';
+  const t = String(s||'').trim();
+  if(!t) return '';
+
+  // ISO flexible: YYYY-M-D (con o sin hora)
+  let m = /^(\d{4})-(\d{1,2})-(\d{1,2})(?:[ T].*)?$/.exec(t);
+  if (m){
+    const d = new Date(+m[1], +m[2]-1, +m[3]);
+    return isNaN(+d) ? '' : ymd(d);
+  }
+
+  // D/M/YYYY o M/D/YYYY (elegir por cercanía a hoy)
+  m = /^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})$/.exec(t);
+  if (m){
+    const a = new Date(+m[3], +m[2]-1, +m[1]); // D/M
+    const b = new Date(+m[3], +m[1]-1, +m[2]); // M/D
+    const d = (!isNaN(+a) && !isNaN(+b))
+      ? (Math.abs(+a - +TODAY) <= Math.abs(+b - +TODAY) ? a : b)
+      : (!isNaN(+a)) ? a : (!isNaN(+b)) ? b : null;
+    return d ? ymd(d) : '';
+  }
+
+  // Español: 1-sep-2025 / 1 sept 2025
+  m = /^(\d{1,2})[\s\-\/]([A-Za-záéíóúñ]+)[\s\-\/](\d{4})$/i.exec(t);
+  if (m){
+    const k = m[2].toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+    const key = k.startsWith('sept') ? 'sept' : k.slice(0,3);
+    const mi = MONTHS_ES[key];
+    if (mi!=null){
+      const d = new Date(+m[3], mi, +m[1]);
+      return isNaN(+d) ? '' : ymd(d);
+    }
+  }
+
+  // Serial de Excel/Sheets razonable
+  if (/^\d{4,6}$/.test(t)){
+    const n = +t;
+    if (n >= 35000 && n <= 80000){
+      const d = excelSerialToDate(n);
+      return isNaN(+d) ? '' : ymd(d);
+    }
+  }
+
+  // Último intento genérico
+  const d = new Date(t);
+  return isNaN(+d) ? '' : ymd(d);
 }
 
 function isPresent(v){
   const s = norm(v);
   if(!s) return false;
-  if(!Number.isNaN(+s)) return (+s) > 0; // 1, 0, etc.
+  if(!Number.isNaN(+s)) return (+s) > 0; // 1, 0, 2, etc.
   const s2 = s.replace(/\s+/g,'');
   if(/^1\(100%?\)$/.test(s2)) return true;
   return ['x','✓','✔','p','presente','si','sí','s','ok','true','asistio','asistió'].includes(s);
@@ -183,12 +231,10 @@ function getDateCols(cols){
   return cols.map((c,i)=>normDate(String(c).trim())?i:-1).filter(i=>i>=0);
 }
 
-/* ====== NUEVO: detectar columna de ID aunque no se llame "ID" ====== */
+/* ====== Detectar columna de ID aunque no se llame "ID" ====== */
 function findIDColumn(cols, rows){
-  // 1) por encabezado
   let idx = cols.findIndex(c => /^(id|matric)/i.test(String(c||'')));
   if (idx >= 0) return idx;
-  // 2) heurística por patrón de valores IDXXXX...
   for (let i = 0; i < cols.length; i++){
     let ok = 0, tot = 0;
     for (let r = 0; r < Math.min(rows.length, 30); r++){
@@ -197,38 +243,58 @@ function findIDColumn(cols, rows){
       tot++;
       if (/^ID[A-Z0-9]{6,}$/.test(v)) ok++;
     }
-    if (tot && ok/tot >= 0.6) return i; // 60%+ parecen IDs
+    if (tot && ok/tot >= 0.6) return i;
   }
   return -1;
 }
 
-/* ====== NUEVO: fechas de encabezado robustas ====== */
+/* ====== Fechas de encabezado robustas (incluye serial) ====== */
 function parseHeaderDateLabel(lbl){
-  const t = String(lbl||'').trim();
+  const tRaw = String(lbl||'').trim();
+  const t = tRaw.replace(/\s+/g,' ');
 
-  // ISO: YYYY-MM-DD
-  let m = /^(\d{4})-(\d{1,2})-(\d{1,2})/.exec(t);
+  // ISO flexible: YYYY-M-D (con o sin hora)
+  let m = /^(\d{4})-(\d{1,2})-(\d{1,2})(?:[ T].*)?$/.exec(t);
   if (m){
     const d = new Date(+m[1], +m[2]-1, +m[3]);
-    return isNaN(+d) ? null : { iso: ymd(d), date: d };
+    if (!isNaN(+d)) return { iso: ymd(d), date: d };
   }
 
-  // D/M/YYYY o M/D/YYYY (desambiguar por cercanía a hoy)
+  // D/M/YYYY o M/D/YYYY (elige por cercanía a hoy)
   m = /^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})$/.exec(t);
   if (m){
     const a = new Date(+m[3], +m[2]-1, +m[1]); // D/M
     const b = new Date(+m[3], +m[1]-1, +m[2]); // M/D
-    const diffA = Math.abs(+a - +TODAY);
-    const diffB = Math.abs(+b - +TODAY);
-    const d = (!isNaN(+a) && !isNaN(+b)) ? (diffA <= diffB ? a : b)
-            : (!isNaN(+a)) ? a
-            : (!isNaN(+b)) ? b : null;
-    return d ? { iso: ymd(d), date: d } : null;
+    const d = (!isNaN(+a) && !isNaN(+b))
+      ? (Math.abs(+a - +TODAY) <= Math.abs(+b - +TODAY) ? a : b)
+      : (!isNaN(+a)) ? a : (!isNaN(+b)) ? b : null;
+    if (d) return { iso: ymd(d), date: d };
   }
 
-  // Último intento
+  // Español: 1-sep-2025 / 1 sept 2025
+  m = /^(\d{1,2})[\s\-\/]([A-Za-záéíóúñ]+)[\s\-\/](\d{4})$/i.exec(t);
+  if (m){
+    const k = m[2].toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+    const key = k.startsWith('sept') ? 'sept' : k.slice(0,3);
+    const mi = MONTHS_ES[key];
+    if (mi!=null){
+      const d = new Date(+m[3], mi, +m[1]);
+      if (!isNaN(+d)) return { iso: ymd(d), date: d };
+    }
+  }
+
+  // Serial de Excel/Sheets
+  if (/^\d{4,6}$/.test(t)){
+    const n = +t;
+    if (n >= 35000 && n <= 80000){
+      const d = excelSerialToDate(n);
+      if (!isNaN(+d)) return { iso: ymd(d), date: d };
+    }
+  }
+
+  // Último intento genérico
   const d = new Date(t);
-  return isNaN(+d) ? null : { iso: ymd(d), date: d };
+  return isNaN(+d) ? null : { iso: ymd(d), date: new Date(d.getFullYear(), d.getMonth(), d.getDate()) };
 }
 
 function getDateColInfo(cols){
@@ -375,7 +441,7 @@ async function loadBlock(name){
   catch{ return await fetchCSVByGid(SHEET_ID, GIDS[name]); }
 }
 
-/* === NUEVO: cargar JSON de enlaces (opcional) === */
+/* === Links (opcional) === */
 async function loadLinks(){
   try{
     const res=await fetch(LINKS_JSON,{cache:'no-store'});
@@ -405,7 +471,6 @@ function renderBarChart({faltantes,tarde,atiempo}){
   set('#bar-fal',faltantes); set('#bar-tar',tarde); set('#bar-ati',atiempo);
 }
 
-/* === NUEVO: botón de evidencia en cada trabajo === */
 function linksFor(uid){
   const rec = LINKMAP?.[uid];
   if(!rec) return '';
@@ -442,21 +507,16 @@ async function cargarAlumnoPorID(id){
   $('#student-view').style.display='none';
   $('#alumno-nombre').textContent='Cargando…'; $('#alumno-id').textContent='';
 
-  // Cargar enlaces primero (si existen)
   await loadLinks();
 
-  // 1) Bloques de la hoja
   const [asis, reg, pre] = await Promise.all([loadBlock('asistencia'), loadBlock('registro'), loadBlock('presets')]);
 
-  // 2) Parseo y selección del alumno en REGISTRO
   const entregas = parseRegistro(reg.cols, reg.rows);
   const presets  = parsePresets(pre.cols, pre.rows);
   let entAlumno  = entregas.filter(t => norm(t.id) === norm(id));
 
-  // 3) Nombre desde REGISTRO
   const nombreDeRegistro = entAlumno.find(e => e.nombre)?.nombre || '';
 
-  // 4) Cruce Presets vs Entregas
   const uids   = new Map(entAlumno.filter(t => t.uidPreset).map(t => [t.uidPreset, t]));
   const claves = new Map(entAlumno.filter(t => !t.uidPreset).map(t => [
     [norm(t.materia), norm(String(t.numero).replace(/^trabajo\s*/i,'')),
@@ -475,7 +535,6 @@ async function cargarAlumnoPorID(id){
   }
   ALL={faltantes,tarde,atiempo,presets};
 
-  // 5) Nombre visible + etiquetas
   const [w0,w1] = weekRange(new Date());
   const aw = asistenciaAlumno(asis.cols, asis.rows, {id, nombre:nombreDeRegistro}, w0, w1);
 
@@ -495,7 +554,6 @@ async function cargarAlumnoPorID(id){
   $('#alumno-id').textContent     = 'ID: ' + id;
   $('#grupo-label').innerHTML     = `<span class="badgeb">👩‍🏫 Grupo: <b>${GROUP_LABEL}</b></span>`;
 
-  // 6) Asistencias
   const hoy=new Date();
   const a30 = asistenciaAlumno(asis.cols, asis.rows, {id, nombre:nombre}, ymd(new Date(hoy.getFullYear(),hoy.getMonth(),hoy.getDate()-30)), ymd(hoy));
   const ah  = asistenciaHistorica(asis.cols, asis.rows, {id, nombre:nombre});
@@ -505,10 +563,8 @@ async function cargarAlumnoPorID(id){
   $('#stat-asHist').textContent = ah.total  ? `${Math.round(ah.present/ah.total*100)}%  (${ah.present}/${ah.total})` : '–';
   $('#stat-faltHist').textContent = ah.total ? `${ah.total - ah.present}` : '–';
 
-  // 7) Pintar listas y gráfico
   TRI='ALL'; setTriChips(); renderLists();
 
-  // 8) Mostrar
   $('#student-view').style.display='block';
   window.scrollTo({top:document.body.offsetTop, behavior:'smooth'});
 }
