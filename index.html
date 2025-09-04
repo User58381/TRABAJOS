@@ -154,15 +154,91 @@ const LINKS_JSON = 'data/links_4A.json';   // súbelo desde el panel privado
 let LINKMAP = {};                          // { uid: {urls:[...], note:""} }
 
 /* ====== UTIL ====== */
-const $=s=>document.querySelector(s);
-const strip=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-const norm=s=>strip(String(s||'').toLowerCase()).replace(/\s+/g,' ').trim();
-const pad=n=>String(n).padStart(2,'0'); const ymd=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
-function normDate(s){const t=String(s||'').trim(); if(!t)return''; const a=/^(\d{4}-\d{2}-\d{2})/.exec(t); if(a) return a[1];
-  const b=/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/.exec(t); if(b){const d=new Date(+b[3],b[2]-1,+b[1]); return ymd(d);} const d=new Date(t); if(!isNaN(+d)) return ymd(d); return'';}
-function isPresent(v){const s=norm(v); if(!s) return false; if(!Number.isNaN(+s)) return (+s)>0; const s2=s.replace(/\s+/g,''); if(/^1\(100%?\)$/.test(s2)) return true;
-  return ['x','✓','✔','p','presente','si','sí','s','ok','true','asistio','asistió'].includes(s);}
-function getDateCols(cols){return cols.map((c,i)=>normDate(String(c).trim())?i:-1).filter(i=>i>=0);}
+const $ = s => document.querySelector(s);
+const strip = s => String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+const norm = s => strip(String(s||'').toLowerCase()).replace(/\s+/g,' ').trim();
+const pad = n => String(n).padStart(2,'0');
+const ymd = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const TODAY = new Date();
+
+function normDate(s){
+  const t = String(s||'').trim(); if(!t) return '';
+  const a = /^(\d{4}-\d{2}-\d{2})/.exec(t); if (a) return a[1];
+  const b = /^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/.exec(t);
+  if (b){ const d = new Date(+b[3], b[2]-1, +b[1]); return ymd(d); }
+  const d = new Date(t); if(!isNaN(+d)) return ymd(d);
+  return '';
+}
+
+function isPresent(v){
+  const s = norm(v);
+  if(!s) return false;
+  if(!Number.isNaN(+s)) return (+s) > 0; // 1, 0, etc.
+  const s2 = s.replace(/\s+/g,'');
+  if(/^1\(100%?\)$/.test(s2)) return true;
+  return ['x','✓','✔','p','presente','si','sí','s','ok','true','asistio','asistió'].includes(s);
+}
+
+function getDateCols(cols){
+  return cols.map((c,i)=>normDate(String(c).trim())?i:-1).filter(i=>i>=0);
+}
+
+/* ====== NUEVO: detectar columna de ID aunque no se llame "ID" ====== */
+function findIDColumn(cols, rows){
+  // 1) por encabezado
+  let idx = cols.findIndex(c => /^(id|matric)/i.test(String(c||'')));
+  if (idx >= 0) return idx;
+  // 2) heurística por patrón de valores IDXXXX...
+  for (let i = 0; i < cols.length; i++){
+    let ok = 0, tot = 0;
+    for (let r = 0; r < Math.min(rows.length, 30); r++){
+      const v = String(rows[r]?.[i] ?? '').trim();
+      if (!v) continue;
+      tot++;
+      if (/^ID[A-Z0-9]{6,}$/.test(v)) ok++;
+    }
+    if (tot && ok/tot >= 0.6) return i; // 60%+ parecen IDs
+  }
+  return -1;
+}
+
+/* ====== NUEVO: fechas de encabezado robustas ====== */
+function parseHeaderDateLabel(lbl){
+  const t = String(lbl||'').trim();
+
+  // ISO: YYYY-MM-DD
+  let m = /^(\d{4})-(\d{1,2})-(\d{1,2})/.exec(t);
+  if (m){
+    const d = new Date(+m[1], +m[2]-1, +m[3]);
+    return isNaN(+d) ? null : { iso: ymd(d), date: d };
+  }
+
+  // D/M/YYYY o M/D/YYYY (desambiguar por cercanía a hoy)
+  m = /^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})$/.exec(t);
+  if (m){
+    const a = new Date(+m[3], +m[2]-1, +m[1]); // D/M
+    const b = new Date(+m[3], +m[1]-1, +m[2]); // M/D
+    const diffA = Math.abs(+a - +TODAY);
+    const diffB = Math.abs(+b - +TODAY);
+    const d = (!isNaN(+a) && !isNaN(+b)) ? (diffA <= diffB ? a : b)
+            : (!isNaN(+a)) ? a
+            : (!isNaN(+b)) ? b : null;
+    return d ? { iso: ymd(d), date: d } : null;
+  }
+
+  // Último intento
+  const d = new Date(t);
+  return isNaN(+d) ? null : { iso: ymd(d), date: d };
+}
+
+function getDateColInfo(cols){
+  const out = [];
+  for (let i = 0; i < cols.length; i++){
+    const info = parseHeaderDateLabel(cols[i]);
+    if (info) out.push({ i, ...info });
+  }
+  return out;
+}
 
 /* ====== LECTORES ====== */
 let _cbSeq=0;
@@ -242,29 +318,55 @@ function parsePresets(cols,rows){
     nombreTrabajo:String((iNom>=0?r[iNom]:'')??'').trim()})).filter(p=>p.uid);
 }
 
-/* ====== ASISTENCIA ====== */
+/* ====== ASISTENCIA (corregida) ====== */
 function asistenciaAlumno(cols,rows,ref,start,end){
-  const iId=cols.findIndex(c=>/^(id|matric)/i.test(c));
-  const iNom=cols.findIndex(c=>/^nombre/i.test(c));
-  let row=null; if(iId>=0 && ref.id) row=rows.find(r=>norm(r[iId])===norm(ref.id));
-  if(!row && iNom>=0 && ref.nombre) row=rows.find(r=>norm(r[iNom])===norm(ref.nombre));
-  if(!row) return {present:0,total:0,row:null};
-  const dateCols=getDateCols(cols).filter(i=>{const d=normDate(cols[i]); return d && d>=start && d<=end;});
-  let present=0,total=0; for(const i of dateCols){const v=row[i]; if(v!==null&&v!==''){ total++; if(isPresent(v)) present++; } }
+  const iId  = findIDColumn(cols, rows);
+  const iNom = cols.findIndex(c=>/^nombre/i.test(String(c||'')));
+
+  let row = null;
+  if (iId >= 0 && ref.id) row = rows.find(r => norm(r[iId]) === norm(ref.id));
+  if (!row && iNom >= 0 && ref.nombre) row = rows.find(r => norm(r[iNom]) === norm(ref.nombre));
+  if (!row) return {present:0,total:0,row:null};
+
+  const infos = getDateColInfo(cols).filter(x => x.iso >= start && x.iso <= end);
+  let present = 0, total = 0;
+  for (const info of infos){
+    const v = row[info.i];
+    if (v !== null && v !== ''){
+      total++;
+      if (isPresent(v)) present++;
+    }
+  }
   return {present,total,row};
 }
+
 function asistenciaHistorica(cols,rows,ref){
-  const iId=cols.findIndex(c=>/^(id|matric)/i.test(c));
-  const iNom=cols.findIndex(c=>/^nombre/i.test(c));
-  let row=null; if(iId>=0 && ref.id) row=rows.find(r=>norm(r[iId])===norm(ref.id));
-  if(!row && iNom>=0 && ref.nombre) row=rows.find(r=>norm(r[iNom])===norm(ref.nombre));
-  if(!row) return {present:0,total:0};
-  const dateCols=getDateCols(cols);
-  let present=0,total=0; for(const i of dateCols){const v=row[i]; if(v!==null&&v!==''){ total++; if(isPresent(v)) present++; } }
+  const iId  = findIDColumn(cols, rows);
+  const iNom = cols.findIndex(c=>/^nombre/i.test(String(c||'')));
+
+  let row = null;
+  if (iId >= 0 && ref.id) row = rows.find(r => norm(r[iId]) === norm(ref.id));
+  if (!row && iNom >= 0 && ref.nombre) row = rows.find(r => norm(r[iNom]) === norm(ref.nombre));
+  if (!row) return {present:0,total:0};
+
+  const infos = getDateColInfo(cols);
+  let present = 0, total = 0;
+  for (const info of infos){
+    const v = row[info.i];
+    if (v !== null && v !== ''){
+      total++;
+      if (isPresent(v)) present++;
+    }
+  }
   return {present,total};
 }
-function weekRange(d){const day=d.getDay(); const diff=(day===0?-6:1-day); const mon=new Date(d); mon.setDate(d.getDate()+diff); mon.setHours(0,0,0,0);
-  const fri=new Date(mon); fri.setDate(mon.getDate()+4); return [ymd(mon), ymd(fri)]; }
+
+function weekRange(d){
+  const day=d.getDay(); const diff=(day===0?-6:1-day);
+  const mon=new Date(d); mon.setDate(d.getDate()+diff); mon.setHours(0,0,0,0);
+  const fri=new Date(mon); fri.setDate(mon.getDate()+4);
+  return [ymd(mon), ymd(fri)];
+}
 
 /* ====== CARGA Y RENDER ====== */
 async function loadBlock(name){
@@ -294,7 +396,9 @@ function setTriChips(){
   for(const b of host.querySelectorAll('.chip')) b.onclick=()=>{TRI=b.getAttribute('data-v'); setTriChips(); renderLists();};
   $('#tri-subtitle').textContent='Resumen de '+({ALL:'Todo',M1:'Trimestre 1',M2:'Trimestre 2',M3:'Trimestre 3'}[TRI]);
 }
+
 function byTri(list){ if(TRI==='ALL') return list; return list.filter(x=>String(x.momento||'').toUpperCase()===TRI); }
+
 function renderBarChart({faltantes,tarde,atiempo}){
   const max=Math.max(faltantes,tarde,atiempo,1);
   const set=(id,val)=>{ const el=$(id); el.style.setProperty('--pct',(val/max).toFixed(3)); el.querySelector('.val').textContent=val; };
@@ -323,7 +427,7 @@ function renderLists(){
     const mom = t.momento ? ` · ${t.momento}` : '';
     const fecha = t.fechaObjetivo ? ` · ${normDate(t.fechaObjetivo)}` : '';
     const nom = t.nombreTrabajo ? ` · <i>${t.nombreTrabajo}</i>` : '';
-    const kLink = linksFor(t.uid);   // <<< NUEVO
+    const kLink = linksFor(t.uid);
     return `<details>
       <summary><b>${t.materia||'–'}</b> — ${t.numero||'–'} (${t.origen||'–'}${t.pagina?' · p.'+t.pagina:''})${nom}${fecha}${mom}${kLink? ' ' + kLink : ''}</summary>
     </details>`;
@@ -374,11 +478,12 @@ async function cargarAlumnoPorID(id){
   // 5) Nombre visible + etiquetas
   const [w0,w1] = weekRange(new Date());
   const aw = asistenciaAlumno(asis.cols, asis.rows, {id, nombre:nombreDeRegistro}, w0, w1);
-  const iNom = asis.cols.findIndex(c=>/^nombre/i.test(c));
+
+  const iNom = asis.cols.findIndex(c=>/^nombre/i.test(String(c||'')));
   let nombre = nombreDeRegistro;
   if (aw.row && iNom>=0) nombre = String(aw.row[iNom]||'');
   if (!nombre){
-    const iId=asis.cols.findIndex(c=>/^(id|matric)/i.test(c));
+    const iId = findIDColumn(asis.cols, asis.rows);
     if (iId>=0 && iNom>=0){
       const r=asis.rows.find(r=>norm(r[iId])===norm(id));
       if (r) nombre=String(r[iNom]||'');
