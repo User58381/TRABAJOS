@@ -29,6 +29,8 @@
   .hero{display:grid;gap:12px}
   .input{display:grid;grid-template-columns:1fr auto auto;gap:8px}
   @media (max-width:640px){.input{grid-template-columns:1fr;}}
+  .input input{padding:14px 16px;border:1px solid var(--bd);border-radius:12px;background:white;font-size:16px}
+  [data-theme="dark"] .input input{background:#0d152b;color:var(--text)}
   .hint{color:var(--muted);font-size:13px}
   h2{margin:8px 0 6px 0}
   h3{margin:10px 0 8px 0}
@@ -159,6 +161,28 @@ const ymd   = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())
 const TODAY = new Date();
 const MONTHS_ES = {ene:0,feb:1,mar:2,abr:3,may:4,jun:5,jul:6,ago:7,sep:8,sept:8,oct:9,nov:10,dic:11};
 const isWeekend = d => [0,6].includes(new Date(d).getDay());
+
+/* ←––––––––– ESTA FUNCIÓN FALTABA –––––––––→ */
+function findIDColumn(cols, rows){
+  // 1) Encabezado típico
+  let idx = cols.findIndex(c => /^(id|matric)/i.test(String(c||'')));
+  if (idx >= 0) return idx;
+
+  // 2) Heurística por patrón de valores (IDXXXX…)
+  let best = -1, bestOk = -1;
+  for (let i = 0; i < cols.length; i++){
+    let ok = 0, tot = 0;
+    for (let r = 0; r < Math.min(rows.length, 50); r++){
+      const v = String(rows[r]?.[i] ?? '').trim();
+      if (!v) continue;
+      tot++;
+      if (/^ID[A-Z0-9]{6,}$/i.test(v)) ok++;
+    }
+    if (tot && ok/tot >= 0.5) return i; // suficiente evidencia
+    if (ok > bestOk){ bestOk = ok; best = i; }
+  }
+  return best; // quizá -1 si no se detecta nada
+}
 
 function excelSerialToDate(n){
   const baseUTC = new Date(Date.UTC(1899,11,30));
@@ -338,7 +362,7 @@ function asistenciaAlumno(cols,rows,ref,start,end,opts={}){
   let present = 0, total = 0;
   for (const info of infos){
     const v = row[info.i];
-    total++;                  // ← ahora SIEMPRE cuenta el día
+    total++;               // contamos el día exista o no marca
     if (isPresent(v)) present++;
   }
   return {present,total,row};
@@ -358,7 +382,7 @@ function asistenciaHistorica(cols,rows,ref,opts={}){
   let present = 0, total = 0;
   for (const info of infos){
     const v = row[info.i];
-    total++;                  // ← ahora SIEMPRE cuenta el día
+    total++;
     if (isPresent(v)) present++;
   }
   return {present,total};
@@ -436,7 +460,7 @@ async function cargarAlumnoPorID(id){
 
   const [asis, reg, pre] = await Promise.all([loadBlock('asistencia'), loadBlock('registro'), loadBlock('presets')]);
 
-  // DEBUG
+  // DEBUG rápido
   const infosAll = getDateColInfo(asis.cols);
   console.log('[Aula Digital] Encabezados asistencia:', asis.cols);
   console.table(infosAll.map(x=>({index:x.i, iso:x.iso})));
