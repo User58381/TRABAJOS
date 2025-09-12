@@ -1,5 +1,3 @@
-
-
 <!doctype html>
 <html lang="es" data-theme="light">
 <head>
@@ -151,7 +149,7 @@ const SHEET_ID = '1SWtGmXlf7WbNvUlJBDktXpDcq5OfJkHE75bH5nkxurk';
 const GIDS = { puntos:'0', asistencia:'280572348', registro:'1343140445', presets:'104702199' };
 const GROUP_LABEL = '4to A'; // fijo en esta página
 
-/* === NUEVO: archivo de enlaces público === */
+/* === Archivo de enlaces público (opcional) === */
 const LINKS_JSON = 'data/links_4A.json';   // súbelo desde el panel privado
 let LINKMAP = {};                          // { uid: {urls:[...], note:""} }
 
@@ -228,6 +226,8 @@ function parseRegistro(cols,rows){
     };
   });
 }
+
+/* --- Presets: ahora también lee URL Evidencia y Hoja evidencia --- */
 function parsePresets(cols,rows){
   const iUID=cols.findIndex(c=>/uid[_ ]?preset/i.test(c));
   const iFO=cols.findIndex(c=>/fecha.*objetivo/i.test(c));
@@ -237,11 +237,21 @@ function parsePresets(cols,rows){
   const iOri=cols.findIndex(c=>/^origen$/i.test(c));
   const iPag=cols.findIndex(c=>/^p[aá]gina/i.test(c));
   const iNom=cols.findIndex(c=>/nombre.*trabajo/i.test(c));
-  return rows.map(r=>({uid:String((iUID>=0?r[iUID]:'')??'').trim(),
-    fechaObjetivo:String((iFO>=0?r[iFO]:'')??'').trim(), momento:String((iMom>=0?r[iMom]:'')??'').trim(),
-    materia:String((iMat>=0?r[iMat]:'')??'').trim(), numero:String((iNum>=0?r[iNum]:'')??'').trim(),
-    origen:String((iOri>=0?r[iOri]:'')??'').trim(), pagina:String((iPag>=0?r[iPag]:'')??'').trim(),
-    nombreTrabajo:String((iNom>=0?r[iNom]:'')??'').trim()})).filter(p=>p.uid);
+  const iEUrl=cols.findIndex(c=>/url.*evidenc/i.test(c));     // URL Evidencia
+  const iESh =cols.findIndex(c=>/(hoja|sheet).*evidenc/i.test(c)); // Hoja evidencia
+
+  return rows.map(r=>({
+    uid:String((iUID>=0?r[iUID]:'')??'').trim(),
+    fechaObjetivo:String((iFO>=0?r[iFO]:'')??'').trim(),
+    momento:String((iMom>=0?r[iMom]:'')??'').trim(),
+    materia:String((iMat>=0?r[iMat]:'')??'').trim(),
+    numero:String((iNum>=0?r[iNum]:'')??'').trim(),
+    origen:String((iOri>=0?r[iOri]:'')??'').trim(),
+    pagina:String((iPag>=0?r[iPag]:'')??'').trim(),
+    nombreTrabajo:String((iNom>=0?r[iNom]:'')??'').trim(),
+    evidUrl:String((iEUrl>=0?r[iEUrl]:'')??'').trim(),
+    evidSheet:String((iESh>=0?r[iESh]:'')??'').trim(),
+  })).filter(p=>p.uid);
 }
 
 /* ====== ASISTENCIA ====== */
@@ -275,7 +285,7 @@ async function loadBlock(name){
   catch{ return await fetchCSVByGid(SHEET_ID, GIDS[name]); }
 }
 
-/* === NUEVO: cargar JSON de enlaces (opcional) === */
+/* === Cargar JSON de enlaces (opcional) === */
 async function loadLinks(){
   try{
     const res=await fetch(LINKS_JSON,{cache:'no-store'});
@@ -303,13 +313,26 @@ function renderBarChart({faltantes,tarde,atiempo}){
   set('#bar-fal',faltantes); set('#bar-tar',tarde); set('#bar-ati',atiempo);
 }
 
-/* === NUEVO: botón de evidencia en cada trabajo === */
-function linksFor(uid){
+/* === Botón de evidencia: combina JSON + Sheet === */
+function linksFor(uid, preset){
+  const urls = [];
+
+  // JSON público (opcional)
   const rec = LINKMAP?.[uid];
-  if(!rec) return '';
-  const arr = Array.isArray(rec.urls) ? rec.urls : (rec.url?[rec.url]:[]);
-  if(!arr.length) return '';
-  return arr.map((u,i)=>`<a class="linkbtn" href="${u}" target="_blank" rel="noopener">📷 Ver evidencia ${arr.length>1?i+1:''}</a>`).join('');
+  if (rec) {
+    if (Array.isArray(rec.urls)) urls.push(...rec.urls);
+    else if (rec.url) urls.push(rec.url);
+  }
+
+  // Desde el sheet (columna "URL Evidencia")
+  if (preset?.evidUrl) urls.push(String(preset.evidUrl));
+
+  const uniq = [...new Set(urls.map(u=>String(u||'').trim()).filter(Boolean))];
+  if (!uniq.length) return '';
+
+  return uniq
+    .map((u,i)=>`<a class="linkbtn" href="${u}" target="_blank" rel="noopener">📷 Ver evidencia ${uniq.length>1?i+1:''}</a>`)
+    .join('');
 }
 
 function renderLists(){
@@ -325,11 +348,14 @@ function renderLists(){
     const mom = t.momento ? ` · ${t.momento}` : '';
     const fecha = t.fechaObjetivo ? ` · ${normDate(t.fechaObjetivo)}` : '';
     const nom = t.nombreTrabajo ? ` · <i>${t.nombreTrabajo}</i>` : '';
-    const kLink = linksFor(t.uid);   // <<< NUEVO
+    const kLink = linksFor(t.uid, t);      // ← combina JSON + Sheet
+    const kSheet = t.evidSheet ? ` <span class="badgeb">📄 ${t.evidSheet}</span>` : '';
+
     return `<details>
-      <summary><b>${t.materia||'–'}</b> — ${t.numero||'–'} (${t.origen||'–'}${t.pagina?' · p.'+t.pagina:''})${nom}${fecha}${mom}${kLink? ' ' + kLink : ''}</summary>
+      <summary><b>${t.materia||'–'}</b> — ${t.numero||'–'} (${t.origen||'–'}${t.pagina?' · p.'+t.pagina:''})${nom}${fecha}${mom}${kLink? ' ' + kLink : ''}${kSheet}</summary>
     </details>`;
   };
+
   $('#faltantes').innerHTML = falt.length ? falt.map(renderItem).join('') : '<div class="hint">No hay trabajos faltantes 💙</div>';
   $('#tarde').innerHTML     = tar.length   ? tar.map(renderItem).join('')   : '<div class="hint">No hay entregas tarde</div>';
   $('#atiempo').innerHTML   = ati.length   ? ati.map(renderItem).join('')   : '<div class="hint">Aún no hay entregas registradas</div>';
