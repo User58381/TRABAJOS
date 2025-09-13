@@ -110,6 +110,7 @@
         <div><div class="k">Asistencia — 30 días</div><div class="v" id="stat-as30">–</div></div>
         <div><div class="k">Asistencia total (histórica)</div><div class="v" id="stat-asHist">–</div></div>
         <div><div class="k">Faltas (históricas)</div><div class="v" id="stat-faltHist">–</div></div>
+        <div><div class="k">Asistencias — hoja (relativo)</div><div class="v" id="stat-asSheet">–</div></div>
       </div>
 
       <div class="chart" aria-label="Resumen visual del trimestre">
@@ -157,12 +158,56 @@ let LINKMAP = {};                          // { uid: {urls:[...], note:""} }
 const $=s=>document.querySelector(s);
 const strip=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'');
 const norm=s=>strip(String(s||'').toLowerCase()).replace(/\s+/g,' ').trim();
-const pad=n=>String(n).padStart(2,'0'); const ymd=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
-function normDate(s){const t=String(s||'').trim(); if(!t)return''; const a=/^(\d{4}-\d{2}-\d{2})/.exec(t); if(a) return a[1];
-  const b=/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/.exec(t); if(b){const d=new Date(+b[3],b[2]-1,+b[1]); return ymd(d);} const d=new Date(t); if(!isNaN(+d)) return ymd(d); return'';}
-function isPresent(v){const s=norm(v); if(!s) return false; if(!Number.isNaN(+s)) return (+s)>0; const s2=s.replace(/\s+/g,''); if(/^1\(100%?\)$/.test(s2)) return true;
-  return ['x','✓','✔','p','presente','si','sí','s','ok','true','asistio','asistió'].includes(s);}
-function getDateCols(cols){return cols.map((c,i)=>normDate(String(c).trim())?i:-1).filter(i=>i>=0);}
+const pad=n=>String(n).padStart(2,'0');
+const ymd=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+
+/* Fechas robustas: YYYY-MM-DD / YYYY/M/D / DD/MM/YYYY / MM/DD/YYYY / Date(YYYY,MM,DD)… */
+function normDate(s){
+  const t=String(s||'').trim();
+  if(!t) return '';
+
+  // ISO flexible: 2025-9-1 o 2025/09/01
+  let m=t.match(/^(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})/);
+  if(m){
+    const y=+m[1], mo=+m[2], d=+m[3];
+    return `${y}-${pad(mo)}-${pad(d)}`;
+  }
+
+  // DMY: 1/9/2025 o 01-09-2025
+  m=t.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/);
+  if(m){
+    const d=+m[1], mo=+m[2], y=+m[3];
+    return `${y}-${pad(mo)}-${pad(d)}`;
+  }
+
+  // GViz: Date(2025,8,30) (mes 0-index en GViz)
+  m=t.match(/^Date\((\d{4})\s*,\s*(\d{1,2})\s*,\s*(\d{1,2})/i);
+  if(m){
+    const y=+m[1], mo=+m[2], d=+m[3];
+    return ymd(new Date(y, mo, d));
+  }
+
+  // Fallback: confiar en Date() si reconoce el string
+  const d=new Date(t);
+  if(!isNaN(+d)) return ymd(d);
+
+  return '';
+}
+
+function isPresent(v){
+  const s=norm(v);
+  if(!s) return false;
+  if(!Number.isNaN(+s)) return (+s)>0; // '1' cuenta como presente
+  const s2=s.replace(/\s+/g,'');
+  if(/^1\(100%?\)$/.test(s2)) return true;
+  return ['x','✓','✔','p','presente','si','sí','s','ok','true','asistio','asistió'].includes(s);
+}
+
+function getDateCols(cols){
+  return cols
+    .map((c,i)=>normDate(String(c).trim()) ? i : -1)
+    .filter(i=>i>=0);
+}
 
 /* ====== LECTORES ====== */
 let _cbSeq=0;
@@ -176,27 +221,42 @@ function fetchGViz(sheetId, sheetName){
     window[cb]=(json)=>{cleanup(); try{
       let cols=(json.table?.cols||[]).map(c=>String(c.label||'').trim());
       let rows=(json.table?.rows||[]).map(r=>(r.c||[]).map(c=>c?.v ?? ''));
+      // Fallback si vienen sin encabezados
       const empty=cols.filter(c=>!c||/^[A-Z]$/.test(c)).length;
-      if(empty>=Math.ceil(cols.length*0.5)&&rows.length){cols=rows[0].map(v=>String(v??'')); rows=rows.slice(1);}
+      if(empty>=Math.ceil(cols.length*0.5)&&rows.length){
+        cols=rows[0].map(v=>String(v??''));
+        rows=rows.slice(1);
+      }
       resolve({cols,rows});
     }catch(e){reject(e)} };
     sc.onerror=()=>{cleanup();reject(new Error('Error GViz'))};
     sc.src=url; document.head.appendChild(sc);
   });
 }
+
 async function fetchCSVByGid(sheetId,gid){
   const url=`https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}&ts=${Date.now()}`;
   const res=await fetch(url,{cache:'no-store'}); if(!res.ok) throw new Error('CSV '+gid);
   const txt=await res.text(); const rows=parseCSV(txt); const cols=(rows.shift()||[]).map(v=>String(v??'')); return {cols,rows};
 }
+
 function parseCSV(t){
   const rows=[]; let row=[], cur='', q=false;
-  for(let i=0;i<t.length;i++){const ch=t[i],nx=t[i+1];
-    if(q){ if(ch==='"'&&nx==='"'){cur+='"';i++;} else if(ch==='"'){q=false;} else cur+=ch; }
-    else { if(ch==='"'){q=true;} else if(ch===','){row.push(cur);cur='';}
+  for(let i=0;i<t.length;i++){
+    const ch=t[i],nx=t[i+1];
+    if(q){
+      if(ch==='"'&&nx==='"'){cur+='"';i++;}
+      else if(ch==='"'){q=false;}
+      else cur+=ch;
+    }else{
+      if(ch==='"'){q=true;}
+      else if(ch===','){row.push(cur);cur='';}
       else if(ch==='\n'||ch==='\r'){ if(cur!==''||row.length){row.push(cur);rows.push(row);row=[];cur='';} }
-      else cur+=ch; } }
-  if(cur!==''||row.length){row.push(cur);rows.push(row);} return rows;
+      else cur+=ch;
+    }
+  }
+  if(cur!==''||row.length){row.push(cur);rows.push(row);}
+  return rows;
 }
 
 /* ====== PARSERS ====== */
@@ -215,14 +275,23 @@ function parseRegistro(cols,rows){
   const iMom=cols.findIndex(c=>/^momento$/i.test(c));
   const iNomT=cols.findIndex(c=>/nombre.*trabajo/i.test(c));
   return rows.map(r=>{
-    const fecha=String(r[iF]??'').trim(); const fo=String((iFO>=0?r[iFO]:'')??'').trim()||fecha;
+    const fecha=String(r[iF]??'').trim();
+    const fo=String((iFO>=0?r[iFO]:'')??'').trim()||fecha;
     const atraso = (()=>{ if(iAtr>=0 && r[iAtr]!=='' && r[iAtr]!=null) return +r[iAtr]||0;
       const d=new Date(fecha), o=new Date(fo); if(isNaN(+d)||isNaN(+o)) return 0; return Math.max(0, Math.round((d-o)/86400000));})();
-    return { uidPreset:String((iUID>=0?r[iUID]:'')??'').trim(), fecha, fechaObjetivo:fo, id:String((iID>=0?r[iID]:'')??'').trim(),
-      nombre:String((iNom>=0?r[iNom]:'')??'').trim(), materia:String((iMat>=0?r[iMat]:'')??'').trim(),
-      numero:String((iNum>=0?r[iNum]:'')??'').trim(), origen:String((iOri>=0?r[iOri]:'')??'').trim(),
-      pagina:String((iPag>=0?r[iPag]:'')??'').trim(), puntos:+((iPts>=0?r[iPts]:0)??0)||0,
-      atrasoDias:atraso, momento:String((iMom>=0?r[iMom]:'')??'').trim(), nombreTrabajo:String((iNomT>=0?r[iNomT]:'')??'').trim()
+    return {
+      uidPreset:String((iUID>=0?r[iUID]:'')??'').trim(),
+      fecha, fechaObjetivo:fo,
+      id:String((iID>=0?r[iID]:'')??'').trim(),
+      nombre:String((iNom>=0?r[iNom]:'')??'').trim(),
+      materia:String((iMat>=0?r[iMat]:'')??'').trim(),
+      numero:String((iNum>=0?r[iNum]:'')??'').trim(),
+      origen:String((iOri>=0?r[iOri]:'')??'').trim(),
+      pagina:String((iPag>=0?r[iPag]:'')??'').trim(),
+      puntos:+((iPts>=0?r[iPts]:0)??0)||0,
+      atrasoDias:atraso,
+      momento:String((iMom>=0?r[iMom]:'')??'').trim(),
+      nombreTrabajo:String((iNomT>=0?r[iNomT]:'')??'').trim()
     };
   });
 }
@@ -239,7 +308,6 @@ function parsePresets(cols,rows){
   const iNom=cols.findIndex(c=>/nombre.*trabajo/i.test(c));
   const iEUrl=cols.findIndex(c=>/url.*evidenc/i.test(c));     // URL Evidencia
   const iESh =cols.findIndex(c=>/(hoja|sheet).*evidenc/i.test(c)); // Hoja evidencia
-
   return rows.map(r=>({
     uid:String((iUID>=0?r[iUID]:'')??'').trim(),
     fechaObjetivo:String((iFO>=0?r[iFO]:'')??'').trim(),
@@ -261,10 +329,17 @@ function asistenciaAlumno(cols,rows,ref,start,end){
   let row=null; if(iId>=0 && ref.id) row=rows.find(r=>norm(r[iId])===norm(ref.id));
   if(!row && iNom>=0 && ref.nombre) row=rows.find(r=>norm(r[iNom])===norm(ref.nombre));
   if(!row) return {present:0,total:0,row:null};
-  const dateCols=getDateCols(cols).filter(i=>{const d=normDate(cols[i]); return d && d>=start && d<=end;});
-  let present=0,total=0; for(const i of dateCols){const v=row[i]; if(v!==null&&v!==''){ total++; if(isPresent(v)) present++; } }
+  const dateCols=getDateCols(cols).filter(i=>{
+    const d=normDate(cols[i]); return d && d>=start && d<=end;
+  });
+  let present=0,total=0;
+  for(const i of dateCols){
+    const v=row[i];
+    if(v!==null&&v!==''){ total++; if(isPresent(v)) present++; }
+  }
   return {present,total,row};
 }
+
 function asistenciaHistorica(cols,rows,ref){
   const iId=cols.findIndex(c=>/^(id|matric)/i.test(c));
   const iNom=cols.findIndex(c=>/^nombre/i.test(c));
@@ -272,11 +347,44 @@ function asistenciaHistorica(cols,rows,ref){
   if(!row && iNom>=0 && ref.nombre) row=rows.find(r=>norm(r[iNom])===norm(ref.nombre));
   if(!row) return {present:0,total:0};
   const dateCols=getDateCols(cols);
-  let present=0,total=0; for(const i of dateCols){const v=row[i]; if(v!==null&&v!==''){ total++; if(isPresent(v)) present++; } }
+  let present=0,total=0;
+  for(const i of dateCols){
+    const v=row[i];
+    if(v!==null&&v!==''){ total++; if(isPresent(v)) present++; }
+  }
   return {present,total};
 }
-function weekRange(d){const day=d.getDay(); const diff=(day===0?-6:1-day); const mon=new Date(d); mon.setDate(d.getDate()+diff); mon.setHours(0,0,0,0);
-  const fri=new Date(mon); fri.setDate(mon.getDate()+4); return [ymd(mon), ymd(fri)]; }
+
+/* === “Asistencias — hoja (relativo)” como en tu fórmula de Sheets ===
+   Texto: X (Y%), donde:
+   X = presentes del alumno en todas las columnas de fecha
+   Y = X / máximo de presentes entre todos los alumnos * 100 (cap 100) */
+function asistenciaRelativa(cols, rows, ref){
+  const iId=cols.findIndex(c=>/^(id|matric)/i.test(c));
+  const iNom=cols.findIndex(c=>/^nombre/i.test(c));
+  let ri=-1; if(iId>=0 && ref.id) ri=rows.findIndex(r=>norm(r[iId])===norm(ref.id));
+  if(ri<0 && iNom>=0 && ref.nombre) ri=rows.findIndex(r=>norm(r[iNom])===norm(ref.nombre));
+  const dcols=getDateCols(cols);
+  if(ri<0 || !dcols.length) return {present:0,max:0,text:'0 (0%)'};
+
+  const countPresent = r => dcols.reduce((acc,i)=>acc+(isPresent(r[i])?1:0),0);
+
+  const presentRow = countPresent(rows[ri]);
+  let maxDays = 0;
+  for(const r of rows){ const c = countPresent(r); if(c>maxDays) maxDays=c; }
+
+  if(maxDays<=0) return {present:0,max:0,text:'0 (0%)'};
+
+  const pct = Math.min(100, Math.round((presentRow / maxDays) * 100));
+  return {present:presentRow, max:maxDays, text: `${presentRow} (${pct}%)`};
+}
+
+function weekRange(d){
+  const day=d.getDay(); const diff=(day===0?-6:1-day);
+  const mon=new Date(d); mon.setDate(d.getDate()+diff); mon.setHours(0,0,0,0);
+  const fri=new Date(mon); fri.setDate(mon.getDate()+4);
+  return [ymd(mon), ymd(fri)];
+}
 
 /* ====== CARGA Y RENDER ====== */
 async function loadBlock(name){
@@ -422,11 +530,13 @@ async function cargarAlumnoPorID(id){
   const hoy=new Date();
   const a30 = asistenciaAlumno(asis.cols, asis.rows, {id, nombre:nombre}, ymd(new Date(hoy.getFullYear(),hoy.getMonth(),hoy.getDate()-30)), ymd(hoy));
   const ah  = asistenciaHistorica(asis.cols, asis.rows, {id, nombre:nombre});
+  const rel = asistenciaRelativa(asis.cols, asis.rows, {id, nombre:nombre}); // ← NUEVO
 
-  $('#stat-aswk').textContent   = aw.total  ? `${Math.round(aw.present/aw.total*100)}%  (${aw.present}/${aw.total})` : '–';
-  $('#stat-as30').textContent   = a30.total ? `${Math.round(a30.present/a30.total*100)}%  (${a30.present}/${a30.total})` : '–';
-  $('#stat-asHist').textContent = ah.total  ? `${Math.round(ah.present/ah.total*100)}%  (${ah.present}/${ah.total})` : '–';
+  $('#stat-aswk').textContent     = aw.total  ? `${Math.round(aw.present/aw.total*100)}%  (${aw.present}/${aw.total})` : '–';
+  $('#stat-as30').textContent     = a30.total ? `${Math.round(a30.present/a30.total*100)}%  (${a30.present}/${a30.total})` : '–';
+  $('#stat-asHist').textContent   = ah.total  ? `${Math.round(ah.present/ah.total*100)}%  (${ah.present}/${ah.total})` : '–';
   $('#stat-faltHist').textContent = ah.total ? `${ah.total - ah.present}` : '–';
+  $('#stat-asSheet').textContent  = rel.text; // “X (Y%)” como en la hoja
 
   // 7) Pintar listas y gráfico
   TRI='ALL'; setTriChips(); renderLists();
