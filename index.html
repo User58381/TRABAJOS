@@ -73,7 +73,7 @@
   <section class="card hero" id="search-card">
     <div>
       <h2>Encuentre el progreso de su hijo(a)</h2>
-      <p class="hint">Escriba el <b>ID escolar</b> que le proporcionó la escuela para consultar tareas y asistencia.</p>
+    <p class="hint">Escriba el <b>ID escolar</b> que le proporcionó la escuela para consultar tareas y asistencia.</p>
     </div>
     <div class="input">
       <input id="idInput" autocomplete="off" placeholder="Pegue aquí el ID entregado por la escuela" inputmode="latin-name">
@@ -110,7 +110,9 @@
         <div><div class="k">Asistencia — 30 días</div><div class="v" id="stat-as30">–</div></div>
         <div><div class="k">Asistencia total (histórica)</div><div class="v" id="stat-asHist">–</div></div>
         <div><div class="k">Faltas (históricas)</div><div class="v" id="stat-faltHist">–</div></div>
+        <!-- (Opcional) si quieres ver el relativo X (Y%):
         <div><div class="k">Asistencias — hoja (relativo)</div><div class="v" id="stat-asSheet">–</div></div>
+        -->
       </div>
 
       <div class="chart" aria-label="Resumen visual del trimestre">
@@ -148,65 +150,47 @@
 /* ====== CONFIG ====== */
 const SHEET_ID = '1SWtGmXlf7WbNvUlJBDktXpDcq5OfJkHE75bH5nkxurk';
 const GIDS = { puntos:'0', asistencia:'280572348', registro:'1343140445', presets:'104702199' };
-const GROUP_LABEL = '4to A'; // fijo en esta página
+const GROUP_LABEL = '4to A';
 
-/* === Archivo de enlaces público (opcional) === */
-const LINKS_JSON = 'data/links_4A.json';   // súbelo desde el panel privado
-let LINKMAP = {};                          // { uid: {urls:[...], note:""} }
+/* JSON de enlaces (opcional) */
+const LINKS_JSON = 'data/links_4A.json';
+let LINKMAP = {};
 
-/* ====== UTIL ====== */
 const $=s=>document.querySelector(s);
 const strip=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'');
 const norm=s=>strip(String(s||'').toLowerCase()).replace(/\s+/g,' ').trim();
-const pad=n=>String(n).padStart(2,'0');
-const ymd=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const pad=n=>String(n).padStart(2,'0'); const ymd=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
 
-/* Fechas robustas: YYYY-MM-DD / YYYY/M/D / DD/MM/YYYY / MM/DD/YYYY / Date(YYYY,MM,DD)… */
+/* === FECHAS ROBUSTAS === */
 function normDate(s){
   const t=String(s||'').trim();
   if(!t) return '';
-
-  // ISO flexible: 2025-9-1 o 2025/09/01
+  // ISO y variantes: 2025-9-1 / 2025/09/01
   let m=t.match(/^(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})/);
-  if(m){
-    const y=+m[1], mo=+m[2], d=+m[3];
-    return `${y}-${pad(mo)}-${pad(d)}`;
-  }
-
+  if(m){ const y=+m[1], mo=+m[2], d=+m[3]; return `${y}-${pad(mo)}-${pad(d)}`; }
   // DMY: 1/9/2025 o 01-09-2025
   m=t.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/);
-  if(m){
-    const d=+m[1], mo=+m[2], y=+m[3];
-    return `${y}-${pad(mo)}-${pad(d)}`;
-  }
-
-  // GViz: Date(2025,8,30) (mes 0-index en GViz)
+  if(m){ const d=+m[1], mo=+m[2], y=+m[3]; return `${y}-${pad(mo)}-${pad(d)}`; }
+  // GViz: Date(2025,8,30)
   m=t.match(/^Date\((\d{4})\s*,\s*(\d{1,2})\s*,\s*(\d{1,2})/i);
-  if(m){
-    const y=+m[1], mo=+m[2], d=+m[3];
-    return ymd(new Date(y, mo, d));
-  }
-
-  // Fallback: confiar en Date() si reconoce el string
-  const d=new Date(t);
-  if(!isNaN(+d)) return ymd(d);
-
+  if(m){ const y=+m[1], mo=+m[2], d=+m[3]; return ymd(new Date(y, mo, d)); }
+  // Fallback
+  const d=new Date(t); if(!isNaN(+d)) return ymd(d);
   return '';
 }
-
 function isPresent(v){
-  const s=norm(v);
-  if(!s) return false;
-  if(!Number.isNaN(+s)) return (+s)>0; // '1' cuenta como presente
-  const s2=s.replace(/\s+/g,'');
-  if(/^1\(100%?\)$/.test(s2)) return true;
+  const s=norm(v); if(!s) return false;
+  if(!Number.isNaN(+s)) return (+s)>0; // '1' cuenta
+  const s2=s.replace(/\s+/g,''); if(/^1\(100%?\)$/.test(s2)) return true;
   return ['x','✓','✔','p','presente','si','sí','s','ok','true','asistio','asistió'].includes(s);
 }
-
 function getDateCols(cols){
-  return cols
-    .map((c,i)=>normDate(String(c).trim()) ? i : -1)
-    .filter(i=>i>=0);
+  return cols.map((c,i)=>normDate(String(c).trim())?i:-1).filter(i=>i>=0);
+}
+/* NUEVO: columnas de fecha ACTIVAS (al menos alguien marcó) */
+function getActiveDateCols(cols, rows){
+  const dcols=getDateCols(cols);
+  return dcols.filter(i=>rows.some(r=>(r[i]!=='' && r[i]!=null)));
 }
 
 /* ====== LECTORES ====== */
@@ -221,42 +205,27 @@ function fetchGViz(sheetId, sheetName){
     window[cb]=(json)=>{cleanup(); try{
       let cols=(json.table?.cols||[]).map(c=>String(c.label||'').trim());
       let rows=(json.table?.rows||[]).map(r=>(r.c||[]).map(c=>c?.v ?? ''));
-      // Fallback si vienen sin encabezados
       const empty=cols.filter(c=>!c||/^[A-Z]$/.test(c)).length;
-      if(empty>=Math.ceil(cols.length*0.5)&&rows.length){
-        cols=rows[0].map(v=>String(v??''));
-        rows=rows.slice(1);
-      }
+      if(empty>=Math.ceil(cols.length*0.5)&&rows.length){cols=rows[0].map(v=>String(v??'')); rows=rows.slice(1);}
       resolve({cols,rows});
     }catch(e){reject(e)} };
     sc.onerror=()=>{cleanup();reject(new Error('Error GViz'))};
     sc.src=url; document.head.appendChild(sc);
   });
 }
-
 async function fetchCSVByGid(sheetId,gid){
   const url=`https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}&ts=${Date.now()}`;
   const res=await fetch(url,{cache:'no-store'}); if(!res.ok) throw new Error('CSV '+gid);
   const txt=await res.text(); const rows=parseCSV(txt); const cols=(rows.shift()||[]).map(v=>String(v??'')); return {cols,rows};
 }
-
 function parseCSV(t){
   const rows=[]; let row=[], cur='', q=false;
-  for(let i=0;i<t.length;i++){
-    const ch=t[i],nx=t[i+1];
-    if(q){
-      if(ch==='"'&&nx==='"'){cur+='"';i++;}
-      else if(ch==='"'){q=false;}
-      else cur+=ch;
-    }else{
-      if(ch==='"'){q=true;}
-      else if(ch===','){row.push(cur);cur='';}
+  for(let i=0;i<t.length;i++){const ch=t[i],nx=t[i+1];
+    if(q){ if(ch==='"'&&nx==='"'){cur+='"';i++;} else if(ch==='"'){q=false;} else cur+=ch; }
+    else { if(ch==='"'){q=true;} else if(ch===','){row.push(cur);cur='';}
       else if(ch==='\n'||ch==='\r'){ if(cur!==''||row.length){row.push(cur);rows.push(row);row=[];cur='';} }
-      else cur+=ch;
-    }
-  }
-  if(cur!==''||row.length){row.push(cur);rows.push(row);}
-  return rows;
+      else cur+=ch; } }
+  if(cur!==''||row.length){row.push(cur);rows.push(row);} return rows;
 }
 
 /* ====== PARSERS ====== */
@@ -275,28 +244,17 @@ function parseRegistro(cols,rows){
   const iMom=cols.findIndex(c=>/^momento$/i.test(c));
   const iNomT=cols.findIndex(c=>/nombre.*trabajo/i.test(c));
   return rows.map(r=>{
-    const fecha=String(r[iF]??'').trim();
-    const fo=String((iFO>=0?r[iFO]:'')??'').trim()||fecha;
+    const fecha=String(r[iF]??'').trim(); const fo=String((iFO>=0?r[iFO]:'')??'').trim()||fecha;
     const atraso = (()=>{ if(iAtr>=0 && r[iAtr]!=='' && r[iAtr]!=null) return +r[iAtr]||0;
       const d=new Date(fecha), o=new Date(fo); if(isNaN(+d)||isNaN(+o)) return 0; return Math.max(0, Math.round((d-o)/86400000));})();
-    return {
-      uidPreset:String((iUID>=0?r[iUID]:'')??'').trim(),
-      fecha, fechaObjetivo:fo,
-      id:String((iID>=0?r[iID]:'')??'').trim(),
-      nombre:String((iNom>=0?r[iNom]:'')??'').trim(),
-      materia:String((iMat>=0?r[iMat]:'')??'').trim(),
-      numero:String((iNum>=0?r[iNum]:'')??'').trim(),
-      origen:String((iOri>=0?r[iOri]:'')??'').trim(),
-      pagina:String((iPag>=0?r[iPag]:'')??'').trim(),
-      puntos:+((iPts>=0?r[iPts]:0)??0)||0,
-      atrasoDias:atraso,
-      momento:String((iMom>=0?r[iMom]:'')??'').trim(),
-      nombreTrabajo:String((iNomT>=0?r[iNomT]:'')??'').trim()
+    return { uidPreset:String((iUID>=0?r[iUID]:'')??'').trim(), fecha, fechaObjetivo:fo, id:String((iID>=0?r[iID]:'')??'').trim(),
+      nombre:String((iNom>=0?r[iNom]:'')??'').trim(), materia:String((iMat>=0?r[iMat]:'')??'').trim(),
+      numero:String((iNum>=0?r[iNum]:'')??'').trim(), origen:String((iOri>=0?r[iOri]:'')??'').trim(),
+      pagina:String((iPag>=0?r[iPag]:'')??'').trim(), puntos:+((iPts>=0?r[iPts]:0)??0)||0,
+      atrasoDias:atraso, momento:String((iMom>=0?r[iMom]:'')??'').trim(), nombreTrabajo:String((iNomT>=0?r[iNomT]:'')??'').trim()
     };
   });
 }
-
-/* --- Presets: ahora también lee URL Evidencia y Hoja evidencia --- */
 function parsePresets(cols,rows){
   const iUID=cols.findIndex(c=>/uid[_ ]?preset/i.test(c));
   const iFO=cols.findIndex(c=>/fecha.*objetivo/i.test(c));
@@ -306,8 +264,8 @@ function parsePresets(cols,rows){
   const iOri=cols.findIndex(c=>/^origen$/i.test(c));
   const iPag=cols.findIndex(c=>/^p[aá]gina/i.test(c));
   const iNom=cols.findIndex(c=>/nombre.*trabajo/i.test(c));
-  const iEUrl=cols.findIndex(c=>/url.*evidenc/i.test(c));     // URL Evidencia
-  const iESh =cols.findIndex(c=>/(hoja|sheet).*evidenc/i.test(c)); // Hoja evidencia
+  const iEUrl=cols.findIndex(c=>/url.*evidenc/i.test(c));
+  const iESh =cols.findIndex(c=>/(hoja|sheet).*evidenc/i.test(c));
   return rows.map(r=>({
     uid:String((iUID>=0?r[iUID]:'')??'').trim(),
     fechaObjetivo:String((iFO>=0?r[iFO]:'')??'').trim(),
@@ -322,69 +280,53 @@ function parsePresets(cols,rows){
   })).filter(p=>p.uid);
 }
 
-/* ====== ASISTENCIA ====== */
+/* ====== ASISTENCIA (solo corregido) ====== */
 function asistenciaAlumno(cols,rows,ref,start,end){
   const iId=cols.findIndex(c=>/^(id|matric)/i.test(c));
   const iNom=cols.findIndex(c=>/^nombre/i.test(c));
   let row=null; if(iId>=0 && ref.id) row=rows.find(r=>norm(r[iId])===norm(ref.id));
   if(!row && iNom>=0 && ref.nombre) row=rows.find(r=>norm(r[iNom])===norm(ref.nombre));
   if(!row) return {present:0,total:0,row:null};
-  const dateCols=getDateCols(cols).filter(i=>{
+
+  // Denominador: columnas de fecha ACTIVAS en el rango (como en tu hoja)
+  const activeCols=getActiveDateCols(cols, rows).filter(i=>{
     const d=normDate(cols[i]); return d && d>=start && d<=end;
   });
-  let present=0,total=0;
-  for(const i of dateCols){
-    const v=row[i];
-    if(v!==null&&v!==''){ total++; if(isPresent(v)) present++; }
-  }
+
+  const present=activeCols.reduce((acc,i)=>acc+(isPresent(row[i])?1:0),0);
+  const total=activeCols.length;
   return {present,total,row};
 }
-
 function asistenciaHistorica(cols,rows,ref){
   const iId=cols.findIndex(c=>/^(id|matric)/i.test(c));
   const iNom=cols.findIndex(c=>/^nombre/i.test(c));
   let row=null; if(iId>=0 && ref.id) row=rows.find(r=>norm(r[iId])===norm(ref.id));
   if(!row && iNom>=0 && ref.nombre) row=rows.find(r=>norm(r[iNom])===norm(ref.nombre));
   if(!row) return {present:0,total:0};
-  const dateCols=getDateCols(cols);
-  let present=0,total=0;
-  for(const i of dateCols){
-    const v=row[i];
-    if(v!==null&&v!==''){ total++; if(isPresent(v)) present++; }
-  }
+
+  const activeCols=getActiveDateCols(cols, rows); // todas las fechas activas
+  const present=activeCols.reduce((acc,i)=>acc+(isPresent(row[i])?1:0),0);
+  const total=activeCols.length;
   return {present,total};
 }
-
-/* === “Asistencias — hoja (relativo)” como en tu fórmula de Sheets ===
-   Texto: X (Y%), donde:
-   X = presentes del alumno en todas las columnas de fecha
-   Y = X / máximo de presentes entre todos los alumnos * 100 (cap 100) */
+/* Opcional: relativo X (Y%) como la columna “10 (100%)” de la hoja */
 function asistenciaRelativa(cols, rows, ref){
   const iId=cols.findIndex(c=>/^(id|matric)/i.test(c));
   const iNom=cols.findIndex(c=>/^nombre/i.test(c));
   let ri=-1; if(iId>=0 && ref.id) ri=rows.findIndex(r=>norm(r[iId])===norm(ref.id));
   if(ri<0 && iNom>=0 && ref.nombre) ri=rows.findIndex(r=>norm(r[iNom])===norm(ref.nombre));
-  const dcols=getDateCols(cols);
+  const dcols=getActiveDateCols(cols, rows);
   if(ri<0 || !dcols.length) return {present:0,max:0,text:'0 (0%)'};
-
-  const countPresent = r => dcols.reduce((acc,i)=>acc+(isPresent(r[i])?1:0),0);
-
-  const presentRow = countPresent(rows[ri]);
-  let maxDays = 0;
-  for(const r of rows){ const c = countPresent(r); if(c>maxDays) maxDays=c; }
-
+  const count=r=>dcols.reduce((a,i)=>a+(isPresent(r[i])?1:0),0);
+  const presentRow=count(rows[ri]);
+  const maxDays=rows.reduce((m,r)=>Math.max(m,count(r)),0);
   if(maxDays<=0) return {present:0,max:0,text:'0 (0%)'};
-
-  const pct = Math.min(100, Math.round((presentRow / maxDays) * 100));
-  return {present:presentRow, max:maxDays, text: `${presentRow} (${pct}%)`};
+  const pct=Math.min(100, Math.round(presentRow/maxDays*100));
+  return {present:presentRow,max:maxDays,text:`${presentRow} (${pct}%)`};
 }
 
-function weekRange(d){
-  const day=d.getDay(); const diff=(day===0?-6:1-day);
-  const mon=new Date(d); mon.setDate(d.getDate()+diff); mon.setHours(0,0,0,0);
-  const fri=new Date(mon); fri.setDate(mon.getDate()+4);
-  return [ymd(mon), ymd(fri)];
-}
+function weekRange(d){const day=d.getDay(); const diff=(day===0?-6:1-day); const mon=new Date(d); mon.setDate(d.getDate()+diff); mon.setHours(0,0,0,0);
+  const fri=new Date(mon); fri.setDate(mon.getDate()+4); return [ymd(mon), ymd(fri)]; }
 
 /* ====== CARGA Y RENDER ====== */
 async function loadBlock(name){
@@ -392,21 +334,15 @@ async function loadBlock(name){
   try{ return await fetchGViz(SHEET_ID, names[name]); }
   catch{ return await fetchCSVByGid(SHEET_ID, GIDS[name]); }
 }
-
-/* === Cargar JSON de enlaces (opcional) === */
 async function loadLinks(){
   try{
     const res=await fetch(LINKS_JSON,{cache:'no-store'});
-    if(res.ok){
-      const j=await res.json();
-      if(j?.items) LINKMAP=j.items;
-    }
-  }catch{ /* si no existe, seguimos sin enlaces */ }
+    if(res.ok){ const j=await res.json(); if(j?.items) LINKMAP=j.items; }
+  }catch{ /* opcional */ }
 }
 
 let ALL = {faltantes:[], tarde:[], atiempo:[], presets:[]};
 let TRI='ALL';
-
 function setTriChips(){
   const host=$('#tri-chips');
   const opts=[['ALL','Todo'],['M1','Trimestre 1'],['M2','Trimestre 2'],['M3','Trimestre 3']];
@@ -420,75 +356,52 @@ function renderBarChart({faltantes,tarde,atiempo}){
   const set=(id,val)=>{ const el=$(id); el.style.setProperty('--pct',(val/max).toFixed(3)); el.querySelector('.val').textContent=val; };
   set('#bar-fal',faltantes); set('#bar-tar',tarde); set('#bar-ati',atiempo);
 }
-
-/* === Botón de evidencia: combina JSON + Sheet === */
 function linksFor(uid, preset){
   const urls = [];
-
-  // JSON público (opcional)
   const rec = LINKMAP?.[uid];
-  if (rec) {
-    if (Array.isArray(rec.urls)) urls.push(...rec.urls);
-    else if (rec.url) urls.push(rec.url);
-  }
-
-  // Desde el sheet (columna "URL Evidencia")
+  if (rec) { if (Array.isArray(rec.urls)) urls.push(...rec.urls); else if (rec.url) urls.push(rec.url); }
   if (preset?.evidUrl) urls.push(String(preset.evidUrl));
-
   const uniq = [...new Set(urls.map(u=>String(u||'').trim()).filter(Boolean))];
   if (!uniq.length) return '';
-
-  return uniq
-    .map((u,i)=>`<a class="linkbtn" href="${u}" target="_blank" rel="noopener">📷 Ver evidencia ${uniq.length>1?i+1:''}</a>`)
-    .join('');
+  return uniq.map((u,i)=>`<a class="linkbtn" href="${u}" target="_blank" rel="noopener">📷 Ver evidencia ${uniq.length>1?i+1:''}</a>`).join('');
 }
-
 function renderLists(){
   const falt=byTri(ALL.faltantes), tar=byTri(ALL.tarde), ati=byTri(ALL.atiempo);
   const totalTri = byTri(ALL.presets).length;
   const hechosTri = tar.length + ati.length;
-
   $('#stat-cump-tri').textContent = totalTri? `${Math.round(hechosTri/totalTri*100)}%` : '–';
   $('#stat-tot-tri').textContent  = `Faltantes ${falt.length} · Tarde ${tar.length} · A tiempo ${ati.length} · Trabajos totales ${totalTri}`;
   renderBarChart({faltantes:falt.length, tarde:tar.length, atiempo:ati.length});
-
   const renderItem = (t) => {
     const mom = t.momento ? ` · ${t.momento}` : '';
     const fecha = t.fechaObjetivo ? ` · ${normDate(t.fechaObjetivo)}` : '';
     const nom = t.nombreTrabajo ? ` · <i>${t.nombreTrabajo}</i>` : '';
-    const kLink = linksFor(t.uid, t);      // ← combina JSON + Sheet
+    const kLink = linksFor(t.uid, t);
     const kSheet = t.evidSheet ? ` <span class="badgeb">📄 ${t.evidSheet}</span>` : '';
-
     return `<details>
       <summary><b>${t.materia||'–'}</b> — ${t.numero||'–'} (${t.origen||'–'}${t.pagina?' · p.'+t.pagina:''})${nom}${fecha}${mom}${kLink? ' ' + kLink : ''}${kSheet}</summary>
     </details>`;
   };
-
   $('#faltantes').innerHTML = falt.length ? falt.map(renderItem).join('') : '<div class="hint">No hay trabajos faltantes 💙</div>';
   $('#tarde').innerHTML     = tar.length   ? tar.map(renderItem).join('')   : '<div class="hint">No hay entregas tarde</div>';
   $('#atiempo').innerHTML   = ati.length   ? ati.map(renderItem).join('')   : '<div class="hint">Aún no hay entregas registradas</div>';
 }
 
-/* ====== CARGA (con nombre desde REGISTRO y fallback a ASISTENCIA) ====== */
+/* ====== CARGA (con asistencia corregida) ====== */
 async function cargarAlumnoPorID(id){
   $('#student-view').style.display='none';
   $('#alumno-nombre').textContent='Cargando…'; $('#alumno-id').textContent='';
 
-  // Cargar enlaces primero (si existen)
   await loadLinks();
 
-  // 1) Bloques de la hoja
   const [asis, reg, pre] = await Promise.all([loadBlock('asistencia'), loadBlock('registro'), loadBlock('presets')]);
 
-  // 2) Parseo y selección del alumno en REGISTRO
   const entregas = parseRegistro(reg.cols, reg.rows);
   const presets  = parsePresets(pre.cols, pre.rows);
   let entAlumno  = entregas.filter(t => norm(t.id) === norm(id));
 
-  // 3) Nombre desde REGISTRO
   const nombreDeRegistro = entAlumno.find(e => e.nombre)?.nombre || '';
 
-  // 4) Cruce Presets vs Entregas
   const uids   = new Map(entAlumno.filter(t => t.uidPreset).map(t => [t.uidPreset, t]));
   const claves = new Map(entAlumno.filter(t => !t.uidPreset).map(t => [
     [norm(t.materia), norm(String(t.numero).replace(/^trabajo\s*/i,'')),
@@ -507,7 +420,7 @@ async function cargarAlumnoPorID(id){
   }
   ALL={faltantes,tarde,atiempo,presets};
 
-  // 5) Nombre visible + etiquetas
+  // Nombre visible + etiquetas
   const [w0,w1] = weekRange(new Date());
   const aw = asistenciaAlumno(asis.cols, asis.rows, {id, nombre:nombreDeRegistro}, w0, w1);
   const iNom = asis.cols.findIndex(c=>/^nombre/i.test(c));
@@ -526,22 +439,22 @@ async function cargarAlumnoPorID(id){
   $('#alumno-id').textContent     = 'ID: ' + id;
   $('#grupo-label').innerHTML     = `<span class="badgeb">👩‍🏫 Grupo: <b>${GROUP_LABEL}</b></span>`;
 
-  // 6) Asistencias
+  // Asistencias (corregidas)
   const hoy=new Date();
   const a30 = asistenciaAlumno(asis.cols, asis.rows, {id, nombre:nombre}, ymd(new Date(hoy.getFullYear(),hoy.getMonth(),hoy.getDate()-30)), ymd(hoy));
   const ah  = asistenciaHistorica(asis.cols, asis.rows, {id, nombre:nombre});
-  const rel = asistenciaRelativa(asis.cols, asis.rows, {id, nombre:nombre}); // ← NUEVO
+  const rel = asistenciaRelativa(asis.cols, asis.rows, {id, nombre:nombre}); // opcional
 
   $('#stat-aswk').textContent     = aw.total  ? `${Math.round(aw.present/aw.total*100)}%  (${aw.present}/${aw.total})` : '–';
   $('#stat-as30').textContent     = a30.total ? `${Math.round(a30.present/a30.total*100)}%  (${a30.present}/${a30.total})` : '–';
   $('#stat-asHist').textContent   = ah.total  ? `${Math.round(ah.present/ah.total*100)}%  (${ah.present}/${ah.total})` : '–';
   $('#stat-faltHist').textContent = ah.total ? `${ah.total - ah.present}` : '–';
-  $('#stat-asSheet').textContent  = rel.text; // “X (Y%)” como en la hoja
+  // Si existe el renglón relativo en tu HTML, lo llenamos; si no, se ignora
+  const relEl=document.getElementById('stat-asSheet'); if(relEl) relEl.textContent = rel.text;
 
-  // 7) Pintar listas y gráfico
+  // Pintar listas y gráfico de trabajos
   TRI='ALL'; setTriChips(); renderLists();
 
-  // 8) Mostrar
   $('#student-view').style.display='block';
   window.scrollTo({top:document.body.offsetTop, behavior:'smooth'});
 }
