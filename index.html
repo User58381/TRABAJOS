@@ -73,7 +73,7 @@
   <section class="card hero" id="search-card">
     <div>
       <h2>Encuentre el progreso de su hijo(a)</h2>
-    <p class="hint">Escriba el <b>ID escolar</b> que le proporcionó la escuela para consultar tareas y asistencia.</p>
+      <p class="hint">Escriba el <b>ID escolar</b> que le proporcionó la escuela para consultar tareas y asistencia.</p>
     </div>
     <div class="input">
       <input id="idInput" autocomplete="off" placeholder="Pegue aquí el ID entregado por la escuela" inputmode="latin-name">
@@ -159,7 +159,8 @@ let LINKMAP = {};
 const $=s=>document.querySelector(s);
 const strip=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'');
 const norm=s=>strip(String(s||'').toLowerCase()).replace(/\s+/g,' ').trim();
-const pad=n=>String(n).padStart(2,'0'); const ymd=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const pad=n=>String(n).padStart(2,'0');
+const ymd=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
 
 /* === FECHAS ROBUSTAS === */
 function normDate(s){
@@ -220,12 +221,22 @@ async function fetchCSVByGid(sheetId,gid){
 }
 function parseCSV(t){
   const rows=[]; let row=[], cur='', q=false;
-  for(let i=0;i<t.length;i++){const ch=t[i],nx=t[i+1];
-    if(q){ if(ch==='"'&&nx==='"'){cur+='"';i++;} else if(ch==='"'){q=false;} else cur+=ch; }
-    else { if(ch==='"'){q=true;} else if(ch===','){row.push(cur);cur='';}
-      else if(ch==='\n'||ch==='\r'){ if(cur!==''||row.length){row.push(cur);rows.push(row);row=[];cur='';} }
-      else cur+=ch; } }
-  if(cur!==''||row.length){row.push(cur);rows.push(row);} return rows;
+  for(let i=0;i<t.length;i++){
+    const ch=t[i],nx=t[i+1];
+    if(q){
+      if(ch==='"'&&nx==='"'){cur+='"';i++;}
+      else if(ch==='"'){q=false;}
+      else cur+=ch;
+    }else{
+      if(ch==='"'){q=true;}
+      else if(ch===','){row.push(cur);cur='';}
+      else if(ch==='\n'||ch==='\r'){
+        if(cur!==''||row.length){row.push(cur);rows.push(row);row=[];cur='';}
+      }else cur+=ch;
+    }
+  }
+  if(cur!==''||row.length){row.push(cur);rows.push(row);}
+  return rows;
 }
 
 /* ====== PARSERS ====== */
@@ -244,14 +255,27 @@ function parseRegistro(cols,rows){
   const iMom=cols.findIndex(c=>/^momento$/i.test(c));
   const iNomT=cols.findIndex(c=>/nombre.*trabajo/i.test(c));
   return rows.map(r=>{
-    const fecha=String(r[iF]??'').trim(); const fo=String((iFO>=0?r[iFO]:'')??'').trim()||fecha;
-    const atraso = (()=>{ if(iAtr>=0 && r[iAtr]!=='' && r[iAtr]!=null) return +r[iAtr]||0;
-      const d=new Date(fecha), o=new Date(fo); if(isNaN(+d)||isNaN(+o)) return 0; return Math.max(0, Math.round((d-o)/86400000));})();
-    return { uidPreset:String((iUID>=0?r[iUID]:'')??'').trim(), fecha, fechaObjetivo:fo, id:String((iID>=0?r[iID]:'')??'').trim(),
-      nombre:String((iNom>=0?r[iNom]:'')??'').trim(), materia:String((iMat>=0?r[iMat]:'')??'').trim(),
-      numero:String((iNum>=0?r[iNum]:'')??'').trim(), origen:String((iOri>=0?r[iOri]:'')??'').trim(),
-      pagina:String((iPag>=0?r[iPag]:'')??'').trim(), puntos:+((iPts>=0?r[iPts]:0)??0)||0,
-      atrasoDias:atraso, momento:String((iMom>=0?r[iMom]:'')??'').trim(), nombreTrabajo:String((iNomT>=0?r[iNomT]:'')??'').trim()
+    const fecha=String(r[iF]??'').trim();
+    const fo=String((iFO>=0?r[iFO]:'')??'').trim()||fecha;
+    const atraso = (()=>{
+      if(iAtr>=0 && r[iAtr]!=='' && r[iAtr]!=null) return +r[iAtr]||0;
+      const d=new Date(fecha), o=new Date(fo); if(isNaN(+d)||isNaN(+o)) return 0;
+      return Math.max(0, Math.round((d-o)/86400000));
+    })();
+    return {
+      uidPreset:String((iUID>=0?r[iUID]:'')??'').trim(),
+      fecha,
+      fechaObjetivo:fo,
+      id:String((iID>=0?r[iID]:'')??'').trim(),
+      nombre:String((iNom>=0?r[iNom]:'')??'').trim(),
+      materia:String((iMat>=0?r[iMat]:'')??'').trim(),
+      numero:String((iNum>=0?r[iNum]:'')??'').trim(),
+      origen:String((iOri>=0?r[iOri]:'')??'').trim(),
+      pagina:String((iPag>=0?r[iPag]:'')??'').trim(),
+      puntos:+((iPts>=0?r[iPts]:0)??0)||0,
+      atrasoDias:atraso,
+      momento:String((iMom>=0?r[iMom]:'')??'').trim(),
+      nombreTrabajo:String((iNomT>=0?r[iNomT]:'')??'').trim()
     };
   });
 }
@@ -284,11 +308,12 @@ function parsePresets(cols,rows){
 function asistenciaAlumno(cols,rows,ref,start,end){
   const iId=cols.findIndex(c=>/^(id|matric)/i.test(c));
   const iNom=cols.findIndex(c=>/^nombre/i.test(c));
-  let row=null; if(iId>=0 && ref.id) row=rows.find(r=>norm(r[iId])===norm(ref.id));
+  let row=null;
+  if(iId>=0 && ref.id) row=rows.find(r=>norm(r[iId])===norm(ref.id));
   if(!row && iNom>=0 && ref.nombre) row=rows.find(r=>norm(r[iNom])===norm(ref.nombre));
   if(!row) return {present:0,total:0,row:null};
 
-  // Denominador: columnas de fecha ACTIVAS en el rango (como en tu hoja)
+  // Denominador: columnas de fecha ACTIVAS en el rango
   const activeCols=getActiveDateCols(cols, rows).filter(i=>{
     const d=normDate(cols[i]); return d && d>=start && d<=end;
   });
@@ -300,11 +325,12 @@ function asistenciaAlumno(cols,rows,ref,start,end){
 function asistenciaHistorica(cols,rows,ref){
   const iId=cols.findIndex(c=>/^(id|matric)/i.test(c));
   const iNom=cols.findIndex(c=>/^nombre/i.test(c));
-  let row=null; if(iId>=0 && ref.id) row=rows.find(r=>norm(r[iId])===norm(ref.id));
+  let row=null;
+  if(iId>=0 && ref.id) row=rows.find(r=>norm(r[iId])===norm(ref.id));
   if(!row && iNom>=0 && ref.nombre) row=rows.find(r=>norm(r[iNom])===norm(ref.nombre));
   if(!row) return {present:0,total:0};
 
-  const activeCols=getActiveDateCols(cols, rows); // todas las fechas activas
+  const activeCols=getActiveDateCols(cols, rows);
   const present=activeCols.reduce((acc,i)=>acc+(isPresent(row[i])?1:0),0);
   const total=activeCols.length;
   return {present,total};
@@ -313,7 +339,8 @@ function asistenciaHistorica(cols,rows,ref){
 function asistenciaRelativa(cols, rows, ref){
   const iId=cols.findIndex(c=>/^(id|matric)/i.test(c));
   const iNom=cols.findIndex(c=>/^nombre/i.test(c));
-  let ri=-1; if(iId>=0 && ref.id) ri=rows.findIndex(r=>norm(r[iId])===norm(ref.id));
+  let ri=-1;
+  if(iId>=0 && ref.id) ri=rows.findIndex(r=>norm(r[iId])===norm(ref.id));
   if(ri<0 && iNom>=0 && ref.nombre) ri=rows.findIndex(r=>norm(r[iNom])===norm(ref.nombre));
   const dcols=getActiveDateCols(cols, rows);
   if(ri<0 || !dcols.length) return {present:0,max:0,text:'0 (0%)'};
@@ -325,8 +352,13 @@ function asistenciaRelativa(cols, rows, ref){
   return {present:presentRow,max:maxDays,text:`${presentRow} (${pct}%)`};
 }
 
-function weekRange(d){const day=d.getDay(); const diff=(day===0?-6:1-day); const mon=new Date(d); mon.setDate(d.getDate()+diff); mon.setHours(0,0,0,0);
-  const fri=new Date(mon); fri.setDate(mon.getDate()+4); return [ymd(mon), ymd(fri)]; }
+function weekRange(d){
+  const day=d.getDay();
+  const diff=(day===0?-6:1-day);
+  const mon=new Date(d); mon.setDate(d.getDate()+diff); mon.setHours(0,0,0,0);
+  const fri=new Date(mon); fri.setDate(mon.getDate()+4);
+  return [ymd(mon), ymd(fri)];
+}
 
 /* ====== CARGA Y RENDER ====== */
 async function loadBlock(name){
@@ -337,29 +369,51 @@ async function loadBlock(name){
 async function loadLinks(){
   try{
     const res=await fetch(LINKS_JSON,{cache:'no-store'});
-    if(res.ok){ const j=await res.json(); if(j?.items) LINKMAP=j.items; }
+    if(res.ok){
+      const j=await res.json();
+      if(j?.items) LINKMAP=j.items;
+    }
   }catch{ /* opcional */ }
 }
 
 let ALL = {faltantes:[], tarde:[], atiempo:[], presets:[]};
-let TRI='ALL';
+let TRI='M2'; // Trimestre 2 por defecto
+
 function setTriChips(){
   const host=$('#tri-chips');
   const opts=[['ALL','Todo'],['M1','Trimestre 1'],['M2','Trimestre 2'],['M3','Trimestre 3']];
   host.innerHTML=opts.map(([v,l])=>`<button class="chip ${TRI===v?'active':''}" data-v="${v}">${l}</button>`).join('');
-  for(const b of host.querySelectorAll('.chip')) b.onclick=()=>{TRI=b.getAttribute('data-v'); setTriChips(); renderLists();};
+  for(const b of host.querySelectorAll('.chip')){
+    b.onclick=()=>{
+      TRI=b.getAttribute('data-v');
+      setTriChips();
+      renderLists();
+    };
+  }
   $('#tri-subtitle').textContent='Resumen de '+({ALL:'Todo',M1:'Trimestre 1',M2:'Trimestre 2',M3:'Trimestre 3'}[TRI]);
 }
-function byTri(list){ if(TRI==='ALL') return list; return list.filter(x=>String(x.momento||'').toUpperCase()===TRI); }
+function byTri(list){
+  if(TRI==='ALL') return list;
+  return list.filter(x=>String(x.momento||'').toUpperCase()===TRI);
+}
 function renderBarChart({faltantes,tarde,atiempo}){
   const max=Math.max(faltantes,tarde,atiempo,1);
-  const set=(id,val)=>{ const el=$(id); el.style.setProperty('--pct',(val/max).toFixed(3)); el.querySelector('.val').textContent=val; };
-  set('#bar-fal',faltantes); set('#bar-tar',tarde); set('#bar-ati',atiempo);
+  const set=(id,val)=>{
+    const el=$(id);
+    el.style.setProperty('--pct',(val/max).toFixed(3));
+    el.querySelector('.val').textContent=val;
+  };
+  set('#bar-fal',faltantes);
+  set('#bar-tar',tarde);
+  set('#bar-ati',atiempo);
 }
 function linksFor(uid, preset){
   const urls = [];
   const rec = LINKMAP?.[uid];
-  if (rec) { if (Array.isArray(rec.urls)) urls.push(...rec.urls); else if (rec.url) urls.push(rec.url); }
+  if (rec) {
+    if (Array.isArray(rec.urls)) urls.push(...rec.urls);
+    else if (rec.url) urls.push(rec.url);
+  }
   if (preset?.evidUrl) urls.push(String(preset.evidUrl));
   const uniq = [...new Set(urls.map(u=>String(u||'').trim()).filter(Boolean))];
   if (!uniq.length) return '';
@@ -433,7 +487,10 @@ async function cargarAlumnoPorID(id){
       if (r) nombre=String(r[iNom]||'');
     }
   }
-  if (!nombre){ alert('No encontramos ese ID. Verifique que esté correcto (sin espacios) o contacte a la escuela.'); return; }
+  if (!nombre){
+    alert('No encontramos ese ID. Verifique que esté correcto (sin espacios) o contacte a la escuela.');
+    return;
+  }
 
   $('#alumno-nombre').textContent = nombre;
   $('#alumno-id').textContent     = 'ID: ' + id;
@@ -449,11 +506,12 @@ async function cargarAlumnoPorID(id){
   $('#stat-as30').textContent     = a30.total ? `${Math.round(a30.present/a30.total*100)}%  (${a30.present}/${a30.total})` : '–';
   $('#stat-asHist').textContent   = ah.total  ? `${Math.round(ah.present/ah.total*100)}%  (${ah.present}/${ah.total})` : '–';
   $('#stat-faltHist').textContent = ah.total ? `${ah.total - ah.present}` : '–';
-  // Si existe el renglón relativo en tu HTML, lo llenamos; si no, se ignora
   const relEl=document.getElementById('stat-asSheet'); if(relEl) relEl.textContent = rel.text;
 
-  // Pintar listas y gráfico de trabajos
-  TRI='ALL'; setTriChips(); renderLists();
+  // Pintar listas y gráfico de trabajos — ahora por defecto M2
+  TRI='M2';
+  setTriChips();
+  renderLists();
 
   $('#student-view').style.display='block';
   window.scrollTo({top:document.body.offsetTop, behavior:'smooth'});
@@ -461,19 +519,38 @@ async function cargarAlumnoPorID(id){
 
 /* ====== UI ====== */
 const themeBtn=$('#themeBtn');
-function applyTheme(t){document.documentElement.setAttribute('data-theme', t); themeBtn.textContent=(t==='dark'?'☀️ Claro':'🌙 Oscuro'); localStorage.setItem('familias_theme',t);}
+function applyTheme(t){
+  document.documentElement.setAttribute('data-theme', t);
+  themeBtn.textContent=(t==='dark'?'☀️ Claro':'🌙 Oscuro');
+  localStorage.setItem('familias_theme',t);
+}
 applyTheme(localStorage.getItem('familias_theme')||'light');
 themeBtn.onclick=()=>applyTheme(document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark');
 
-$('#saveBtn').onclick=()=>{const v=$('#idInput').value.trim(); if(!v){alert('Escriba el ID escolar.'); return;} localStorage.setItem('familias_id',v); alert('Listo. Guardado en este dispositivo.');};
+$('#saveBtn').onclick=()=>{
+  const v=$('#idInput').value.trim();
+  if(!v){alert('Escriba el ID escolar.'); return;}
+  localStorage.setItem('familias_id',v);
+  alert('Listo. Guardado en este dispositivo.');
+};
 $('#goBtn').onclick=async()=>{
   const id=$('#idInput').value.trim().toUpperCase();
-  if(!/^ID[A-Z0-9]{6,}$/.test(id)){ alert('ID no válido. Revise que no tenga espacios ni letras minúsculas.'); return; }
-  try{ await cargarAlumnoPorID(id); } catch(e){ alert('No fue posible leer los datos: '+e.message); }
+  if(!/^ID[A-Z0-9]{6,}$/.test(id)){
+    alert('ID no válido. Revise que no tenga espacios ni letras minúsculas.');
+    return;
+  }
+  try{
+    await cargarAlumnoPorID(id);
+  } catch(e){
+    alert('No fue posible leer los datos: '+e.message);
+  }
 };
 $('#idInput').addEventListener('keydown',e=>{ if(e.key==='Enter'){ $('#goBtn').click(); }});
 const saved=localStorage.getItem('familias_id'); if(saved) $('#idInput').value=saved;
-$('#backBtn')?.addEventListener('click',()=>{ $('#student-view').style.display='none'; window.scrollTo({top:0,behavior:'smooth'}); });
+$('#backBtn')?.addEventListener('click',()=>{
+  $('#student-view').style.display='none';
+  window.scrollTo({top:0,behavior:'smooth'});
+});
 </script>
 </body>
 </html>
