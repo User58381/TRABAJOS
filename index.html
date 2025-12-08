@@ -331,7 +331,7 @@ function asistenciaHistorica(cols,rows,ref){
   if(!row) return {present:0,total:0};
 
   const activeCols=getActiveDateCols(cols, rows);
-  const present=activeCols.reduce((acc,i)=>acc+(isPresent(row[i])?1:0),0);
+  const present=activeCols.reduce((acc,i)=>acc+(isPresent(r[i])?1:0),0);
   const total=activeCols.length;
   return {present,total};
 }
@@ -441,7 +441,7 @@ function renderLists(){
   $('#atiempo').innerHTML   = ati.length   ? ati.map(renderItem).join('')   : '<div class="hint">Aún no hay entregas registradas</div>';
 }
 
-/* ====== CARGA (con asistencia corregida y filtro de futuros) ====== */
+/* ====== CARGA (con asistencia corregida y filtro de futuros + horario 6am) ====== */
 async function cargarAlumnoPorID(id){
   $('#student-view').style.display='none';
   $('#alumno-nombre').textContent='Cargando…'; $('#alumno-id').textContent='';
@@ -454,14 +454,20 @@ async function cargarAlumnoPorID(id){
   const presets  = parsePresets(pre.cols, pre.rows);
   let entAlumno  = entregas.filter(t => norm(t.id) === norm(id));
 
-  // 🔹 Hoy (según el navegador del papá/mamá)
-  const today = ymd(new Date());
+  // 🔹 "Hoy" efectivo: el día cambia a las 6:00 am
+  const now = new Date();
+  const effective = new Date(now);
+  if (now.getHours() < 6) {
+    // Antes de las 6am seguimos considerando el día anterior
+    effective.setDate(effective.getDate() - 1);
+  }
+  const today = ymd(effective);
 
   // 🔹 Ocultar trabajos FUTUROS sin la palabra "TAREA"
   const isFutureNonTarea = (p) => {
     const f = normDate(p.fechaObjetivo);
     if (!f) return false;          // si no tiene fecha, no se filtra
-    if (f <= today) return false;  // sólo filtramos si es FECHA POSTERIOR a hoy
+    if (f <= today) return false;  // sólo filtramos si es FECHA POSTERIOR a "hoy efectivo"
 
     const txt = (
       (p.nombreTrabajo || '') + ' ' +
