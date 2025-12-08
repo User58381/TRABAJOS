@@ -331,7 +331,8 @@ function asistenciaHistorica(cols,rows,ref){
   if(!row) return {present:0,total:0};
 
   const activeCols=getActiveDateCols(cols, rows);
-  const present=activeCols.reduce((acc,i)=>acc+(isPresent(r[i])?1:0),0);
+  // 🔧 AQUÍ ESTABA EL BUG: antes usaba "r[i]" sin existir "r"
+  const present=activeCols.reduce((acc,i)=>acc+(isPresent(row[i])?1:0),0);
   const total=activeCols.length;
   return {present,total};
 }
@@ -503,9 +504,10 @@ async function cargarAlumnoPorID(id){
 
   // Nombre visible + etiquetas
   const [w0,w1] = weekRange(new Date());
-  const aw = asistenciaAlumno(asis.cols, asis.rows, {id, nombre:entAlumno.find(e => e.nombre)?.nombre || ''}, w0, w1);
+  const nombreDeRegistro = entAlumno.find(e => e.nombre)?.nombre || '';
+  const aw = asistenciaAlumno(asis.cols, asis.rows, {id, nombre:nombreDeRegistro}, w0, w1);
   const iNom = asis.cols.findIndex(c=>/^nombre/i.test(c));
-  let nombre = entAlumno.find(e => e.nombre)?.nombre || '';
+  let nombre = nombreDeRegistro;
   if (aw.row && iNom>=0) nombre = String(aw.row[iNom]||'');
   if (!nombre){
     const iId=asis.cols.findIndex(c=>/^(id|matric)/i.test(c));
