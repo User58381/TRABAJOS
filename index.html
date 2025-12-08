@@ -441,7 +441,7 @@ function renderLists(){
   $('#atiempo').innerHTML   = ati.length   ? ati.map(renderItem).join('')   : '<div class="hint">Aún no hay entregas registradas</div>';
 }
 
-/* ====== CARGA (con asistencia corregida) ====== */
+/* ====== CARGA (con asistencia corregida y filtro de futuros) ====== */
 async function cargarAlumnoPorID(id){
   $('#student-view').style.display='none';
   $('#alumno-nombre').textContent='Cargando…'; $('#alumno-id').textContent='';
@@ -454,7 +454,25 @@ async function cargarAlumnoPorID(id){
   const presets  = parsePresets(pre.cols, pre.rows);
   let entAlumno  = entregas.filter(t => norm(t.id) === norm(id));
 
-  const nombreDeRegistro = entAlumno.find(e => e.nombre)?.nombre || '';
+  // 🔹 Hoy (según el navegador del papá/mamá)
+  const today = ymd(new Date());
+
+  // 🔹 Ocultar trabajos FUTUROS sin la palabra "TAREA"
+  const isFutureNonTarea = (p) => {
+    const f = normDate(p.fechaObjetivo);
+    if (!f) return false;          // si no tiene fecha, no se filtra
+    if (f <= today) return false;  // sólo filtramos si es FECHA POSTERIOR a hoy
+
+    const txt = (
+      (p.nombreTrabajo || '') + ' ' +
+      (p.origen || '') + ' ' +
+      (p.materia || '') + ' ' +
+      (p.numero || '')
+    ).toUpperCase();
+
+    // Si NO tiene "TAREA" en ningún campo de texto → se oculta
+    return !txt.includes('TAREA');
+  };
 
   const uids   = new Map(entAlumno.filter(t => t.uidPreset).map(t => [t.uidPreset, t]));
   const claves = new Map(entAlumno.filter(t => !t.uidPreset).map(t => [
@@ -464,6 +482,9 @@ async function cargarAlumnoPorID(id){
 
   const faltantes=[], tarde=[], atiempo=[];
   for (const p of presets){
+    // ⛔ Ocultar trabajos de fecha futura SIN "TAREA"
+    if (isFutureNonTarea(p)) continue;
+
     let e = uids.get(p.uid);
     if (!e){
       const k = [norm(p.materia), norm(String(p.numero).replace(/^trabajo\s*/i,'')),
@@ -476,9 +497,9 @@ async function cargarAlumnoPorID(id){
 
   // Nombre visible + etiquetas
   const [w0,w1] = weekRange(new Date());
-  const aw = asistenciaAlumno(asis.cols, asis.rows, {id, nombre:nombreDeRegistro}, w0, w1);
+  const aw = asistenciaAlumno(asis.cols, asis.rows, {id, nombre:entAlumno.find(e => e.nombre)?.nombre || ''}, w0, w1);
   const iNom = asis.cols.findIndex(c=>/^nombre/i.test(c));
-  let nombre = nombreDeRegistro;
+  let nombre = entAlumno.find(e => e.nombre)?.nombre || '';
   if (aw.row && iNom>=0) nombre = String(aw.row[iNom]||'');
   if (!nombre){
     const iId=asis.cols.findIndex(c=>/^(id|matric)/i.test(c));
