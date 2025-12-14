@@ -66,7 +66,14 @@
   .modal-card{width:min(520px, 100%);background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:14px}
   .modal-top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}
   .modal-top h3{margin:0}
-  #qrReader{width:100%; border:1px solid var(--bd); border-radius:14px; overflow:hidden; background:color-mix(in oklab, var(--card) 92%, transparent)}
+  #qrReader{
+    width:100%;
+    min-height:320px; /* ✅ evita “modal vacío” */
+    border:1px solid var(--bd);
+    border-radius:14px;
+    overflow:hidden;
+    background:color-mix(in oklab, var(--card) 92%, transparent)
+  }
   .modal-hint{margin-top:8px;font-size:12px;color:var(--muted)}
 </style>
 </head>
@@ -128,9 +135,9 @@
       </div>
 
       <div class="chart" aria-label="Resumen visual del trimestre">
-        <div class="bar fal" id="bar-fal"><span class="lbl">⏳ Faltantes</span><span class="val" id="val-fal">0</span></div>
-        <div class="bar tar" id="bar-tar"><span class="lbl">🕒 Tarde</span><span class="val" id="val-tar">0</span></div>
-        <div class="bar ati" id="bar-ati"><span class="lbl">✅ A tiempo</span><span class="val" id="val-ati">0</span></div>
+        <div class="bar fal" id="bar-fal"><span class="lbl">⏳ Faltantes</span><span class="val">0</span></div>
+        <div class="bar tar" id="bar-tar"><span class="lbl">🕒 Tarde</span><span class="val">0</span></div>
+        <div class="bar ati" id="bar-ati"><span class="lbl">✅ A tiempo</span><span class="val">0</span></div>
       </div>
 
       <p class="footer-note" style="margin-top:10px">
@@ -448,6 +455,7 @@ function renderLists(){
   $('#stat-cump-tri').textContent = totalTri? `${Math.round(hechosTri/totalTri*100)}%` : '–';
   $('#stat-tot-tri').textContent  = `Faltantes ${falt.length} · Tarde ${tar.length} · A tiempo ${ati.length} · Trabajos totales ${totalTri}`;
   renderBarChart({faltantes:falt.length, tarde:tar.length, atiempo:ati.length});
+
   const renderItem = (t) => {
     const mom = t.momento ? ` · ${t.momento}` : '';
     const fecha = t.fechaObjetivo ? ` · ${normDate(t.fechaObjetivo)}` : '';
@@ -458,6 +466,7 @@ function renderLists(){
       <summary><b>${t.materia||'–'}</b> — ${t.numero||'–'} (${t.origen||'–'}${t.pagina?' · p.'+t.pagina:''})${nom}${fecha}${mom}${kLink? ' ' + kLink : ''}${kSheet}</summary>
     </details>`;
   };
+
   $('#faltantes').innerHTML = falt.length ? falt.map(renderItem).join('') : '<div class="hint">No hay trabajos faltantes 💙</div>';
   $('#tarde').innerHTML     = tar.length   ? tar.map(renderItem).join('')   : '<div class="hint">No hay entregas tarde</div>';
   $('#atiempo').innerHTML   = ati.length   ? ati.map(renderItem).join('')   : '<div class="hint">Aún no hay entregas registradas</div>';
@@ -581,23 +590,23 @@ $('#backBtn')?.addEventListener('click',()=>{
   window.scrollTo({top:0,behavior:'smooth'});
 });
 
-/* ====== QR SCANNER ====== */
+/* ====== QR SCANNER (ROBUSTO) ====== */
 let qrScanner = null;
 let qrBusy = false;
 
 function extractID(text){
   const raw = String(text || '').trim();
-  // Si el QR trae exactamente el ID:
   if (/^ID[A-Z0-9]{6,}$/i.test(raw)) return raw.toUpperCase();
-  // Si el QR trae un texto/URL con el ID dentro:
   const m = raw.match(/(ID[A-Z0-9]{6,})/i);
   return m ? m[1].toUpperCase() : '';
 }
-
 function qrSupportOk(){
   const isHttps = location.protocol === 'https:' || location.hostname === 'localhost';
   const hasMedia = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
   return isHttps && hasMedia;
+}
+function nextFrame(){
+  return new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
 }
 
 async function openQr(){
@@ -614,41 +623,57 @@ async function openQr(){
   $('#qrModal').classList.add('open');
   $('#qrModal').setAttribute('aria-hidden','false');
 
+  // ✅ Espera a que el modal se renderice (evita “pantalla negra”)
+  await nextFrame();
+
   if (!qrScanner){
     qrScanner = new Html5Qrcode("qrReader");
   }
 
-  try{
-    const devices = await Html5Qrcode.getCameras();
-    if(!devices || !devices.length){
-      alert('No se detectó cámara en este dispositivo.');
-      closeQr();
-      return;
-    }
+  const config = {
+    fps: 10,
+    qrbox: (vw, vh) => {
+      const size = Math.min(300, Math.floor(Math.min(vw, vh) * 0.72));
+      return { width: size, height: size };
+    },
+    rememberLastUsedCamera: true
+  };
 
-    const back = devices.find(d => /back|rear|trasera/i.test(d.label)) || devices[devices.length-1];
+  const onScan = (decodedText) => {
+    if (qrBusy) return;
+    const id = extractID(decodedText);
+    if (!id) return;
+    qrBusy = true;
 
-    await qrScanner.start(
-      { deviceId: { exact: back.id } },
-      { fps: 10, qrbox: { width: 260, height: 260 } },
-      (decodedText) => {
-        if (qrBusy) return;
-        const id = extractID(decodedText);
-        if (!id) return;
-        qrBusy = true;
+    try{ navigator.vibrate?.(60); }catch{}
 
-        try{ navigator.vibrate?.(60); }catch{}
-
-        $('#idInput').value = id;
-        closeQr();
-        $('#goBtn').click();
-
-        setTimeout(()=>{ qrBusy=false; }, 900);
-      }
-    );
-  }catch(err){
-    alert('No fue posible abrir la cámara. Permita el acceso a cámara en el navegador.\n\nDetalle: ' + (err?.message || err));
+    $('#idInput').value = id;
     closeQr();
+    $('#goBtn').click();
+
+    setTimeout(()=>{ qrBusy=false; }, 900);
+  };
+
+  try{
+    // 1) ✅ Intento más compatible: cámara trasera por facingMode
+    await qrScanner.start({ facingMode: "environment" }, config, onScan);
+    return;
+  }catch(e1){
+    // 2) Fallback: elegir deviceId
+    try{
+      const devices = await Html5Qrcode.getCameras();
+      if(!devices || !devices.length){
+        alert('No se detectó cámara en este dispositivo.');
+        await closeQr();
+        return;
+      }
+      const back = devices.find(d => /back|rear|trasera/i.test(d.label)) || devices[devices.length-1];
+      await qrScanner.start({ deviceId: { exact: back.id } }, config, onScan);
+      return;
+    }catch(e2){
+      alert('No fue posible abrir la cámara. Permita el acceso a cámara en el navegador.\n\nDetalle: ' + (e2?.message || e2));
+      await closeQr();
+    }
   }
 }
 
@@ -658,7 +683,6 @@ async function closeQr(){
   try{
     if(qrScanner && qrScanner.isScanning){
       await qrScanner.stop();
-      await qrScanner.clear();
     }
   }catch{}
 }
@@ -666,7 +690,6 @@ async function closeQr(){
 $('#scanBtn').addEventListener('click', openQr);
 $('#qrCloseBtn').addEventListener('click', closeQr);
 $('#qrModal').addEventListener('click', (e)=>{ if(e.target.id==='qrModal') closeQr(); });
-
 </script>
 </body>
 </html>
