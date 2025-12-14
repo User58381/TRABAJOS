@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Aula Digital — Consulta para familias</title>
+
 <style>
   :root{
     --bg:#f7f9ff; --card:#ffffff; --text:#0b1020; --muted:#526072; --accent:#2b6bff;
@@ -27,7 +28,7 @@
   main{max-width:960px;margin:auto;padding:18px}
   .card{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:16px}
   .hero{display:grid;gap:12px}
-  .input{display:grid;grid-template-columns:1fr auto auto;gap:8px}
+  .input{display:grid;grid-template-columns:1fr auto auto auto;gap:8px}
   @media (max-width:640px){.input{grid-template-columns:1fr;}}
   .input input{padding:14px 16px;border:1px solid var(--bd);border-radius:12px;background:white;font-size:16px}
   [data-theme="dark"] .input input{background:#0d152b;color:var(--text)}
@@ -58,8 +59,18 @@
   .bar .lbl{position:relative;z-index:1;padding-left:12px;font-weight:800}
   .bar .val{position:absolute;right:10px;z-index:1;font-weight:900}
   .linkbtn{display:inline-block;margin-left:8px;border:1px solid var(--bd);padding:4px 8px;border-radius:999px;font-size:12px;text-decoration:none}
+
+  /* ====== MODAL QR ====== */
+  .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.55);padding:14px;z-index:999}
+  .modal.open{display:flex}
+  .modal-card{width:min(520px, 100%);background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:14px}
+  .modal-top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}
+  .modal-top h3{margin:0}
+  #qrReader{width:100%; border:1px solid var(--bd); border-radius:14px; overflow:hidden; background:color-mix(in oklab, var(--card) 92%, transparent)}
+  .modal-hint{margin-top:8px;font-size:12px;color:var(--muted)}
 </style>
 </head>
+
 <body>
 <header>
   <h1>👪 Aula Digital — Consulta para familias</h1>
@@ -75,12 +86,16 @@
       <h2>Encuentre el progreso de su hijo(a)</h2>
       <p class="hint">Escriba el <b>ID escolar</b> que le proporcionó la escuela para consultar tareas y asistencia.</p>
     </div>
+
     <div class="input">
       <input id="idInput" autocomplete="off" placeholder="Pegue aquí el ID entregado por la escuela" inputmode="latin-name">
+      <button id="scanBtn" class="btn ghost">📷 QR</button>
       <button id="goBtn" class="btn primary">Buscar alumno</button>
       <button id="saveBtn" class="btn ghost">Recordar ID en este dispositivo</button>
     </div>
+
     <div class="hint">Este sitio <u>solo lee</u> los datos. No modifica nada en la libreta digital.</div>
+    <div class="hint" id="qrSupportHint" style="display:none"></div>
   </section>
 
   <!-- Resultados -->
@@ -110,9 +125,6 @@
         <div><div class="k">Asistencia — 30 días</div><div class="v" id="stat-as30">–</div></div>
         <div><div class="k">Asistencia total (histórica)</div><div class="v" id="stat-asHist">–</div></div>
         <div><div class="k">Faltas (históricas)</div><div class="v" id="stat-faltHist">–</div></div>
-        <!-- (Opcional) si quieres ver el relativo X (Y%):
-        <div><div class="k">Asistencias — hoja (relativo)</div><div class="v" id="stat-asSheet">–</div></div>
-        -->
       </div>
 
       <div class="chart" aria-label="Resumen visual del trimestre">
@@ -144,7 +156,24 @@
 
     <p class="footer-note">Si detecta algún dato que no coincide, contacte a la escuela para verificar la libreta digital.</p>
   </section>
+
+  <!-- ====== MODAL QR ====== -->
+  <div class="modal" id="qrModal" aria-hidden="true">
+    <div class="modal-card">
+      <div class="modal-top">
+        <h3>📷 Escanear QR</h3>
+        <button id="qrCloseBtn" class="btn ghost small">Cerrar</button>
+      </div>
+      <div id="qrReader"></div>
+      <div class="modal-hint">
+        Consejo: ponga el QR centrado y con buena luz. Al detectarlo, se buscará automáticamente.
+      </div>
+    </div>
+  </div>
 </main>
+
+<!-- Librería QR (CDN) -->
+<script src="https://unpkg.com/html5-qrcode@2.3.10/html5-qrcode.min.js"></script>
 
 <script>
 /* ====== CONFIG ====== */
@@ -166,29 +195,24 @@ const ymd=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
 function normDate(s){
   const t=String(s||'').trim();
   if(!t) return '';
-  // ISO y variantes: 2025-9-1 / 2025/09/01
   let m=t.match(/^(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})/);
   if(m){ const y=+m[1], mo=+m[2], d=+m[3]; return `${y}-${pad(mo)}-${pad(d)}`; }
-  // DMY: 1/9/2025 o 01-09-2025
   m=t.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/);
   if(m){ const d=+m[1], mo=+m[2], y=+m[3]; return `${y}-${pad(mo)}-${pad(d)}`; }
-  // GViz: Date(2025,8,30)
   m=t.match(/^Date\((\d{4})\s*,\s*(\d{1,2})\s*,\s*(\d{1,2})/i);
   if(m){ const y=+m[1], mo=+m[2], d=+m[3]; return ymd(new Date(y, mo, d)); }
-  // Fallback
   const d=new Date(t); if(!isNaN(+d)) return ymd(d);
   return '';
 }
 function isPresent(v){
   const s=norm(v); if(!s) return false;
-  if(!Number.isNaN(+s)) return (+s)>0; // '1' cuenta
+  if(!Number.isNaN(+s)) return (+s)>0;
   const s2=s.replace(/\s+/g,''); if(/^1\(100%?\)$/.test(s2)) return true;
   return ['x','✓','✔','p','presente','si','sí','s','ok','true','asistio','asistió'].includes(s);
 }
 function getDateCols(cols){
   return cols.map((c,i)=>normDate(String(c).trim())?i:-1).filter(i=>i>=0);
 }
-/* NUEVO: columnas de fecha ACTIVAS (al menos alguien marcó) */
 function getActiveDateCols(cols, rows){
   const dcols=getDateCols(cols);
   return dcols.filter(i=>rows.some(r=>(r[i]!=='' && r[i]!=null)));
@@ -304,7 +328,7 @@ function parsePresets(cols,rows){
   })).filter(p=>p.uid);
 }
 
-/* ====== ASISTENCIA (solo corregido) ====== */
+/* ====== ASISTENCIA ====== */
 function asistenciaAlumno(cols,rows,ref,start,end){
   const iId=cols.findIndex(c=>/^(id|matric)/i.test(c));
   const iNom=cols.findIndex(c=>/^nombre/i.test(c));
@@ -313,7 +337,6 @@ function asistenciaAlumno(cols,rows,ref,start,end){
   if(!row && iNom>=0 && ref.nombre) row=rows.find(r=>norm(r[iNom])===norm(ref.nombre));
   if(!row) return {present:0,total:0,row:null};
 
-  // Denominador: columnas de fecha ACTIVAS en el rango
   const activeCols=getActiveDateCols(cols, rows).filter(i=>{
     const d=normDate(cols[i]); return d && d>=start && d<=end;
   });
@@ -331,12 +354,10 @@ function asistenciaHistorica(cols,rows,ref){
   if(!row) return {present:0,total:0};
 
   const activeCols=getActiveDateCols(cols, rows);
-  // 🔧 AQUÍ ESTABA EL BUG: antes usaba "r[i]" sin existir "r"
   const present=activeCols.reduce((acc,i)=>acc+(isPresent(row[i])?1:0),0);
   const total=activeCols.length;
   return {present,total};
 }
-/* Opcional: relativo X (Y%) como la columna “10 (100%)” de la hoja */
 function asistenciaRelativa(cols, rows, ref){
   const iId=cols.findIndex(c=>/^(id|matric)/i.test(c));
   const iNom=cols.findIndex(c=>/^nombre/i.test(c));
@@ -374,11 +395,11 @@ async function loadLinks(){
       const j=await res.json();
       if(j?.items) LINKMAP=j.items;
     }
-  }catch{ /* opcional */ }
+  }catch{}
 }
 
 let ALL = {faltantes:[], tarde:[], atiempo:[], presets:[]};
-let TRI='M2'; // Trimestre 2 por defecto
+let TRI='M2';
 
 function setTriChips(){
   const host=$('#tri-chips');
@@ -442,42 +463,28 @@ function renderLists(){
   $('#atiempo').innerHTML   = ati.length   ? ati.map(renderItem).join('')   : '<div class="hint">Aún no hay entregas registradas</div>';
 }
 
-/* ====== CARGA (con asistencia corregida y filtro de futuros + horario 6am) ====== */
+/* ====== CARGA ====== */
 async function cargarAlumnoPorID(id){
   $('#student-view').style.display='none';
   $('#alumno-nombre').textContent='Cargando…'; $('#alumno-id').textContent='';
 
   await loadLinks();
-
   const [asis, reg, pre] = await Promise.all([loadBlock('asistencia'), loadBlock('registro'), loadBlock('presets')]);
 
   const entregas = parseRegistro(reg.cols, reg.rows);
   const presets  = parsePresets(pre.cols, pre.rows);
   let entAlumno  = entregas.filter(t => norm(t.id) === norm(id));
 
-  // 🔹 "Hoy" efectivo: el día cambia a las 6:00 am
   const now = new Date();
   const effective = new Date(now);
-  if (now.getHours() < 6) {
-    // Antes de las 6am seguimos considerando el día anterior
-    effective.setDate(effective.getDate() - 1);
-  }
+  if (now.getHours() < 6) effective.setDate(effective.getDate() - 1);
   const today = ymd(effective);
 
-  // 🔹 Ocultar trabajos FUTUROS sin la palabra "TAREA"
   const isFutureNonTarea = (p) => {
     const f = normDate(p.fechaObjetivo);
-    if (!f) return false;          // si no tiene fecha, no se filtra
-    if (f <= today) return false;  // sólo filtramos si es FECHA POSTERIOR a "hoy efectivo"
-
-    const txt = (
-      (p.nombreTrabajo || '') + ' ' +
-      (p.origen || '') + ' ' +
-      (p.materia || '') + ' ' +
-      (p.numero || '')
-    ).toUpperCase();
-
-    // Si NO tiene "TAREA" en ningún campo de texto → se oculta
+    if (!f) return false;
+    if (f <= today) return false;
+    const txt = ((p.nombreTrabajo||'')+' '+(p.origen||'')+' '+(p.materia||'')+' '+(p.numero||'')).toUpperCase();
     return !txt.includes('TAREA');
   };
 
@@ -489,7 +496,6 @@ async function cargarAlumnoPorID(id){
 
   const faltantes=[], tarde=[], atiempo=[];
   for (const p of presets){
-    // ⛔ Ocultar trabajos de fecha futura SIN "TAREA"
     if (isFutureNonTarea(p)) continue;
 
     let e = uids.get(p.uid);
@@ -502,7 +508,6 @@ async function cargarAlumnoPorID(id){
   }
   ALL={faltantes,tarde,atiempo,presets};
 
-  // Nombre visible + etiquetas
   const [w0,w1] = weekRange(new Date());
   const nombreDeRegistro = entAlumno.find(e => e.nombre)?.nombre || '';
   const aw = asistenciaAlumno(asis.cols, asis.rows, {id, nombre:nombreDeRegistro}, w0, w1);
@@ -525,11 +530,10 @@ async function cargarAlumnoPorID(id){
   $('#alumno-id').textContent     = 'ID: ' + id;
   $('#grupo-label').innerHTML     = `<span class="badgeb">👩‍🏫 Grupo: <b>${GROUP_LABEL}</b></span>`;
 
-  // Asistencias (corregidas)
   const hoy=new Date();
   const a30 = asistenciaAlumno(asis.cols, asis.rows, {id, nombre:nombre}, ymd(new Date(hoy.getFullYear(),hoy.getMonth(),hoy.getDate()-30)), ymd(hoy));
   const ah  = asistenciaHistorica(asis.cols, asis.rows, {id, nombre:nombre});
-  const rel = asistenciaRelativa(asis.cols, asis.rows, {id, nombre:nombre}); // opcional
+  const rel = asistenciaRelativa(asis.cols, asis.rows, {id, nombre:nombre});
 
   $('#stat-aswk').textContent     = aw.total  ? `${Math.round(aw.present/aw.total*100)}%  (${aw.present}/${aw.total})` : '–';
   $('#stat-as30').textContent     = a30.total ? `${Math.round(a30.present/a30.total*100)}%  (${a30.present}/${a30.total})` : '–';
@@ -537,7 +541,6 @@ async function cargarAlumnoPorID(id){
   $('#stat-faltHist').textContent = ah.total ? `${ah.total - ah.present}` : '–';
   const relEl=document.getElementById('stat-asSheet'); if(relEl) relEl.textContent = rel.text;
 
-  // Pintar listas y gráfico de trabajos — ahora por defecto M2
   TRI='M2';
   setTriChips();
   renderLists();
@@ -568,11 +571,8 @@ $('#goBtn').onclick=async()=>{
     alert('ID no válido. Revise que no tenga espacios ni letras minúsculas.');
     return;
   }
-  try{
-    await cargarAlumnoPorID(id);
-  } catch(e){
-    alert('No fue posible leer los datos: '+e.message);
-  }
+  try{ await cargarAlumnoPorID(id); }
+  catch(e){ alert('No fue posible leer los datos: '+e.message); }
 };
 $('#idInput').addEventListener('keydown',e=>{ if(e.key==='Enter'){ $('#goBtn').click(); }});
 const saved=localStorage.getItem('familias_id'); if(saved) $('#idInput').value=saved;
@@ -580,6 +580,93 @@ $('#backBtn')?.addEventListener('click',()=>{
   $('#student-view').style.display='none';
   window.scrollTo({top:0,behavior:'smooth'});
 });
+
+/* ====== QR SCANNER ====== */
+let qrScanner = null;
+let qrBusy = false;
+
+function extractID(text){
+  const raw = String(text || '').trim();
+  // Si el QR trae exactamente el ID:
+  if (/^ID[A-Z0-9]{6,}$/i.test(raw)) return raw.toUpperCase();
+  // Si el QR trae un texto/URL con el ID dentro:
+  const m = raw.match(/(ID[A-Z0-9]{6,})/i);
+  return m ? m[1].toUpperCase() : '';
+}
+
+function qrSupportOk(){
+  const isHttps = location.protocol === 'https:' || location.hostname === 'localhost';
+  const hasMedia = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+  return isHttps && hasMedia;
+}
+
+async function openQr(){
+  const hint = $('#qrSupportHint');
+  hint.style.display = 'none';
+  hint.textContent = '';
+
+  if (!qrSupportOk()){
+    hint.style.display = 'block';
+    hint.textContent = 'Para usar la cámara, abra este sitio en HTTPS y en un navegador moderno (Chrome/Edge).';
+    return;
+  }
+
+  $('#qrModal').classList.add('open');
+  $('#qrModal').setAttribute('aria-hidden','false');
+
+  if (!qrScanner){
+    qrScanner = new Html5Qrcode("qrReader");
+  }
+
+  try{
+    const devices = await Html5Qrcode.getCameras();
+    if(!devices || !devices.length){
+      alert('No se detectó cámara en este dispositivo.');
+      closeQr();
+      return;
+    }
+
+    const back = devices.find(d => /back|rear|trasera/i.test(d.label)) || devices[devices.length-1];
+
+    await qrScanner.start(
+      { deviceId: { exact: back.id } },
+      { fps: 10, qrbox: { width: 260, height: 260 } },
+      (decodedText) => {
+        if (qrBusy) return;
+        const id = extractID(decodedText);
+        if (!id) return;
+        qrBusy = true;
+
+        try{ navigator.vibrate?.(60); }catch{}
+
+        $('#idInput').value = id;
+        closeQr();
+        $('#goBtn').click();
+
+        setTimeout(()=>{ qrBusy=false; }, 900);
+      }
+    );
+  }catch(err){
+    alert('No fue posible abrir la cámara. Permita el acceso a cámara en el navegador.\n\nDetalle: ' + (err?.message || err));
+    closeQr();
+  }
+}
+
+async function closeQr(){
+  $('#qrModal').classList.remove('open');
+  $('#qrModal').setAttribute('aria-hidden','true');
+  try{
+    if(qrScanner && qrScanner.isScanning){
+      await qrScanner.stop();
+      await qrScanner.clear();
+    }
+  }catch{}
+}
+
+$('#scanBtn').addEventListener('click', openQr);
+$('#qrCloseBtn').addEventListener('click', closeQr);
+$('#qrModal').addEventListener('click', (e)=>{ if(e.target.id==='qrModal') closeQr(); });
+
 </script>
 </body>
 </html>
