@@ -91,7 +91,7 @@
           <h2 id="alumno-nombre">Alumno</h2>
           <div class="hint" id="alumno-id"></div>
           <div class="hint" id="grupo-label" style="margin-top:4px"></div>
-          <div id="tri-subtitle" class="hint" style="margin-top:6px">Resumen de Todo</div>
+          <div id="tri-subtitle" class="hint" style="margin-top:6px">Resumen de Trimestre 3</div>
         </div>
         <div>
           <button id="backBtn" class="btn ghost">Cambiar de alumno</button>
@@ -100,7 +100,7 @@
 
       <div style="margin-top:10px">
         <div class="chips" id="tri-chips"></div>
-        <div class="hint">Vea <b>Todo</b> o sólo un trimestre: <b>Trimestre 1</b> (M1), <b>Trimestre 2</b> (M2), <b>Trimestre 3</b> (M3).</div>
+        <div class="hint">Se muestra únicamente la información del <b>Trimestre 3</b>.</div>
       </div>
 
       <div class="stat" style="margin-top:12px">
@@ -331,7 +331,6 @@ function asistenciaHistorica(cols,rows,ref){
   if(!row) return {present:0,total:0};
 
   const activeCols=getActiveDateCols(cols, rows);
-  // 🔧 AQUÍ ESTABA EL BUG: antes usaba "r[i]" sin existir "r"
   const present=activeCols.reduce((acc,i)=>acc+(isPresent(row[i])?1:0),0);
   const total=activeCols.length;
   return {present,total};
@@ -378,24 +377,16 @@ async function loadLinks(){
 }
 
 let ALL = {faltantes:[], tarde:[], atiempo:[], presets:[]};
-let TRI='M2'; // Trimestre 2 por defecto
+let TRI='M3'; // Solo Trimestre 3
 
 function setTriChips(){
+  TRI='M3';
   const host=$('#tri-chips');
-  const opts=[['ALL','Todo'],['M1','Trimestre 1'],['M2','Trimestre 2'],['M3','Trimestre 3']];
-  host.innerHTML=opts.map(([v,l])=>`<button class="chip ${TRI===v?'active':''}" data-v="${v}">${l}</button>`).join('');
-  for(const b of host.querySelectorAll('.chip')){
-    b.onclick=()=>{
-      TRI=b.getAttribute('data-v');
-      setTriChips();
-      renderLists();
-    };
-  }
-  $('#tri-subtitle').textContent='Resumen de '+({ALL:'Todo',M1:'Trimestre 1',M2:'Trimestre 2',M3:'Trimestre 3'}[TRI]);
+  host.innerHTML='';
+  $('#tri-subtitle').textContent='Resumen de Trimestre 3';
 }
 function byTri(list){
-  if(TRI==='ALL') return list;
-  return list.filter(x=>String(x.momento||'').toUpperCase()===TRI);
+  return list.filter(x=>String(x.momento||'').toUpperCase()==='M3');
 }
 function renderBarChart({faltantes,tarde,atiempo}){
   const max=Math.max(faltantes,tarde,atiempo,1);
@@ -467,8 +458,8 @@ async function cargarAlumnoPorID(id){
   // 🔹 Ocultar trabajos FUTUROS sin la palabra "TAREA"
   const isFutureNonTarea = (p) => {
     const f = normDate(p.fechaObjetivo);
-    if (!f) return false;          // si no tiene fecha, no se filtra
-    if (f <= today) return false;  // sólo filtramos si es FECHA POSTERIOR a "hoy efectivo"
+    if (!f) return false;
+    if (f <= today) return false;
 
     const txt = (
       (p.nombreTrabajo || '') + ' ' +
@@ -477,7 +468,6 @@ async function cargarAlumnoPorID(id){
       (p.numero || '')
     ).toUpperCase();
 
-    // Si NO tiene "TAREA" en ningún campo de texto → se oculta
     return !txt.includes('TAREA');
   };
 
@@ -489,7 +479,6 @@ async function cargarAlumnoPorID(id){
 
   const faltantes=[], tarde=[], atiempo=[];
   for (const p of presets){
-    // ⛔ Ocultar trabajos de fecha futura SIN "TAREA"
     if (isFutureNonTarea(p)) continue;
 
     let e = uids.get(p.uid);
@@ -529,7 +518,7 @@ async function cargarAlumnoPorID(id){
   const hoy=new Date();
   const a30 = asistenciaAlumno(asis.cols, asis.rows, {id, nombre:nombre}, ymd(new Date(hoy.getFullYear(),hoy.getMonth(),hoy.getDate()-30)), ymd(hoy));
   const ah  = asistenciaHistorica(asis.cols, asis.rows, {id, nombre:nombre});
-  const rel = asistenciaRelativa(asis.cols, asis.rows, {id, nombre:nombre}); // opcional
+  const rel = asistenciaRelativa(asis.cols, asis.rows, {id, nombre:nombre});
 
   $('#stat-aswk').textContent     = aw.total  ? `${Math.round(aw.present/aw.total*100)}%  (${aw.present}/${aw.total})` : '–';
   $('#stat-as30').textContent     = a30.total ? `${Math.round(a30.present/a30.total*100)}%  (${a30.present}/${a30.total})` : '–';
@@ -537,8 +526,8 @@ async function cargarAlumnoPorID(id){
   $('#stat-faltHist').textContent = ah.total ? `${ah.total - ah.present}` : '–';
   const relEl=document.getElementById('stat-asSheet'); if(relEl) relEl.textContent = rel.text;
 
-  // Pintar listas y gráfico de trabajos — ahora por defecto M2
-  TRI='M2';
+  // Pintar listas y gráfico de trabajos — solo Trimestre 3
+  TRI='M3';
   setTriChips();
   renderLists();
 
