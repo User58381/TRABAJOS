@@ -1,339 +1,879 @@
 <!doctype html>
-
 <html lang="es" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+
 <title>Aula Digital — Consulta para familias</title>
+
 <style>
   :root{
-    --bg:#f7f9ff; --card:#ffffff; --text:#0b1020; --muted:#526072; --accent:#2b6bff;
-    --bd:#d9e3ff; --ok:#0ea371; --warn:#f0b429; --bad:#ef4444;
-    --barbg: color-mix(in oklab, var(--card) 80%, transparent);
+    --bg:#f7f9ff;
+    --card:#ffffff;
+    --text:#0b1020;
+    --muted:#526072;
+    --accent:#2b6bff;
+    --bd:#d9e3ff;
+    --ok:#0ea371;
+    --warn:#f0b429;
+    --bad:#ef4444;
+    --barbg:color-mix(in oklab, var(--card) 80%, transparent);
   }
+
   [data-theme="dark"]{
-    --bg:#0c1220; --card:#101a34; --text:#eaf3ff; --muted:#93a6bc; --accent:#6aa9ff;
-    --bd:#223056; --ok:#1ec48d; --warn:#ffce3a; --bad:#ff7a7a; --barbg:#0a1330;
+    --bg:#0c1220;
+    --card:#101a34;
+    --text:#eaf3ff;
+    --muted:#93a6bc;
+    --accent:#6aa9ff;
+    --bd:#223056;
+    --ok:#1ec48d;
+    --warn:#ffce3a;
+    --bad:#ff7a7a;
+    --barbg:#0a1330;
   }
-  *{box-sizing:border-box}
-  body{margin:0;font-family:system-ui, -apple-system, Segoe UI, Inter, Roboto, Arial;background:var(--bg);color:var(--text)}
-  header{position:sticky;top:0;z-index:10;background:color-mix(in oklab, var(--card) 90%, transparent);
-    backdrop-filter:blur(6px); border-bottom:1px solid var(--bd); padding:14px 16px; display:flex; gap:12px; align-items:center}
-  header h1{font-size:18px;margin:0}
-  header .right{margin-left:auto;display:flex;gap:8px;align-items:center}
-  .btn{border:0;border-radius:12px;padding:12px 16px;font-weight:700;cursor:pointer;touch-action:manipulation}
-  .btn.primary{background:var(--accent);color:white}
-  .btn.ghost{background:transparent;border:1px solid var(--bd);color:var(--text)}
-  .btn.small{padding:8px 10px;border-radius:10px}
-  main{max-width:960px;margin:auto;padding:18px}
-  .card{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:16px}
-  .hero{display:grid;gap:12px}
-  .input{display:grid;grid-template-columns:1fr auto auto;gap:8px}
-  @media (max-width:640px){.input{grid-template-columns:1fr;}}
-  .input input{padding:14px 16px;border:1px solid var(--bd);border-radius:12px;background:white;font-size:16px}
-  [data-theme="dark"] .input input{background:#0d152b;color:var(--text)}
-  .hint{color:var(--muted);font-size:13px}
-  h2{margin:8px 0 6px 0}
-  h3{margin:10px 0 8px 0}
-  .grid2{display:grid;grid-template-columns:1fr;gap:12px}
-  @media (min-width:840px){.grid2{grid-template-columns:1fr 1fr}}
-  .list{display:grid;gap:8px}
-  details{border:1px solid var(--bd);border-radius:12px;padding:8px 10px;background:color-mix(in oklab, var(--card) 94%, transparent)}
-  summary{cursor:pointer;font-weight:700}
-  .stat{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-  @media (max-width:640px){.stat{grid-template-columns:1fr}}
-  .k{color:var(--muted);font-size:14px}
-  .v{font-weight:900;font-size:20px}
-  .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
-  .chip{border:1px solid var(--bd);background:transparent;border-radius:999px;padding:10px 14px;font-weight:700;cursor:pointer}
-  .chip.active{background:var(--accent);color:#fff;border-color:var(--accent)}
-  .topbar{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap}
-  .badgeb{display:inline-flex;gap:6px;align-items:center;border:1px solid var(--bd);border-radius:999px;padding:6px 10px;font-size:12px}
-  .footer-note{margin-top:12px;font-size:12px;color:var(--muted)}
-  .chart{display:grid;gap:10px;margin-top:14px}
-  .bar{position:relative;border-radius:12px;border:1px solid var(--bd);background:var(--barbg);height:44px;display:flex;align-items:center;overflow:hidden}
-  .bar::before{content:"";position:absolute;inset:0;transform-origin:left center;transform:scaleX(var(--pct,0));}
-  .bar.fal::before{background:linear-gradient(90deg, var(--bad), #ff9b9b)}
-  .bar.tar::before{background:linear-gradient(90deg, var(--warn), #ffe08a)}
-  .bar.ati::before{background:linear-gradient(90deg, var(--ok), #a7efd5)}
-  .bar .lbl{position:relative;z-index:1;padding-left:12px;font-weight:800}
-  .bar .val{position:absolute;right:10px;z-index:1;font-weight:900}
-  .linkbtn{display:inline-block;margin-left:8px;border:1px solid var(--bd);padding:4px 8px;border-radius:999px;font-size:12px;text-decoration:none}
+
+  *{
+    box-sizing:border-box;
+  }
+
+  body{
+    margin:0;
+    font-family:system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial;
+    background:var(--bg);
+    color:var(--text);
+  }
+
+  header{
+    position:sticky;
+    top:0;
+    z-index:10;
+    background:color-mix(in oklab,var(--card) 90%,transparent);
+    backdrop-filter:blur(6px);
+    border-bottom:1px solid var(--bd);
+    padding:14px 16px;
+    display:flex;
+    gap:12px;
+    align-items:center;
+  }
+
+  header h1{
+    font-size:18px;
+    margin:0;
+  }
+
+  header .right{
+    margin-left:auto;
+    display:flex;
+    gap:8px;
+    align-items:center;
+  }
+
+  .btn{
+    border:0;
+    border-radius:12px;
+    padding:12px 16px;
+    font-weight:700;
+    cursor:pointer;
+    touch-action:manipulation;
+  }
+
+  .btn.primary{
+    background:var(--accent);
+    color:white;
+  }
+
+  .btn.ghost{
+    background:transparent;
+    border:1px solid var(--bd);
+    color:var(--text);
+  }
+
+  .btn.small{
+    padding:8px 10px;
+    border-radius:10px;
+  }
+
+  main{
+    max-width:960px;
+    margin:auto;
+    padding:18px;
+  }
+
+  .card{
+    background:var(--card);
+    border:1px solid var(--bd);
+    border-radius:16px;
+    padding:16px;
+  }
+
+  .hero{
+    display:grid;
+    gap:12px;
+  }
+
+  .input{
+    display:grid;
+    grid-template-columns:1fr auto auto;
+    gap:8px;
+  }
+
+  @media (max-width:640px){
+    .input{
+      grid-template-columns:1fr;
+    }
+  }
+
+  .input input{
+    padding:14px 16px;
+    border:1px solid var(--bd);
+    border-radius:12px;
+    background:white;
+    font-size:16px;
+  }
+
+  [data-theme="dark"] .input input{
+    background:#0d152b;
+    color:var(--text);
+  }
+
+  .hint{
+    color:var(--muted);
+    font-size:13px;
+  }
+
+  h2{
+    margin:8px 0 6px 0;
+  }
+
+  h3{
+    margin:10px 0 8px 0;
+  }
+
+  .grid2{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:12px;
+  }
+
+  @media (min-width:840px){
+    .grid2{
+      grid-template-columns:1fr 1fr;
+    }
+  }
+
+  .list{
+    display:grid;
+    gap:8px;
+  }
+
+  details{
+    border:1px solid var(--bd);
+    border-radius:12px;
+    padding:8px 10px;
+    background:color-mix(in oklab,var(--card) 94%,transparent);
+  }
+
+  summary{
+    cursor:pointer;
+    font-weight:700;
+  }
+
+  .stat{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+  }
+
+  @media (max-width:640px){
+    .stat{
+      grid-template-columns:1fr;
+    }
+  }
+
+  .k{
+    color:var(--muted);
+    font-size:14px;
+  }
+
+  .v{
+    font-weight:900;
+    font-size:20px;
+  }
+
+  .chips{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    margin-top:4px;
+  }
+
+  .chip{
+    border:1px solid var(--bd);
+    background:transparent;
+    border-radius:999px;
+    padding:10px 14px;
+    font-weight:700;
+    cursor:pointer;
+  }
+
+  .chip.active{
+    background:var(--accent);
+    color:#fff;
+    border-color:var(--accent);
+  }
+
+  .topbar{
+    display:flex;
+    gap:8px;
+    align-items:center;
+    justify-content:space-between;
+    flex-wrap:wrap;
+  }
+
+  .badgeb{
+    display:inline-flex;
+    gap:6px;
+    align-items:center;
+    border:1px solid var(--bd);
+    border-radius:999px;
+    padding:6px 10px;
+    font-size:12px;
+  }
+
+  .footer-note{
+    margin-top:12px;
+    font-size:12px;
+    color:var(--muted);
+  }
+
+  .chart{
+    display:grid;
+    gap:10px;
+    margin-top:14px;
+  }
+
+  .bar{
+    position:relative;
+    border-radius:12px;
+    border:1px solid var(--bd);
+    background:var(--barbg);
+    height:44px;
+    display:flex;
+    align-items:center;
+    overflow:hidden;
+  }
+
+  .bar::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    transform-origin:left center;
+    transform:scaleX(var(--pct,0));
+  }
+
+  .bar.fal::before{
+    background:linear-gradient(90deg,var(--bad),#ff9b9b);
+  }
+
+  .bar.tar::before{
+    background:linear-gradient(90deg,var(--warn),#ffe08a);
+  }
+
+  .bar.ati::before{
+    background:linear-gradient(90deg,var(--ok),#a7efd5);
+  }
+
+  .bar .lbl{
+    position:relative;
+    z-index:1;
+    padding-left:12px;
+    font-weight:800;
+  }
+
+  .bar .val{
+    position:absolute;
+    right:10px;
+    z-index:1;
+    font-weight:900;
+  }
+
+  .linkbtn{
+    display:inline-block;
+    margin-left:8px;
+    border:1px solid var(--bd);
+    padding:4px 8px;
+    border-radius:999px;
+    font-size:12px;
+    text-decoration:none;
+  }
 </style>
-</head><body><header>
+</head>
+
+<body>
+
+<header>
   <h1>👪 Aula Digital — Consulta para familias</h1>
+
   <div class="right">
-    <button id="themeBtn" class="btn ghost small" title="Cambiar tema">🌙 Oscuro</button>
+    <button
+      id="themeBtn"
+      class="btn ghost small"
+      title="Cambiar tema">
+      🌙 Oscuro
+    </button>
   </div>
-</header><main>  <!-- Acceso -->  <section class="card hero" id="search-card">
+</header>
+
+
+<main>
+
+  <!-- ACCESO -->
+
+  <section class="card hero" id="search-card">
+
     <div>
       <h2>Encuentre el progreso de su hijo(a)</h2>
+
       <p class="hint">
         Escriba el <b>ID escolar</b> que le proporcionó la escuela para consultar tareas y asistencia.
       </p>
-    </div><div class="input">
-  <input
-    id="idInput"
-    autocomplete="off"
-    placeholder="Pegue aquí el ID entregado por la escuela"
-    inputmode="latin-name">
-
-  <button id="goBtn" class="btn primary">
-    Buscar alumno
-  </button>
-
-  <button id="saveBtn" class="btn ghost">
-    Recordar ID en este dispositivo
-  </button>
-</div>
-
-<div class="hint">
-  Este sitio <u>solo lee</u> los datos. No modifica nada en la libreta digital.
-</div>
-
-  </section>  <!-- Resultados -->  <section id="student-view" style="display:none; margin-top:14px"><div class="card">
-
-  <div class="topbar">
-
-    <div>
-      <h2 id="alumno-nombre">Alumno</h2>
-
-      <div class="hint" id="alumno-id"></div>
-
-      <div class="hint" id="grupo-label" style="margin-top:4px"></div>
-
-      <div id="tri-subtitle" class="hint" style="margin-top:6px">
-        Resumen de Trimestre 3
-      </div>
     </div>
 
-    <div>
-      <button id="backBtn" class="btn ghost">
-        Cambiar de alumno
+
+    <div class="input">
+
+      <input
+        id="idInput"
+        autocomplete="off"
+        placeholder="Pegue aquí el ID entregado por la escuela"
+        inputmode="latin-name">
+
+      <button
+        id="goBtn"
+        class="btn primary">
+        Buscar alumno
       </button>
+
+      <button
+        id="saveBtn"
+        class="btn ghost">
+        Recordar ID en este dispositivo
+      </button>
+
     </div>
 
-  </div>
-
-
-  <div style="margin-top:10px">
-
-    <div class="chips" id="tri-chips"></div>
 
     <div class="hint">
-      Puede ver <b>Todo</b> o cambiar entre
-      <b>Trimestre 1</b>,
-      <b>Trimestre 2</b> y
-      <b>Trimestre 3</b>.
-      Por defecto abre en <b>Trimestre 3</b>.
+      Este sitio <u>solo lee</u> los datos. No modifica nada en la libreta digital.
     </div>
 
-  </div>
+  </section>
 
 
-  <div class="stat" style="margin-top:12px">
 
-    <div>
-      <div class="k">Cumplimiento (trimestre elegido)</div>
-      <div class="v" id="stat-cump-tri">–</div>
+  <!-- RESULTADOS -->
+
+  <section
+    id="student-view"
+    style="display:none; margin-top:14px">
+
+    <div class="card">
+
+      <div class="topbar">
+
+        <div>
+
+          <h2 id="alumno-nombre">
+            Alumno
+          </h2>
+
+          <div
+            class="hint"
+            id="alumno-id">
+          </div>
+
+          <div
+            class="hint"
+            id="grupo-label"
+            style="margin-top:4px">
+          </div>
+
+          <div
+            id="tri-subtitle"
+            class="hint"
+            style="margin-top:6px">
+            Resumen de Trimestre 1
+          </div>
+
+        </div>
+
+
+        <div>
+
+          <button
+            id="backBtn"
+            class="btn ghost">
+            Cambiar de alumno
+          </button>
+
+        </div>
+
+      </div>
+
+
+
+      <div style="margin-top:10px">
+
+        <div
+          class="chips"
+          id="tri-chips">
+        </div>
+
+        <div class="hint">
+          Puede ver <b>Todo</b> o cambiar entre
+          <b>Trimestre 1</b>,
+          <b>Trimestre 2</b> y
+          <b>Trimestre 3</b>.
+          Por defecto abre en <b>Trimestre 1</b>.
+        </div>
+
+      </div>
+
+
+
+      <div
+        class="stat"
+        style="margin-top:12px">
+
+        <div>
+          <div class="k">
+            Cumplimiento (trimestre elegido)
+          </div>
+
+          <div
+            class="v"
+            id="stat-cump-tri">
+            –
+          </div>
+        </div>
+
+
+        <div>
+          <div class="k">
+            Totales — Trimestre
+          </div>
+
+          <div
+            class="v"
+            id="stat-tot-tri">
+            –
+          </div>
+        </div>
+
+
+        <div>
+          <div class="k">
+            Asistencia — semana
+          </div>
+
+          <div
+            class="v"
+            id="stat-aswk">
+            –
+          </div>
+        </div>
+
+
+        <div>
+          <div class="k">
+            Asistencia — 30 días
+          </div>
+
+          <div
+            class="v"
+            id="stat-as30">
+            –
+          </div>
+        </div>
+
+
+        <div>
+          <div class="k">
+            Asistencia total (histórica)
+          </div>
+
+          <div
+            class="v"
+            id="stat-asHist">
+            –
+          </div>
+        </div>
+
+
+        <div>
+          <div class="k">
+            Faltas (históricas)
+          </div>
+
+          <div
+            class="v"
+            id="stat-faltHist">
+            –
+          </div>
+        </div>
+
+      </div>
+
+
+
+      <div
+        class="chart"
+        aria-label="Resumen visual del trimestre">
+
+        <div
+          class="bar fal"
+          id="bar-fal">
+
+          <span class="lbl">
+            ⏳ Faltantes
+          </span>
+
+          <span
+            class="val"
+            id="val-fal">
+            0
+          </span>
+
+        </div>
+
+
+        <div
+          class="bar tar"
+          id="bar-tar">
+
+          <span class="lbl">
+            🕒 Tarde
+          </span>
+
+          <span
+            class="val"
+            id="val-tar">
+            0
+          </span>
+
+        </div>
+
+
+        <div
+          class="bar ati"
+          id="bar-ati">
+
+          <span class="lbl">
+            ✅ A tiempo
+          </span>
+
+          <span
+            class="val"
+            id="val-ati">
+            0
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <p
+        class="footer-note"
+        style="margin-top:10px">
+
+        Importante: si alguna inasistencia fue <b>justificada</b>, no se preocupe;
+        aunque aparezca aquí como falta, la escuela la revisa y no afecta indebidamente.
+
+      </p>
+
     </div>
 
-    <div>
-      <div class="k">Totales — Trimestre</div>
-      <div class="v" id="stat-tot-tri">–</div>
+
+
+    <div
+      class="grid2"
+      style="margin-top:12px">
+
+      <div class="card">
+
+        <h3>
+          ⏳ Trabajos faltantes
+        </h3>
+
+        <div
+          id="faltantes"
+          class="list">
+        </div>
+
+      </div>
+
+
+      <div class="card">
+
+        <h3>
+          🕒 Entregados tarde
+        </h3>
+
+        <div
+          id="tarde"
+          class="list">
+        </div>
+
+      </div>
+
     </div>
 
-    <div>
-      <div class="k">Asistencia — semana</div>
-      <div class="v" id="stat-aswk">–</div>
+
+
+    <div
+      class="card"
+      style="margin-top:12px">
+
+      <h3>
+        ✅ Entregados (a tiempo)
+      </h3>
+
+      <div
+        id="atiempo"
+        class="list">
+      </div>
+
     </div>
 
-    <div>
-      <div class="k">Asistencia — 30 días</div>
-      <div class="v" id="stat-as30">–</div>
-    </div>
 
-    <div>
-      <div class="k">Asistencia total (histórica)</div>
-      <div class="v" id="stat-asHist">–</div>
-    </div>
+    <p class="footer-note">
+      Si detecta algún dato que no coincide, contacte a la escuela para verificar la libreta digital.
+    </p>
 
-    <div>
-      <div class="k">Faltas (históricas)</div>
-      <div class="v" id="stat-faltHist">–</div>
-    </div>
+  </section>
 
-  </div>
+</main>
 
 
-  <div class="chart" aria-label="Resumen visual del trimestre">
 
-    <div class="bar fal" id="bar-fal">
-      <span class="lbl">⏳ Faltantes</span>
-      <span class="val" id="val-fal">0</span>
-    </div>
+<script>
 
-    <div class="bar tar" id="bar-tar">
-      <span class="lbl">🕒 Tarde</span>
-      <span class="val" id="val-tar">0</span>
-    </div>
+/* ==================================================
+   CONFIGURACIÓN
+================================================== */
 
-    <div class="bar ati" id="bar-ati">
-      <span class="lbl">✅ A tiempo</span>
-      <span class="val" id="val-ati">0</span>
-    </div>
+const SHEET_ID =
+'1MgrR0DQauHSVhEu8WTjKgfLTMhtDPcSdFAibZKSwbo8';
 
-  </div>
-
-
-  <p class="footer-note" style="margin-top:10px">
-    Importante: si alguna inasistencia fue <b>justificada</b>, no se preocupe;
-    aunque aparezca aquí como falta, la escuela la revisa y no afecta indebidamente.
-  </p>
-
-</div>
-
-
-<div class="grid2" style="margin-top:12px">
-
-  <div class="card">
-    <h3>⏳ Trabajos faltantes</h3>
-    <div id="faltantes" class="list"></div>
-  </div>
-
-  <div class="card">
-    <h3>🕒 Entregados tarde</h3>
-    <div id="tarde" class="list"></div>
-  </div>
-
-</div>
-
-
-<div class="card" style="margin-top:12px">
-
-  <h3>✅ Entregados (a tiempo)</h3>
-
-  <div id="atiempo" class="list"></div>
-
-</div>
-
-
-<p class="footer-note">
-  Si detecta algún dato que no coincide, contacte a la escuela para verificar la libreta digital.
-</p>
-
-  </section></main><script>
-
-/* ====== CONFIG ====== */
-
-const SHEET_ID = '1MgrR0DQauHSVhEu8WTjKgfLTMhtDPcSdFAibZKSwbo8';
 
 const GIDS = {
+
   puntos:'0',
+
   asistencia:'1076394102',
+
   registro:'1854056136',
+
   aliases:'377574741',
+
   presets:'897365281'
+
 };
 
-const GROUP_LABEL = '3ero A';
+
+const GROUP_LABEL =
+'3ero A';
 
 
-/* JSON de enlaces (opcional) */
-const LINKS_JSON = 'data/links_3A.json';
+/* JSON de enlaces opcional */
+
+const LINKS_JSON =
+'data/links_3A.json';
+
 
 let LINKMAP = {};
 
 
-const $=s=>document.querySelector(s);
 
-const strip=s=>
-  String(s||'')
-  .normalize('NFD')
-  .replace(/[\u0300-\u036f]/g,'');
+/* ==================================================
+   UTILIDADES
+================================================== */
 
-const norm=s=>
-  strip(String(s||'').toLowerCase())
-  .replace(/\s+/g,' ')
-  .trim();
-
-const pad=n=>String(n).padStart(2,'0');
-
-const ymd=d=>
-  `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const $ =
+s => document.querySelector(s);
 
 
-/* ====== FECHAS ROBUSTAS ====== */
+const strip =
+s =>
+String(s || '')
+.normalize('NFD')
+.replace(/[\u0300-\u036f]/g,'');
+
+
+const norm =
+s =>
+strip(
+  String(s || '').toLowerCase()
+)
+.replace(/\s+/g,' ')
+.trim();
+
+
+const pad =
+n =>
+String(n)
+.padStart(2,'0');
+
+
+const ymd =
+d =>
+`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+
+
+
+/* ==================================================
+   FECHAS
+================================================== */
 
 function normDate(s){
 
-  const t=String(s||'').trim();
+  const t =
+  String(s || '')
+  .trim();
 
-  if(!t) return '';
 
-  let m=t.match(/^(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})/);
+  if(!t)
+    return '';
+
+
+  /* yyyy-mm-dd / yyyy/mm/dd */
+
+  let m =
+  t.match(
+    /^(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})/
+  );
+
 
   if(m){
-    const y=+m[1];
-    const mo=+m[2];
-    const d=+m[3];
+
+    const y =
+    +m[1];
+
+    const mo =
+    +m[2];
+
+    const d =
+    +m[3];
+
 
     return `${y}-${pad(mo)}-${pad(d)}`;
+
   }
 
 
-  m=t.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/);
+
+  /* dd-mm-yyyy / dd/mm/yyyy */
+
+  m =
+  t.match(
+    /^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/
+  );
+
 
   if(m){
-    const d=+m[1];
-    const mo=+m[2];
-    const y=+m[3];
+
+    const d =
+    +m[1];
+
+    const mo =
+    +m[2];
+
+    const y =
+    +m[3];
+
 
     return `${y}-${pad(mo)}-${pad(d)}`;
+
   }
 
 
-  m=t.match(/^Date(\d{4})\s*,\s*(\d{1,2})\s*,\s*(\d{1,2})/i);
+
+  /* Formato GViz Date(2026,7,28) */
+
+  m =
+  t.match(
+    /^Date\((\d{4})\s*,\s*(\d{1,2})\s*,\s*(\d{1,2})/i
+  );
+
 
   if(m){
-    const y=+m[1];
-    const mo=+m[2];
-    const d=+m[3];
 
-    return ymd(new Date(y,mo,d));
+    const y =
+    +m[1];
+
+    const mo =
+    +m[2];
+
+    const d =
+    +m[3];
+
+
+    return ymd(
+      new Date(
+        y,
+        mo,
+        d
+      )
+    );
+
   }
 
 
-  const d=new Date(t);
+
+  const d =
+  new Date(t);
+
 
   if(!isNaN(+d))
     return ymd(d);
 
 
   return '';
+
 }
 
 
 
 function isPresent(v){
 
-  const s=norm(v);
+  const s =
+  norm(v);
+
 
   if(!s)
     return false;
 
 
-  if(!Number.isNaN(+s))
-    return (+s)>0;
+  if(
+    !Number.isNaN(+s)
+  )
+    return (+s) > 0;
 
 
-  const s2=s.replace(/\s+/g,'');
+  const s2 =
+  s.replace(/\s+/g,'');
 
-  if(/^1\(100%?$/.test(s2))
+
+  if(
+    /^1\(100%?\)$/.test(s2)
+  )
     return true;
 
 
   return [
+
     'x',
     '✓',
     '✔',
@@ -346,6 +886,7 @@ function isPresent(v){
     'true',
     'asistio',
     'asistió'
+
   ].includes(s);
 
 }
@@ -355,20 +896,37 @@ function isPresent(v){
 function getDateCols(cols){
 
   return cols
-    .map((c,i)=>normDate(String(c).trim())?i:-1)
-    .filter(i=>i>=0);
+  .map(
+    (c,i) =>
+    normDate(
+      String(c).trim()
+    )
+    ? i
+    : -1
+  )
+  .filter(
+    i => i >= 0
+  );
 
 }
 
 
 
-function getActiveDateCols(cols,rows){
+function getActiveDateCols(
+  cols,
+  rows
+){
 
-  const dcols=getDateCols(cols);
+  const dcols =
+  getDateCols(cols);
+
 
   return dcols.filter(
-    i=>rows.some(
-      r=>(r[i]!=='' && r[i]!=null)
+    i =>
+    rows.some(
+      r =>
+      r[i] !== '' &&
+      r[i] != null
     )
   );
 
@@ -376,168 +934,234 @@ function getActiveDateCols(cols,rows){
 
 
 
-/* ====== LECTORES ====== */
+/* ==================================================
+   GOOGLE SHEETS
+================================================== */
 
-let _cbSeq=0;
+let _cbSeq = 0;
 
 
-function fetchGViz(sheetId,sheetName){
+function fetchGViz(
+  sheetId,
+  sheetName
+){
 
-  return new Promise((resolve,reject)=>{
+  return new Promise(
+    (resolve,reject) => {
 
-    const cb=
+      const cb =
       `__cb_${Date.now()}_${++_cbSeq}`;
 
 
-    const url=
+      const url =
       `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?headers=1&tqx=out:json;responseHandler:${cb}&sheet=${encodeURIComponent(sheetName)}&ts=${Date.now()}`;
 
 
-    const sc=
-      document.createElement('script');
+      const sc =
+      document.createElement(
+        'script'
+      );
 
 
-    const timeout=
-      setTimeout(()=>{
+      const timeout =
+      setTimeout(
+        () => {
+
+          cleanup();
+
+          reject(
+            new Error(
+              'Timeout'
+            )
+          );
+
+        },
+        12000
+      );
+
+
+      function cleanup(){
+
+        clearTimeout(
+          timeout
+        );
+
+
+        delete window[cb];
+
+
+        if(
+          sc.parentNode
+        )
+          sc.parentNode.removeChild(
+            sc
+          );
+
+      }
+
+
+      window[cb] =
+      json => {
 
         cleanup();
 
-        reject(
-          new Error('Timeout')
-        );
 
-      },12000);
+        try{
 
-
-    function cleanup(){
-
-      clearTimeout(timeout);
-
-      delete window[cb];
-
-      if(sc.parentNode)
-        sc.parentNode.removeChild(sc);
-
-    }
-
-
-    window[cb]=(json)=>{
-
-      cleanup();
-
-      try{
-
-        let cols=
-          (json.table?.cols||[])
+          let cols =
+          (
+            json.table?.cols ||
+            []
+          )
           .map(
-            c=>String(c.label||'').trim()
+            c =>
+            String(
+              c.label || ''
+            )
+            .trim()
           );
 
 
-        let rows=
-          (json.table?.rows||[])
+          let rows =
+          (
+            json.table?.rows ||
+            []
+          )
           .map(
-            r=>(r.c||[])
+            r =>
+            (
+              r.c ||
+              []
+            )
             .map(
-              c=>c?.v ?? ''
+              c =>
+              c?.v ?? ''
             )
           );
 
 
-        const empty=
+          const empty =
           cols.filter(
-            c=>!c||/^[A-Z]$/.test(c)
+            c =>
+            !c ||
+            /^[A-Z]$/.test(c)
           ).length;
 
 
-        if(
-          empty>=Math.ceil(cols.length*0.5)
-          &&
-          rows.length
-        ){
+          if(
+            empty >=
+            Math.ceil(
+              cols.length * 0.5
+            )
+            &&
+            rows.length
+          ){
 
-          cols=
+            cols =
             rows[0]
             .map(
-              v=>String(v??'')
+              v =>
+              String(
+                v ?? ''
+              )
             );
 
-          rows=
+
+            rows =
             rows.slice(1);
+
+          }
+
+
+          resolve({
+            cols,
+            rows
+          });
+
+        }
+        catch(e){
+
+          reject(e);
 
         }
 
-
-        resolve({
-          cols,
-          rows
-        });
-
-      }
-      catch(e){
-
-        reject(e);
-
-      }
-
-    };
+      };
 
 
-    sc.onerror=()=>{
+      sc.onerror =
+      () => {
 
-      cleanup();
+        cleanup();
 
-      reject(
-        new Error('Error GViz')
+        reject(
+          new Error(
+            'Error GViz'
+          )
+        );
+
+      };
+
+
+      sc.src =
+      url;
+
+
+      document.head.appendChild(
+        sc
       );
 
-    };
-
-
-    sc.src=url;
-
-    document.head.appendChild(sc);
-
-  });
+    }
+  );
 
 }
 
 
 
-async function fetchCSVByGid(sheetId,gid){
+async function fetchCSVByGid(
+  sheetId,
+  gid
+){
 
-  const url=
-    `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}&ts=${Date.now()}`;
-
-
-  const res=
-    await fetch(
-      url,
-      {
-        cache:'no-store'
-      }
-    );
+  const url =
+  `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}&ts=${Date.now()}`;
 
 
-  if(!res.ok)
+  const res =
+  await fetch(
+    url,
+    {
+      cache:'no-store'
+    }
+  );
+
+
+  if(
+    !res.ok
+  )
     throw new Error(
-      'CSV '+gid
+      'CSV ' + gid
     );
 
 
-  const txt=
-    await res.text();
+  const txt =
+  await res.text();
 
 
-  const rows=
-    parseCSV(txt);
+  const rows =
+  parseCSV(txt);
 
 
-  const cols=
-    (rows.shift()||[])
-    .map(
-      v=>String(v??'')
-    );
+  const cols =
+  (
+    rows.shift() ||
+    []
+  )
+  .map(
+    v =>
+    String(
+      v ?? ''
+    )
+  );
 
 
   return {
@@ -551,81 +1175,103 @@ async function fetchCSVByGid(sheetId,gid){
 
 function parseCSV(t){
 
-  const rows=[];
-
-  let row=[];
-  let cur='';
-  let q=false;
+  const rows = [];
 
 
-  for(let i=0;i<t.length;i++){
+  let row = [];
+  let cur = '';
+  let q = false;
 
-    const ch=t[i];
-    const nx=t[i+1];
+
+  for(
+    let i=0;
+    i<t.length;
+    i++
+  ){
+
+    const ch =
+    t[i];
+
+
+    const nx =
+    t[i+1];
 
 
     if(q){
 
       if(
-        ch==='"' &&
-        nx==='"'
+        ch === '"' &&
+        nx === '"'
       ){
 
-        cur+='"';
+        cur += '"';
+
         i++;
 
       }
       else if(
-        ch==='"'
+        ch === '"'
       ){
 
-        q=false;
+        q = false;
 
       }
       else{
 
-        cur+=ch;
+        cur += ch;
 
       }
 
     }
     else{
 
-      if(ch==='"'){
+      if(
+        ch === '"'
+      ){
 
-        q=true;
-
-      }
-      else if(ch===','){
-
-        row.push(cur);
-
-        cur='';
+        q = true;
 
       }
       else if(
-        ch==='\n' ||
-        ch==='\r'
+        ch === ','
+      ){
+
+        row.push(
+          cur
+        );
+
+        cur = '';
+
+      }
+      else if(
+        ch === '\n' ||
+        ch === '\r'
       ){
 
         if(
-          cur!=='' ||
+          cur !== '' ||
           row.length
         ){
 
-          row.push(cur);
+          row.push(
+            cur
+          );
 
-          rows.push(row);
 
-          row=[];
-          cur='';
+          rows.push(
+            row
+          );
+
+
+          row = [];
+          cur = '';
 
         }
 
       }
       else{
 
-        cur+=ch;
+        cur += ch;
 
       }
 
@@ -635,13 +1281,18 @@ function parseCSV(t){
 
 
   if(
-    cur!=='' ||
+    cur !== '' ||
     row.length
   ){
 
-    row.push(cur);
+    row.push(
+      cur
+    );
 
-    rows.push(row);
+
+    rows.push(
+      row
+    );
 
   }
 
@@ -652,414 +1303,532 @@ function parseCSV(t){
 
 
 
-/* ====== PARSERS ====== */
+/* ==================================================
+   REGISTRO DE TRABAJOS
+================================================== */
 
-function parseRegistro(cols,rows){
+function parseRegistro(
+  cols,
+  rows
+){
 
-  const iUID=
-    cols.findIndex(
-      c=>/uid[_ ]?preset/i.test(c)
-    );
-
-  const iF=
-    cols.findIndex(
-      c=>/^fecha$/i.test(c)
-    );
-
-  const iFO=
-    cols.findIndex(
-      c=>/fecha.*objetivo/i.test(c)
-    );
-
-  const iID=
-    cols.findIndex(
-      c=>/^(id|matric)/i.test(c)
-    );
-
-  const iNom=
-    cols.findIndex(
-      c=>/^nombre/i.test(c)
-    );
-
-  const iMat=
-    cols.findIndex(
-      c=>/^materia$/i.test(c)
-    );
-
-  const iNum=
-    cols.findIndex(
-      c=>/n.?trabajo|n.? ?°/i.test(c)
-    );
-
-  const iOri=
-    cols.findIndex(
-      c=>/^origen$/i.test(c)
-    );
-
-  const iPag=
-    cols.findIndex(
-      c=>/^p[aá]gina/i.test(c)
-    );
-
-  const iPts=
-    cols.findIndex(
-      c=>/^puntos$/i.test(c)
-    );
-
-  const iAtr=
-    cols.findIndex(
-      c=>/atraso/i.test(c)
-    );
-
-  const iMom=
-    cols.findIndex(
-      c=>/^momento$/i.test(c)
-    );
-
-  const iNomT=
-    cols.findIndex(
-      c=>/nombre.*trabajo/i.test(c)
-    );
+  const iUID =
+  cols.findIndex(
+    c =>
+    /uid[_ ]?preset/i.test(c)
+  );
 
 
-  return rows.map(r=>{
+  const iF =
+  cols.findIndex(
+    c =>
+    /^fecha$/i.test(c)
+  );
 
-    const fecha=
-      String(
-        r[iF]??''
-      ).trim();
+
+  const iFO =
+  cols.findIndex(
+    c =>
+    /fecha.*objetivo/i.test(c)
+  );
 
 
-    const fo=
+  const iID =
+  cols.findIndex(
+    c =>
+    /^(id|matric)/i.test(c)
+  );
+
+
+  const iNom =
+  cols.findIndex(
+    c =>
+    /^nombre/i.test(c)
+  );
+
+
+  const iMat =
+  cols.findIndex(
+    c =>
+    /^materia$/i.test(c)
+  );
+
+
+  const iNum =
+  cols.findIndex(
+    c =>
+    /n.?trabajo|n.? ?°/i.test(c)
+  );
+
+
+  const iOri =
+  cols.findIndex(
+    c =>
+    /^origen$/i.test(c)
+  );
+
+
+  const iPag =
+  cols.findIndex(
+    c =>
+    /^p[aá]gina/i.test(c)
+  );
+
+
+  const iPts =
+  cols.findIndex(
+    c =>
+    /^puntos$/i.test(c)
+  );
+
+
+  const iAtr =
+  cols.findIndex(
+    c =>
+    /atraso/i.test(c)
+  );
+
+
+  const iMom =
+  cols.findIndex(
+    c =>
+    /^momento$/i.test(c)
+  );
+
+
+  const iNomT =
+  cols.findIndex(
+    c =>
+    /nombre.*trabajo/i.test(c)
+  );
+
+
+  return rows.map(
+    r => {
+
+      const fecha =
       String(
         (
-          iFO>=0
+          iF >= 0
+          ? r[iF]
+          : ''
+        )
+        ?? ''
+      )
+      .trim();
+
+
+      const fo =
+      String(
+        (
+          iFO >= 0
           ? r[iFO]
           : ''
         )
-        ??''
-      ).trim()
-      || fecha;
-
-
-    const atraso=(()=>{
-
-      if(
-        iAtr>=0 &&
-        r[iAtr]!=='' &&
-        r[iAtr]!=null
+        ?? ''
       )
-        return +r[iAtr]||0;
+      .trim()
+      ||
+      fecha;
 
 
-      const d=
+      const atraso =
+      (() => {
+
+        if(
+          iAtr >= 0 &&
+          r[iAtr] !== '' &&
+          r[iAtr] != null
+        ){
+
+          return +r[iAtr] || 0;
+
+        }
+
+
+        const d =
         new Date(fecha);
 
-      const o=
+
+        const o =
         new Date(fo);
 
 
-      if(
-        isNaN(+d) ||
-        isNaN(+o)
-      )
-        return 0;
-
-
-      return Math.max(
-        0,
-        Math.round(
-          (d-o)/86400000
+        if(
+          isNaN(+d) ||
+          isNaN(+o)
         )
-      );
-
-    })();
+          return 0;
 
 
-    return {
+        return Math.max(
+          0,
+          Math.round(
+            (d-o) /
+            86400000
+          )
+        );
 
-      uidPreset:
+      })();
+
+
+      return {
+
+        uidPreset:
         String(
           (
-            iUID>=0
+            iUID >= 0
             ? r[iUID]
             : ''
           )
-          ??''
-        ).trim(),
+          ?? ''
+        )
+        .trim(),
 
-      fecha,
 
-      fechaObjetivo:fo,
+        fecha,
 
-      id:
+
+        fechaObjetivo:
+        fo,
+
+
+        id:
         String(
           (
-            iID>=0
+            iID >= 0
             ? r[iID]
             : ''
           )
-          ??''
-        ).trim(),
+          ?? ''
+        )
+        .trim(),
 
-      nombre:
+
+        nombre:
         String(
           (
-            iNom>=0
+            iNom >= 0
             ? r[iNom]
             : ''
           )
-          ??''
-        ).trim(),
+          ?? ''
+        )
+        .trim(),
 
-      materia:
+
+        materia:
         String(
           (
-            iMat>=0
+            iMat >= 0
             ? r[iMat]
             : ''
           )
-          ??''
-        ).trim(),
+          ?? ''
+        )
+        .trim(),
 
-      numero:
+
+        numero:
         String(
           (
-            iNum>=0
+            iNum >= 0
             ? r[iNum]
             : ''
           )
-          ??''
-        ).trim(),
+          ?? ''
+        )
+        .trim(),
 
-      origen:
+
+        origen:
         String(
           (
-            iOri>=0
+            iOri >= 0
             ? r[iOri]
             : ''
           )
-          ??''
-        ).trim(),
+          ?? ''
+        )
+        .trim(),
 
-      pagina:
+
+        pagina:
         String(
           (
-            iPag>=0
+            iPag >= 0
             ? r[iPag]
             : ''
           )
-          ??''
-        ).trim(),
+          ?? ''
+        )
+        .trim(),
 
-      puntos:
+
+        puntos:
         +(
           (
-            iPts>=0
+            iPts >= 0
             ? r[iPts]
             : 0
           )
-          ??0
+          ?? 0
         )
-        ||0,
+        || 0,
 
-      atrasoDias:
+
+        atrasoDias:
         atraso,
 
-      momento:
+
+        momento:
         String(
           (
-            iMom>=0
+            iMom >= 0
             ? r[iMom]
             : ''
           )
-          ??''
-        ).trim(),
+          ?? ''
+        )
+        .trim(),
 
-      nombreTrabajo:
+
+        nombreTrabajo:
         String(
           (
-            iNomT>=0
+            iNomT >= 0
             ? r[iNomT]
             : ''
           )
-          ??''
-        ).trim()
+          ?? ''
+        )
+        .trim()
 
-    };
+      };
 
-  });
+    }
+  );
 
 }
 
 
 
-function parsePresets(cols,rows){
+/* ==================================================
+   PRESETS
+================================================== */
 
-  const iUID=
-    cols.findIndex(
-      c=>/uid[_ ]?preset/i.test(c)
-    );
+function parsePresets(
+  cols,
+  rows
+){
 
-  const iFO=
-    cols.findIndex(
-      c=>/fecha.*objetivo/i.test(c)
-    );
+  const iUID =
+  cols.findIndex(
+    c =>
+    /uid[_ ]?preset/i.test(c)
+  );
 
-  const iMom=
-    cols.findIndex(
-      c=>/^momento$/i.test(c)
-    );
 
-  const iMat=
-    cols.findIndex(
-      c=>/^materia$/i.test(c)
-    );
+  const iFO =
+  cols.findIndex(
+    c =>
+    /fecha.*objetivo/i.test(c)
+  );
 
-  const iNum=
-    cols.findIndex(
-      c=>/n.?trabajo|n.? ?°/i.test(c)
-    );
 
-  const iOri=
-    cols.findIndex(
-      c=>/^origen$/i.test(c)
-    );
+  const iMom =
+  cols.findIndex(
+    c =>
+    /^momento$/i.test(c)
+  );
 
-  const iPag=
-    cols.findIndex(
-      c=>/^p[aá]gina/i.test(c)
-    );
 
-  const iNom=
-    cols.findIndex(
-      c=>/nombre.*trabajo/i.test(c)
-    );
+  const iMat =
+  cols.findIndex(
+    c =>
+    /^materia$/i.test(c)
+  );
 
-  const iEUrl=
-    cols.findIndex(
-      c=>/url.*evidenc/i.test(c)
-    );
 
-  const iESh=
-    cols.findIndex(
-      c=>/(hoja|sheet).*evidenc/i.test(c)
-    );
+  const iNum =
+  cols.findIndex(
+    c =>
+    /n.?trabajo|n.? ?°/i.test(c)
+  );
+
+
+  const iOri =
+  cols.findIndex(
+    c =>
+    /^origen$/i.test(c)
+  );
+
+
+  const iPag =
+  cols.findIndex(
+    c =>
+    /^p[aá]gina/i.test(c)
+  );
+
+
+  const iNom =
+  cols.findIndex(
+    c =>
+    /nombre.*trabajo/i.test(c)
+  );
+
+
+  const iEUrl =
+  cols.findIndex(
+    c =>
+    /url.*evidenc/i.test(c)
+  );
+
+
+  const iESh =
+  cols.findIndex(
+    c =>
+    /(hoja|sheet).*evidenc/i.test(c)
+  );
 
 
   return rows
-    .map(r=>({
+  .map(
+    r => ({
 
       uid:
-        String(
-          (
-            iUID>=0
-            ? r[iUID]
-            : ''
-          )
-          ??''
-        ).trim(),
+      String(
+        (
+          iUID >= 0
+          ? r[iUID]
+          : ''
+        )
+        ?? ''
+      )
+      .trim(),
+
 
       fechaObjetivo:
-        String(
-          (
-            iFO>=0
-            ? r[iFO]
-            : ''
-          )
-          ??''
-        ).trim(),
+      String(
+        (
+          iFO >= 0
+          ? r[iFO]
+          : ''
+        )
+        ?? ''
+      )
+      .trim(),
+
 
       momento:
-        String(
-          (
-            iMom>=0
-            ? r[iMom]
-            : ''
-          )
-          ??''
-        ).trim(),
+      String(
+        (
+          iMom >= 0
+          ? r[iMom]
+          : ''
+        )
+        ?? ''
+      )
+      .trim(),
+
 
       materia:
-        String(
-          (
-            iMat>=0
-            ? r[iMat]
-            : ''
-          )
-          ??''
-        ).trim(),
+      String(
+        (
+          iMat >= 0
+          ? r[iMat]
+          : ''
+        )
+        ?? ''
+      )
+      .trim(),
+
 
       numero:
-        String(
-          (
-            iNum>=0
-            ? r[iNum]
-            : ''
-          )
-          ??''
-        ).trim(),
+      String(
+        (
+          iNum >= 0
+          ? r[iNum]
+          : ''
+        )
+        ?? ''
+      )
+      .trim(),
+
 
       origen:
-        String(
-          (
-            iOri>=0
-            ? r[iOri]
-            : ''
-          )
-          ??''
-        ).trim(),
+      String(
+        (
+          iOri >= 0
+          ? r[iOri]
+          : ''
+        )
+        ?? ''
+      )
+      .trim(),
+
 
       pagina:
-        String(
-          (
-            iPag>=0
-            ? r[iPag]
-            : ''
-          )
-          ??''
-        ).trim(),
+      String(
+        (
+          iPag >= 0
+          ? r[iPag]
+          : ''
+        )
+        ?? ''
+      )
+      .trim(),
+
 
       nombreTrabajo:
-        String(
-          (
-            iNom>=0
-            ? r[iNom]
-            : ''
-          )
-          ??''
-        ).trim(),
+      String(
+        (
+          iNom >= 0
+          ? r[iNom]
+          : ''
+        )
+        ?? ''
+      )
+      .trim(),
+
 
       evidUrl:
-        String(
-          (
-            iEUrl>=0
-            ? r[iEUrl]
-            : ''
-          )
-          ??''
-        ).trim(),
+      String(
+        (
+          iEUrl >= 0
+          ? r[iEUrl]
+          : ''
+        )
+        ?? ''
+      )
+      .trim(),
+
 
       evidSheet:
-        String(
-          (
-            iESh>=0
-            ? r[iESh]
-            : ''
-          )
-          ??''
-        ).trim()
+      String(
+        (
+          iESh >= 0
+          ? r[iESh]
+          : ''
+        )
+        ?? ''
+      )
+      .trim()
 
-    }))
-    .filter(
-      p=>p.uid
-    );
+    })
+  )
+  .filter(
+    p =>
+    p.uid
+  );
 
 }
 
 
 
-/* ====== ASISTENCIA ====== */
+/* ==================================================
+   ASISTENCIA
+================================================== */
 
 function asistenciaAlumno(
   cols,
@@ -1069,43 +1838,51 @@ function asistenciaAlumno(
   end
 ){
 
-  const iId=
-    cols.findIndex(
-      c=>/^(id|matric)/i.test(c)
-    );
-
-  const iNom=
-    cols.findIndex(
-      c=>/^nombre/i.test(c)
-    );
+  const iId =
+  cols.findIndex(
+    c =>
+    /^(id|matric)/i.test(c)
+  );
 
 
-  let row=null;
+  const iNom =
+  cols.findIndex(
+    c =>
+    /^nombre/i.test(c)
+  );
+
+
+  let row =
+  null;
 
 
   if(
-    iId>=0 &&
+    iId >= 0 &&
     ref.id
   ){
 
-    row=
-      rows.find(
-        r=>norm(r[iId])===norm(ref.id)
-      );
+    row =
+    rows.find(
+      r =>
+      norm(r[iId]) ===
+      norm(ref.id)
+    );
 
   }
 
 
   if(
     !row &&
-    iNom>=0 &&
+    iNom >= 0 &&
     ref.nombre
   ){
 
-    row=
-      rows.find(
-        r=>norm(r[iNom])===norm(ref.nombre)
-      );
+    row =
+    rows.find(
+      r =>
+      norm(r[iNom]) ===
+      norm(ref.nombre)
+    );
 
   }
 
@@ -1118,38 +1895,47 @@ function asistenciaAlumno(
     };
 
 
-  const activeCols=
-    getActiveDateCols(
-      cols,
-      rows
-    )
-    .filter(i=>{
+  const activeCols =
+  getActiveDateCols(
+    cols,
+    rows
+  )
+  .filter(
+    i => {
 
-      const d=
-        normDate(cols[i]);
-
-      return d &&
-        d>=start &&
-        d<=end;
-
-    });
+      const d =
+      normDate(
+        cols[i]
+      );
 
 
-  const present=
-    activeCols.reduce(
-      (acc,i)=>
-        acc+
-        (
-          isPresent(row[i])
-          ?1
-          :0
-        ),
-      0
-    );
+      return (
+        d &&
+        d >= start &&
+        d <= end
+      );
+
+    }
+  );
 
 
-  const total=
-    activeCols.length;
+  const present =
+  activeCols.reduce(
+    (acc,i) =>
+    acc +
+    (
+      isPresent(
+        row[i]
+      )
+      ? 1
+      : 0
+    ),
+    0
+  );
+
+
+  const total =
+  activeCols.length;
 
 
   return {
@@ -1168,43 +1954,51 @@ function asistenciaHistorica(
   ref
 ){
 
-  const iId=
-    cols.findIndex(
-      c=>/^(id|matric)/i.test(c)
-    );
-
-  const iNom=
-    cols.findIndex(
-      c=>/^nombre/i.test(c)
-    );
+  const iId =
+  cols.findIndex(
+    c =>
+    /^(id|matric)/i.test(c)
+  );
 
 
-  let row=null;
+  const iNom =
+  cols.findIndex(
+    c =>
+    /^nombre/i.test(c)
+  );
+
+
+  let row =
+  null;
 
 
   if(
-    iId>=0 &&
+    iId >= 0 &&
     ref.id
   ){
 
-    row=
-      rows.find(
-        r=>norm(r[iId])===norm(ref.id)
-      );
+    row =
+    rows.find(
+      r =>
+      norm(r[iId]) ===
+      norm(ref.id)
+    );
 
   }
 
 
   if(
     !row &&
-    iNom>=0 &&
+    iNom >= 0 &&
     ref.nombre
   ){
 
-    row=
-      rows.find(
-        r=>norm(r[iNom])===norm(ref.nombre)
-      );
+    row =
+    rows.find(
+      r =>
+      norm(r[iNom]) ===
+      norm(ref.nombre)
+    );
 
   }
 
@@ -1216,28 +2010,30 @@ function asistenciaHistorica(
     };
 
 
-  const activeCols=
-    getActiveDateCols(
-      cols,
-      rows
-    );
+  const activeCols =
+  getActiveDateCols(
+    cols,
+    rows
+  );
 
 
-  const present=
-    activeCols.reduce(
-      (acc,i)=>
-        acc+
-        (
-          isPresent(row[i])
-          ?1
-          :0
-        ),
-      0
-    );
+  const present =
+  activeCols.reduce(
+    (acc,i) =>
+    acc +
+    (
+      isPresent(
+        row[i]
+      )
+      ? 1
+      : 0
+    ),
+    0
+  );
 
 
-  const total=
-    activeCols.length;
+  const total =
+  activeCols.length;
 
 
   return {
@@ -1255,56 +2051,64 @@ function asistenciaRelativa(
   ref
 ){
 
-  const iId=
-    cols.findIndex(
-      c=>/^(id|matric)/i.test(c)
-    );
-
-  const iNom=
-    cols.findIndex(
-      c=>/^nombre/i.test(c)
-    );
+  const iId =
+  cols.findIndex(
+    c =>
+    /^(id|matric)/i.test(c)
+  );
 
 
-  let ri=-1;
+  const iNom =
+  cols.findIndex(
+    c =>
+    /^nombre/i.test(c)
+  );
+
+
+  let ri =
+  -1;
 
 
   if(
-    iId>=0 &&
+    iId >= 0 &&
     ref.id
   ){
 
-    ri=
-      rows.findIndex(
-        r=>norm(r[iId])===norm(ref.id)
-      );
+    ri =
+    rows.findIndex(
+      r =>
+      norm(r[iId]) ===
+      norm(ref.id)
+    );
 
   }
 
 
   if(
-    ri<0 &&
-    iNom>=0 &&
+    ri < 0 &&
+    iNom >= 0 &&
     ref.nombre
   ){
 
-    ri=
-      rows.findIndex(
-        r=>norm(r[iNom])===norm(ref.nombre)
-      );
+    ri =
+    rows.findIndex(
+      r =>
+      norm(r[iNom]) ===
+      norm(ref.nombre)
+    );
 
   }
 
 
-  const dcols=
-    getActiveDateCols(
-      cols,
-      rows
-    );
+  const dcols =
+  getActiveDateCols(
+    cols,
+    rows
+  );
 
 
   if(
-    ri<0 ||
+    ri < 0 ||
     !dcols.length
   )
     return {
@@ -1314,36 +2118,42 @@ function asistenciaRelativa(
     };
 
 
-  const count=
-    r=>
-      dcols.reduce(
-        (a,i)=>
-          a+
-          (
-            isPresent(r[i])
-            ?1
-            :0
-          ),
-        0
-      );
+  const count =
+  r =>
+  dcols.reduce(
+    (a,i) =>
+    a +
+    (
+      isPresent(
+        r[i]
+      )
+      ? 1
+      : 0
+    ),
+    0
+  );
 
 
-  const presentRow=
-    count(rows[ri]);
+  const presentRow =
+  count(
+    rows[ri]
+  );
 
 
-  const maxDays=
-    rows.reduce(
-      (m,r)=>
-        Math.max(
-          m,
-          count(r)
-        ),
-      0
-    );
+  const maxDays =
+  rows.reduce(
+    (m,r) =>
+    Math.max(
+      m,
+      count(r)
+    ),
+    0
+  );
 
 
-  if(maxDays<=0)
+  if(
+    maxDays <= 0
+  )
     return {
       present:0,
       max:0,
@@ -1351,19 +2161,28 @@ function asistenciaRelativa(
     };
 
 
-  const pct=
-    Math.min(
-      100,
-      Math.round(
-        presentRow/maxDays*100
-      )
-    );
+  const pct =
+  Math.min(
+    100,
+    Math.round(
+      presentRow /
+      maxDays *
+      100
+    )
+  );
 
 
   return {
-    present:presentRow,
-    max:maxDays,
-    text:`${presentRow} (${pct}%)`
+
+    present:
+    presentRow,
+
+    max:
+    maxDays,
+
+    text:
+    `${presentRow} (${pct}%)`
+
   };
 
 }
@@ -1372,24 +2191,25 @@ function asistenciaRelativa(
 
 function weekRange(d){
 
-  const day=
-    d.getDay();
+  const day =
+  d.getDay();
 
 
-  const diff=
-    (
-      day===0
-      ?-6
-      :1-day
-    );
+  const diff =
+  (
+    day === 0
+    ? -6
+    : 1-day
+  );
 
 
-  const mon=
-    new Date(d);
+  const mon =
+  new Date(d);
 
 
   mon.setDate(
-    d.getDate()+diff
+    d.getDate() +
+    diff
   );
 
 
@@ -1398,12 +2218,13 @@ function weekRange(d){
   );
 
 
-  const fri=
-    new Date(mon);
+  const fri =
+  new Date(mon);
 
 
   fri.setDate(
-    mon.getDate()+4
+    mon.getDate() +
+    4
   );
 
 
@@ -1416,16 +2237,29 @@ function weekRange(d){
 
 
 
-/* ====== CARGA Y RENDER ====== */
+/* ==================================================
+   CARGA DE PESTAÑAS
+================================================== */
 
 async function loadBlock(name){
 
-  const names={
-    puntos:'Puntos',
-    asistencia:'Asistencia',
-    registro:'Registro de trabajos',
-    aliases:'Trabajos_Aliases',
-    presets:'Presets'
+  const names = {
+
+    puntos:
+    'Puntos',
+
+    asistencia:
+    'Asistencia',
+
+    registro:
+    'Registro de trabajos',
+
+    aliases:
+    'Trabajos_Aliases',
+
+    presets:
+    'Presets'
+
   };
 
 
@@ -1454,23 +2288,28 @@ async function loadLinks(){
 
   try{
 
-    const res=
-      await fetch(
-        LINKS_JSON,
-        {
-          cache:'no-store'
-        }
-      );
+    const res =
+    await fetch(
+      LINKS_JSON,
+      {
+        cache:'no-store'
+      }
+    );
 
 
-    if(res.ok){
+    if(
+      res.ok
+    ){
 
-      const j=
-        await res.json();
+      const j =
+      await res.json();
 
 
-      if(j?.items)
-        LINKMAP=j.items;
+      if(
+        j?.items
+      )
+        LINKMAP =
+        j.items;
 
     }
 
@@ -1481,52 +2320,88 @@ async function loadLinks(){
 
 
 
-let ALL={
+/* ==================================================
+   TRIMESTRES
+================================================== */
+
+let ALL = {
+
   faltantes:[],
+
   tarde:[],
+
   atiempo:[],
+
   presets:[]
+
 };
 
 
-/* Abre en Trimestre 3 por defecto */
-let TRI='M3';
+/* Trimestre 1 por defecto */
+
+let TRI =
+'M1';
 
 
 
 function setTriChips(){
 
-  const host=
-    $('#tri-chips');
+  const host =
+  $('#tri-chips');
 
 
-  const opts=[
-    ['ALL','Todo'],
-    ['M1','Trimestre 1'],
-    ['M2','Trimestre 2'],
-    ['M3','Trimestre 3']
+  const opts = [
+
+    [
+      'ALL',
+      'Todo'
+    ],
+
+    [
+      'M1',
+      'Trimestre 1'
+    ],
+
+    [
+      'M2',
+      'Trimestre 2'
+    ],
+
+    [
+      'M3',
+      'Trimestre 3'
+    ]
+
   ];
 
 
-  host.innerHTML=
-    opts
-    .map(
-      ([v,l])=>
-        `<button class="chip ${TRI===v?'active':''}" data-v="${v}">${l}</button>`
-    )
-    .join('');
+  host.innerHTML =
+  opts
+  .map(
+    ([v,l]) =>
+    `<button class="chip ${TRI===v?'active':''}" data-v="${v}">${l}</button>`
+  )
+  .join('');
 
 
   for(
-    const b of host.querySelectorAll('.chip')
+    const b of
+    host.querySelectorAll(
+      '.chip'
+    )
   ){
 
-    b.onclick=()=>{
+    b.onclick =
+    () => {
 
-      TRI=
-        b.getAttribute('data-v');
+      TRI =
+      b.getAttribute(
+        'data-v'
+      );
+
 
       setTriChips();
+
 
       renderLists();
 
@@ -1535,14 +2410,14 @@ function setTriChips(){
   }
 
 
-  $('#tri-subtitle').textContent=
-    'Resumen de '+
-    ({
-      ALL:'Todo',
-      M1:'Trimestre 1',
-      M2:'Trimestre 2',
-      M3:'Trimestre 3'
-    }[TRI]);
+  $('#tri-subtitle').textContent =
+  'Resumen de ' +
+  ({
+    ALL:'Todo',
+    M1:'Trimestre 1',
+    M2:'Trimestre 2',
+    M3:'Trimestre 3'
+  }[TRI]);
 
 }
 
@@ -1550,21 +2425,28 @@ function setTriChips(){
 
 function byTri(list){
 
-  if(TRI==='ALL')
+  if(
+    TRI === 'ALL'
+  )
     return list;
 
 
   return list.filter(
-    x=>
-      String(
-        x.momento||''
-      )
-      .toUpperCase()===TRI
+    x =>
+    String(
+      x.momento || ''
+    )
+    .toUpperCase() ===
+    TRI
   );
 
 }
 
 
+
+/* ==================================================
+   GRÁFICA
+================================================== */
 
 function renderBarChart({
   faltantes,
@@ -1572,28 +2454,38 @@ function renderBarChart({
   atiempo
 }){
 
-  const max=
-    Math.max(
-      faltantes,
-      tarde,
-      atiempo,
-      1
-    );
+  const max =
+  Math.max(
+    faltantes,
+    tarde,
+    atiempo,
+    1
+  );
 
 
-  const set=(id,val)=>{
+  const set =
+  (id,val) => {
 
-    const el=$(id);
+    const el =
+    $(id);
 
 
     el.style.setProperty(
       '--pct',
-      (val/max).toFixed(3)
+      (
+        val /
+        max
+      )
+      .toFixed(3)
     );
 
 
-    el.querySelector('.val').textContent=
-      val;
+    el
+    .querySelector(
+      '.val'
+    )
+    .textContent =
+    val;
 
   };
 
@@ -1603,10 +2495,12 @@ function renderBarChart({
     faltantes
   );
 
+
   set(
     '#bar-tar',
     tarde
   );
+
 
   set(
     '#bar-ati',
@@ -1617,22 +2511,29 @@ function renderBarChart({
 
 
 
+/* ==================================================
+   EVIDENCIAS
+================================================== */
+
 function linksFor(
   uid,
   preset
 ){
 
-  const urls=[];
+  const urls =
+  [];
 
 
-  const rec=
-    LINKMAP?.[uid];
+  const rec =
+  LINKMAP?.[uid];
 
 
   if(rec){
 
     if(
-      Array.isArray(rec.urls)
+      Array.isArray(
+        rec.urls
+      )
     ){
 
       urls.push(
@@ -1666,124 +2567,145 @@ function linksFor(
   }
 
 
-  const uniq=[
+  const uniq =
+  [
     ...new Set(
       urls
       .map(
-        u=>String(u||'').trim()
+        u =>
+        String(
+          u || ''
+        )
+        .trim()
       )
-      .filter(Boolean)
+      .filter(
+        Boolean
+      )
     )
   ];
 
 
-  if(!uniq.length)
+  if(
+    !uniq.length
+  )
     return '';
 
 
   return uniq
-    .map(
-      (u,i)=>
-        `<a class="linkbtn" href="${u}" target="_blank" rel="noopener">📷 Ver evidencia ${uniq.length>1?i+1:''}</a>`
-    )
-    .join('');
+  .map(
+    (u,i) =>
+    `<a class="linkbtn" href="${u}" target="_blank" rel="noopener">📷 Ver evidencia ${uniq.length>1?i+1:''}</a>`
+  )
+  .join('');
 
 }
 
 
 
+/* ==================================================
+   RENDER
+================================================== */
+
 function renderLists(){
 
-  const falt=
-    byTri(
-      ALL.faltantes
-    );
+  const falt =
+  byTri(
+    ALL.faltantes
+  );
 
 
-  const tar=
-    byTri(
-      ALL.tarde
-    );
+  const tar =
+  byTri(
+    ALL.tarde
+  );
 
 
-  const ati=
-    byTri(
-      ALL.atiempo
-    );
+  const ati =
+  byTri(
+    ALL.atiempo
+  );
 
 
-  const totalTri=
-    byTri(
-      ALL.presets
-    ).length;
+  const totalTri =
+  byTri(
+    ALL.presets
+  ).length;
 
 
-  const hechosTri=
-    tar.length+
-    ati.length;
+  const hechosTri =
+  tar.length +
+  ati.length;
 
 
-  $('#stat-cump-tri').textContent=
-    totalTri
-    ?`${Math.round(hechosTri/totalTri*100)}%`
-    :'–';
+  $('#stat-cump-tri').textContent =
+  totalTri
+  ? `${Math.round(hechosTri/totalTri*100)}%`
+  : '–';
 
 
-  $('#stat-tot-tri').textContent=
-    `Faltantes ${falt.length} · Tarde ${tar.length} · A tiempo ${ati.length} · Trabajos totales ${totalTri}`;
+  $('#stat-tot-tri').textContent =
+  `Faltantes ${falt.length} · Tarde ${tar.length} · A tiempo ${ati.length} · Trabajos totales ${totalTri}`;
 
 
   renderBarChart({
-    faltantes:falt.length,
-    tarde:tar.length,
-    atiempo:ati.length
+
+    faltantes:
+    falt.length,
+
+    tarde:
+    tar.length,
+
+    atiempo:
+    ati.length
+
   });
 
 
-  const renderItem=(t)=>{
+  const renderItem =
+  t => {
 
-    const mom=
-      t.momento
-      ?` · ${t.momento}`
-      :'';
-
-
-    const fecha=
-      t.fechaObjetivo
-      ?` · ${normDate(t.fechaObjetivo)}`
-      :'';
+    const mom =
+    t.momento
+    ? ` · ${t.momento}`
+    : '';
 
 
-    const nom=
-      t.nombreTrabajo
-      ?` · <i>${t.nombreTrabajo}</i>`
-      :'';
+    const fecha =
+    t.fechaObjetivo
+    ? ` · ${normDate(t.fechaObjetivo)}`
+    : '';
 
 
-    const kLink=
-      linksFor(
-        t.uid,
-        t
-      );
+    const nom =
+    t.nombreTrabajo
+    ? ` · <i>${t.nombreTrabajo}</i>`
+    : '';
 
 
-    const kSheet=
-      t.evidSheet
-      ?` <span class="badgeb">📄 ${t.evidSheet}</span>`
-      :'';
+    const kLink =
+    linksFor(
+      t.uid,
+      t
+    );
+
+
+    const kSheet =
+    t.evidSheet
+    ? ` <span class="badgeb">📄 ${t.evidSheet}</span>`
+    : '';
 
 
     return `
       <details>
         <summary>
-          <b>${t.materia||'–'}</b>
+          <b>${t.materia || '–'}</b>
           —
-          ${t.numero||'–'}
-          (${t.origen||'–'}${t.pagina?' · p.'+t.pagina:''})
+          ${t.numero || '–'}
+          (${t.origen || '–'}${t.pagina ? ' · p.'+t.pagina : ''})
           ${nom}
           ${fecha}
           ${mom}
-          ${kLink?' '+kLink:''}
+          ${kLink ? ' ' + kLink : ''}
           ${kSheet}
         </summary>
       </details>
@@ -1792,41 +2714,90 @@ function renderLists(){
   };
 
 
-  $('#faltantes').innerHTML=
-    falt.length
-    ?falt.map(renderItem).join('')
-    :'<div class="hint">No hay trabajos faltantes 💙</div>';
+  $('#faltantes').innerHTML =
+  falt.length
+  ? falt.map(
+      renderItem
+    ).join('')
+  : '<div class="hint">No hay trabajos faltantes 💙</div>';
 
 
-  $('#tarde').innerHTML=
-    tar.length
-    ?tar.map(renderItem).join('')
-    :'<div class="hint">No hay entregas tarde</div>';
+  $('#tarde').innerHTML =
+  tar.length
+  ? tar.map(
+      renderItem
+    ).join('')
+  : '<div class="hint">No hay entregas tarde</div>';
 
 
-  $('#atiempo').innerHTML=
-    ati.length
-    ?ati.map(renderItem).join('')
-    :'<div class="hint">Aún no hay entregas registradas</div>';
+  $('#atiempo').innerHTML =
+  ati.length
+  ? ati.map(
+      renderItem
+    ).join('')
+  : '<div class="hint">Aún no hay entregas registradas</div>';
 
 }
 
 
 
-/* ====== CARGA DEL ALUMNO ====== */
+/* ==================================================
+   CLAVE ALTERNATIVA DE TRABAJO
+================================================== */
+
+function claveTrabajo(t){
+
+  return [
+
+    norm(
+      t.materia
+    ),
+
+    norm(
+      String(
+        t.numero || ''
+      )
+      .replace(
+        /^trabajo\s*/i,
+        ''
+      )
+    ),
+
+    norm(
+      t.origen
+    ),
+
+    norm(
+      t.pagina
+    ),
+
+    normDate(
+      t.fechaObjetivo
+    )
+
+  ]
+  .join('|');
+
+}
+
+
+
+/* ==================================================
+   CARGA DEL ALUMNO
+================================================== */
 
 async function cargarAlumnoPorID(id){
 
-  $('#student-view').style.display=
-    'none';
+  $('#student-view').style.display =
+  'none';
 
 
-  $('#alumno-nombre').textContent=
-    'Cargando…';
+  $('#alumno-nombre').textContent =
+  'Cargando…';
 
 
-  $('#alumno-id').textContent=
-    '';
+  $('#alumno-id').textContent =
+  '';
 
 
   await loadLinks();
@@ -1836,97 +2807,121 @@ async function cargarAlumnoPorID(id){
     asis,
     reg,
     pre
-  ]=
-    await Promise.all([
+  ] =
+  await Promise.all([
 
-      loadBlock('asistencia'),
+    loadBlock(
+      'asistencia'
+    ),
 
-      loadBlock('registro'),
+    loadBlock(
+      'registro'
+    ),
 
-      loadBlock('presets')
+    loadBlock(
+      'presets'
+    )
 
-    ]);
-
-
-  const entregas=
-    parseRegistro(
-      reg.cols,
-      reg.rows
-    );
-
-
-  const presets=
-    parsePresets(
-      pre.cols,
-      pre.rows
-    );
+  ]);
 
 
-  let entAlumno=
-    entregas.filter(
-      t=>
-        norm(t.id)===
-        norm(id)
-    );
+  const entregas =
+  parseRegistro(
+    reg.cols,
+    reg.rows
+  );
+
+
+  const presets =
+  parsePresets(
+    pre.cols,
+    pre.rows
+  );
+
+
+  const entAlumno =
+  entregas.filter(
+    t =>
+    norm(t.id) ===
+    norm(id)
+  );
 
 
 
-  /* Fecha efectiva */
+  /* ==================================================
+     FECHA EFECTIVA
+  ================================================== */
 
-  const now=
-    new Date();
+  const now =
+  new Date();
 
 
-  const effective=
-    new Date(now);
+  const effective =
+  new Date(now);
 
 
   if(
-    now.getHours()<6
+    now.getHours() <
+    6
   ){
 
     effective.setDate(
-      effective.getDate()-1
+      effective.getDate() -
+      1
     );
 
   }
 
 
-  const today=
-    ymd(effective);
+  const today =
+  ymd(
+    effective
+  );
 
 
 
-  /* Trabajos futuros */
+  /* ==================================================
+     TRABAJOS FUTUROS
+  ================================================== */
 
-  const isFutureNonTarea=(p)=>{
+  const isFutureNonTarea =
+  p => {
 
-    const f=
-      normDate(
-        p.fechaObjetivo
-      );
+    const f =
+    normDate(
+      p.fechaObjetivo
+    );
 
 
-    if(!f)
+    if(
+      !f
+    )
       return false;
 
 
-    if(f<=today)
+    if(
+      f <= today
+    )
       return false;
 
 
-    const txt=
-      (
-        (p.nombreTrabajo||'')+
-        ' '+
-        (p.origen||'')+
-        ' '+
-        (p.materia||'')+
-        ' '+
-        (p.numero||'')
-      )
-      .toUpperCase();
+    const txt =
+    (
+      (p.nombreTrabajo || '') +
+      ' ' +
+      (p.origen || '') +
+      ' ' +
+      (p.materia || '') +
+      ' ' +
+      (p.numero || '')
+    )
+    .toUpperCase();
 
+
+    /*
+      Si es futura y NO contiene la palabra
+      TAREA, no se muestra todavía.
+    */
 
     return !txt.includes(
       'TAREA'
@@ -1936,67 +2931,67 @@ async function cargarAlumnoPorID(id){
 
 
 
-  /* Relación Preset / Entrega */
+  /* ==================================================
+     MAPA POR UID
+  ================================================== */
 
-  const uids=
-    new Map(
+  const uids =
+  new Map(
 
-      entAlumno
-      .filter(
-        t=>t.uidPreset
-      )
-      .map(
-        t=>[
-          t.uidPreset,
-          t
-        ]
-      )
+    entAlumno
+    .filter(
+      t =>
+      t.uidPreset
+    )
+    .map(
+      t => [
 
-    );
+        norm(
+          t.uidPreset
+        ),
 
+        t
 
-  const claves=
-    new Map(
+      ]
+    )
 
-      entAlumno
-      .filter(
-        t=>!t.uidPreset
-      )
-      .map(
-        t=>[
-
-          [
-            norm(t.materia),
-
-            norm(
-              String(t.numero)
-              .replace(
-                /^trabajo\s*/i,
-                ''
-              )
-            ),
-
-            norm(t.origen),
-
-            norm(t.pagina),
-
-            normDate(
-              t.fechaObjetivo
-            )
-
-          ].join('|'),
-
-          t
-
-        ]
-      )
-
-    );
+  );
 
 
-  const faltantes=[];
-  const tarde=[];
-  const atiempo=[];
+
+  /* ==================================================
+     MAPA ALTERNATIVO
+     Todos los trabajos se incluyen aquí.
+  ================================================== */
+
+  const claves =
+  new Map(
+
+    entAlumno.map(
+      t => [
+
+        claveTrabajo(t),
+
+        t
+
+      ]
+    )
+
+  );
+
+
+
+  const faltantes =
+  [];
+
+
+  const tarde =
+  [];
+
+
+  const atiempo =
+  [];
+
 
 
   for(
@@ -2009,148 +3004,180 @@ async function cargarAlumnoPorID(id){
       continue;
 
 
-    let e=
-      uids.get(
-        p.uid
+    /*
+      Primero intenta UID.
+    */
+
+    let e =
+    p.uid
+    ? uids.get(
+        norm(p.uid)
+      )
+    : null;
+
+
+
+    /*
+      Si UID no coincide,
+      intenta materia+número+origen+página+fecha.
+    */
+
+    if(
+      !e
+    ){
+
+      e =
+      claves.get(
+        claveTrabajo(p)
       );
 
-
-    if(!e){
-
-      const k=[
-        norm(p.materia),
-
-        norm(
-          String(p.numero)
-          .replace(
-            /^trabajo\s*/i,
-            ''
-          )
-        ),
-
-        norm(p.origen),
-
-        norm(p.pagina),
-
-        normDate(
-          p.fechaObjetivo
-        )
-
-      ].join('|');
-
-
-      e=
-        claves.get(k);
-
     }
+
 
 
     if(e){
 
-      (
-        e.atrasoDias>0
-        ?tarde
-        :atiempo
-      )
-      .push(p);
+      if(
+        e.atrasoDias > 0
+      ){
+
+        tarde.push(
+          p
+        );
+
+      }
+      else{
+
+        atiempo.push(
+          p
+        );
+
+      }
 
     }
     else{
 
-      faltantes.push(p);
+      faltantes.push(
+        p
+      );
 
     }
 
   }
 
 
-  ALL={
+
+  ALL = {
+
     faltantes,
+
     tarde,
+
     atiempo,
+
     presets
+
   };
 
 
 
-  /* Asistencia de la semana */
+  /* ==================================================
+     NOMBRE + ASISTENCIA SEMANAL
+  ================================================== */
 
   const [
     w0,
     w1
-  ]=
-    weekRange(
-      new Date()
-    );
+  ] =
+  weekRange(
+    new Date()
+  );
 
 
-  const nombreDeRegistro=
-    entAlumno.find(
-      e=>e.nombre
-    )?.nombre||'';
+  const nombreDeRegistro =
+  entAlumno.find(
+    e =>
+    e.nombre
+  )?.nombre || '';
 
 
-  const aw=
-    asistenciaAlumno(
-      asis.cols,
-      asis.rows,
-      {
-        id,
-        nombre:nombreDeRegistro
-      },
-      w0,
-      w1
-    );
+  const aw =
+  asistenciaAlumno(
+
+    asis.cols,
+
+    asis.rows,
+
+    {
+      id,
+      nombre:
+      nombreDeRegistro
+    },
+
+    w0,
+
+    w1
+
+  );
 
 
-  const iNom=
-    asis.cols.findIndex(
-      c=>/^nombre/i.test(c)
-    );
+  const iNom =
+  asis.cols.findIndex(
+    c =>
+    /^nombre/i.test(c)
+  );
 
 
-  let nombre=
-    nombreDeRegistro;
+  let nombre =
+  nombreDeRegistro;
 
 
   if(
     aw.row &&
-    iNom>=0
+    iNom >= 0
   ){
 
-    nombre=
-      String(
-        aw.row[iNom]||''
-      );
+    nombre =
+    String(
+      aw.row[iNom] ||
+      ''
+    );
 
   }
 
 
-  if(!nombre){
 
-    const iId=
-      asis.cols.findIndex(
-        c=>/^(id|matric)/i.test(c)
-      );
+  if(
+    !nombre
+  ){
+
+    const iId =
+    asis.cols.findIndex(
+      c =>
+      /^(id|matric)/i.test(c)
+    );
 
 
     if(
-      iId>=0 &&
-      iNom>=0
+      iId >= 0 &&
+      iNom >= 0
     ){
 
-      const r=
-        asis.rows.find(
-          r=>norm(r[iId])===norm(id)
-        );
+      const r =
+      asis.rows.find(
+        r =>
+        norm(r[iId]) ===
+        norm(id)
+      );
 
 
       if(r){
 
-        nombre=
-          String(
-            r[iNom]||''
-          );
+        nombre =
+        String(
+          r[iNom] ||
+          ''
+        );
 
       }
 
@@ -2159,7 +3186,10 @@ async function cargarAlumnoPorID(id){
   }
 
 
-  if(!nombre){
+
+  if(
+    !nombre
+  ){
 
     alert(
       'No encontramos ese ID. Verifique que esté correcto (sin espacios) o contacte a la escuela.'
@@ -2171,107 +3201,136 @@ async function cargarAlumnoPorID(id){
 
 
 
-  /* Mostrar alumno */
+  /* ==================================================
+     DATOS DEL ALUMNO
+  ================================================== */
 
-  $('#alumno-nombre').textContent=
-    nombre;
-
-
-  $('#alumno-id').textContent=
-    'ID: '+id;
+  $('#alumno-nombre').textContent =
+  nombre;
 
 
-  $('#grupo-label').innerHTML=
-    `<span class="badgeb">👩‍🏫 Grupo: <b>${GROUP_LABEL}</b></span>`;
+  $('#alumno-id').textContent =
+  'ID: ' +
+  id;
 
 
-
-  /* Asistencia de 30 días e histórica */
-
-  const hoy=
-    new Date();
-
-
-  const a30=
-    asistenciaAlumno(
-      asis.cols,
-      asis.rows,
-      {
-        id,
-        nombre
-      },
-      ymd(
-        new Date(
-          hoy.getFullYear(),
-          hoy.getMonth(),
-          hoy.getDate()-30
-        )
-      ),
-      ymd(hoy)
-    );
-
-
-  const ah=
-    asistenciaHistorica(
-      asis.cols,
-      asis.rows,
-      {
-        id,
-        nombre
-      }
-    );
-
-
-  const rel=
-    asistenciaRelativa(
-      asis.cols,
-      asis.rows,
-      {
-        id,
-        nombre
-      }
-    );
-
-
-  $('#stat-aswk').textContent=
-    aw.total
-    ?`${Math.round(aw.present/aw.total*100)}%  (${aw.present}/${aw.total})`
-    :'–';
-
-
-  $('#stat-as30').textContent=
-    a30.total
-    ?`${Math.round(a30.present/a30.total*100)}%  (${a30.present}/${a30.total})`
-    :'–';
-
-
-  $('#stat-asHist').textContent=
-    ah.total
-    ?`${Math.round(ah.present/ah.total*100)}%  (${ah.present}/${ah.total})`
-    :'–';
-
-
-  $('#stat-faltHist').textContent=
-    ah.total
-    ?`${ah.total-ah.present}`
-    :'–';
-
-
-  const relEl=
-    document.getElementById(
-      'stat-asSheet'
-    );
-
-
-  if(relEl)
-    relEl.textContent=
-      rel.text;
+  $('#grupo-label').innerHTML =
+  `<span class="badgeb">👩‍🏫 Grupo: <b>${GROUP_LABEL}</b></span>`;
 
 
 
-  /* Abrir Trimestre 3 */
+  /* ==================================================
+     ASISTENCIA
+  ================================================== */
 
-  TRI='M3';
+  const hoy =
+  new Date();
+
+
+  const a30 =
+  asistenciaAlumno(
+
+    asis.cols,
+
+    asis.rows,
+
+    {
+      id,
+      nombre
+    },
+
+    ymd(
+      new Date(
+        hoy.getFullYear(),
+        hoy.getMonth(),
+        hoy.getDate()-30
+      )
+    ),
+
+    ymd(hoy)
+
+  );
+
+
+  const ah =
+  asistenciaHistorica(
+
+    asis.cols,
+
+    asis.rows,
+
+    {
+      id,
+      nombre
+    }
+
+  );
+
+
+  const rel =
+  asistenciaRelativa(
+
+    asis.cols,
+
+    asis.rows,
+
+    {
+      id,
+      nombre
+    }
+
+  );
+
+
+
+  $('#stat-aswk').textContent =
+  aw.total
+  ? `${Math.round(aw.present/aw.total*100)}%  (${aw.present}/${aw.total})`
+  : '–';
+
+
+
+  $('#stat-as30').textContent =
+  a30.total
+  ? `${Math.round(a30.present/a30.total*100)}%  (${a30.present}/${a30.total})`
+  : '–';
+
+
+
+  $('#stat-asHist').textContent =
+  ah.total
+  ? `${Math.round(ah.present/ah.total*100)}%  (${ah.present}/${ah.total})`
+  : '–';
+
+
+
+  $('#stat-faltHist').textContent =
+  ah.total
+  ? `${ah.total-ah.present}`
+  : '–';
+
+
+
+  const relEl =
+  document.getElementById(
+    'stat-asSheet'
+  );
+
+
+  if(
+    relEl
+  )
+    relEl.textContent =
+    rel.text;
+
+
+
+  /* ==================================================
+     ABRIR TRIMESTRE 1
+  ================================================== */
+
+  TRI =
+  'M1';
 
 
   setTriChips();
@@ -2280,40 +3339,48 @@ async function cargarAlumnoPorID(id){
   renderLists();
 
 
-  $('#student-view').style.display=
-    'block';
+
+  $('#student-view').style.display =
+  'block';
 
 
   window.scrollTo({
-    top:document.body.offsetTop,
-    behavior:'smooth'
+
+    top:
+    document.body.offsetTop,
+
+    behavior:
+    'smooth'
+
   });
 
 }
 
 
 
-/* ====== TEMA ====== */
+/* ==================================================
+   TEMA
+================================================== */
 
-const themeBtn=
-  $('#themeBtn');
+const themeBtn =
+$('#themeBtn');
 
 
 function applyTheme(t){
 
   document.documentElement
-    .setAttribute(
-      'data-theme',
-      t
-    );
+  .setAttribute(
+    'data-theme',
+    t
+  );
 
 
-  themeBtn.textContent=
-    (
-      t==='dark'
-      ?'☀️ Claro'
-      :'🌙 Oscuro'
-    );
+  themeBtn.textContent =
+  (
+    t === 'dark'
+    ? '☀️ Claro'
+    : '🌙 Oscuro'
+  );
 
 
   localStorage.setItem(
@@ -2326,39 +3393,53 @@ function applyTheme(t){
 
 
 applyTheme(
+
   localStorage.getItem(
     'familias_theme'
   )
   ||
   'light'
+
 );
 
 
-themeBtn.onclick=
-  ()=>
-    applyTheme(
-      document.documentElement
-        .getAttribute(
-          'data-theme'
-        )
-      ==='dark'
-      ?'light'
-      :'dark'
-    );
+
+themeBtn.onclick =
+() => {
+
+  const actual =
+  document.documentElement
+  .getAttribute(
+    'data-theme'
+  );
+
+
+  applyTheme(
+    actual === 'dark'
+    ? 'light'
+    : 'dark'
+  );
+
+};
 
 
 
-/* ====== GUARDAR ID ====== */
+/* ==================================================
+   GUARDAR ID
+================================================== */
 
-$('#saveBtn').onclick=()=>{
+$('#saveBtn').onclick =
+() => {
 
-  const v=
-    $('#idInput')
-      .value
-      .trim();
+  const v =
+  $('#idInput')
+  .value
+  .trim();
 
 
-  if(!v){
+  if(
+    !v
+  ){
 
     alert(
       'Escriba el ID escolar.'
@@ -2383,16 +3464,18 @@ $('#saveBtn').onclick=()=>{
 
 
 
-/* ====== BUSCAR ALUMNO ====== */
+/* ==================================================
+   BUSCAR ALUMNO
+================================================== */
 
-$('#goBtn').onclick=
-async()=>{
+$('#goBtn').onclick =
+async () => {
 
-  const id=
-    $('#idInput')
-      .value
-      .trim()
-      .toUpperCase();
+  const id =
+  $('#idInput')
+  .value
+  .trim()
+  .toUpperCase();
 
 
   if(
@@ -2400,7 +3483,7 @@ async()=>{
   ){
 
     alert(
-      'ID no válido. Revise que no tenga espacios ni letras minúsculas.'
+      'ID no válido. Revise que no tenga espacios.'
     );
 
     return;
@@ -2419,8 +3502,9 @@ async()=>{
 
     console.error(e);
 
+
     alert(
-      'No fue posible leer los datos: '+
+      'No fue posible leer los datos: ' +
       e.message
     );
 
@@ -2430,63 +3514,77 @@ async()=>{
 
 
 
-/* ENTER PARA BUSCAR */
+/* ENTER */
 
 $('#idInput')
-  .addEventListener(
-    'keydown',
-    e=>{
+.addEventListener(
+  'keydown',
+  e => {
 
-      if(
-        e.key==='Enter'
-      ){
+    if(
+      e.key ===
+      'Enter'
+    ){
 
-        $('#goBtn').click();
-
-      }
+      $('#goBtn')
+      .click();
 
     }
-  );
+
+  }
+);
 
 
 
-/* RECUPERAR ID GUARDADO */
+/* ==================================================
+   ID GUARDADO
+================================================== */
 
-const saved=
-  localStorage.getItem(
-    'familias_id'
-  );
+const saved =
+localStorage.getItem(
+  'familias_id'
+);
 
 
-if(saved){
+if(
+  saved
+){
 
-  $('#idInput').value=
-    saved;
+  $('#idInput').value =
+  saved;
 
 }
 
 
 
-/* CAMBIAR DE ALUMNO */
+/* ==================================================
+   CAMBIAR ALUMNO
+================================================== */
 
 $('#backBtn')
-  ?.addEventListener(
-    'click',
-    ()=>{
+?.addEventListener(
+  'click',
+  () => {
 
-      $('#student-view')
-        .style
-        .display=
-        'none';
+    $('#student-view')
+    .style
+    .display =
+    'none';
 
 
-      window.scrollTo({
-        top:0,
-        behavior:'smooth'
-      });
+    window.scrollTo({
 
-    }
-  );
+      top:0,
 
-</script></body>
+      behavior:
+      'smooth'
+
+    });
+
+  }
+);
+
+</script>
+
+</body>
 </html>
