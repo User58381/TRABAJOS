@@ -3,7 +3,6 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-
 <title>Aula Digital — Consulta para familias</title>
 
 <style>
@@ -17,7 +16,7 @@
     --ok:#0ea371;
     --warn:#f0b429;
     --bad:#ef4444;
-    --barbg:color-mix(in oklab, var(--card) 80%, transparent);
+    --barbg:color-mix(in oklab,var(--card) 80%,transparent);
   }
 
   [data-theme="dark"]{
@@ -94,6 +93,11 @@
     border-radius:10px;
   }
 
+  .btn:disabled{
+    cursor:wait;
+    opacity:.7;
+  }
+
   main{
     max-width:960px;
     margin:auto;
@@ -118,13 +122,8 @@
     gap:8px;
   }
 
-  @media (max-width:640px){
-    .input{
-      grid-template-columns:1fr;
-    }
-  }
-
   .input input{
+    min-width:0;
     padding:14px 16px;
     border:1px solid var(--bd);
     border-radius:12px;
@@ -156,12 +155,6 @@
     gap:12px;
   }
 
-  @media (min-width:840px){
-    .grid2{
-      grid-template-columns:1fr 1fr;
-    }
-  }
-
   .list{
     display:grid;
     gap:8px;
@@ -172,6 +165,7 @@
     border-radius:12px;
     padding:8px 10px;
     background:color-mix(in oklab,var(--card) 94%,transparent);
+    overflow-wrap:anywhere;
   }
 
   summary{
@@ -183,12 +177,6 @@
     display:grid;
     grid-template-columns:1fr 1fr;
     gap:12px;
-  }
-
-  @media (max-width:640px){
-    .stat{
-      grid-template-columns:1fr;
-    }
   }
 
   .k{
@@ -211,6 +199,7 @@
   .chip{
     border:1px solid var(--bd);
     background:transparent;
+    color:var(--text);
     border-radius:999px;
     padding:10px 14px;
     font-weight:700;
@@ -306,6 +295,20 @@
     border-radius:999px;
     font-size:12px;
     text-decoration:none;
+    color:var(--accent);
+  }
+
+  @media(max-width:640px){
+    .input,
+    .stat{
+      grid-template-columns:1fr;
+    }
+  }
+
+  @media(min-width:840px){
+    .grid2{
+      grid-template-columns:1fr 1fr;
+    }
   }
 </style>
 </head>
@@ -325,7 +328,6 @@
   </div>
 </header>
 
-
 <main>
 
   <!-- ACCESO -->
@@ -336,62 +338,60 @@
       <h2>Encuentre el progreso de su hijo(a)</h2>
 
       <p class="hint">
-        Escriba el <b>ID escolar</b> que le proporcionó la escuela para consultar tareas y asistencia.
+        Escriba el <b>ID escolar</b> que le proporcionó la escuela
+        para consultar tareas y asistencia.
       </p>
     </div>
-
 
     <div class="input">
 
       <input
         id="idInput"
         autocomplete="off"
+        autocapitalize="characters"
+        spellcheck="false"
+        aria-label="ID escolar"
         placeholder="Pegue aquí el ID entregado por la escuela"
-        inputmode="latin-name">
+        inputmode="text">
 
-      <button
-        id="goBtn"
-        class="btn primary">
+      <button id="goBtn" class="btn primary">
         Buscar alumno
       </button>
 
-      <button
-        id="saveBtn"
-        class="btn ghost">
+      <button id="saveBtn" class="btn ghost">
         Recordar ID en este dispositivo
       </button>
 
     </div>
 
-
     <div class="hint">
-      Este sitio <u>solo lee</u> los datos. No modifica nada en la libreta digital.
+      Este sitio <u>solo lee</u> los datos.
+      No modifica nada en la libreta digital.
+    </div>
+
+    <div
+      id="search-status"
+      class="hint"
+      role="status"
+      aria-live="polite">
     </div>
 
   </section>
-
-
 
   <!-- RESULTADOS -->
 
   <section
     id="student-view"
-    style="display:none; margin-top:14px">
+    style="display:none;margin-top:14px">
 
     <div class="card">
 
       <div class="topbar">
 
         <div>
+          <h2 id="alumno-nombre">Alumno</h2>
 
-          <h2 id="alumno-nombre">
-            Alumno
-          </h2>
-
-          <div
-            class="hint"
-            id="alumno-id">
-          </div>
+          <div class="hint" id="alumno-id"></div>
 
           <div
             class="hint"
@@ -405,30 +405,19 @@
             style="margin-top:6px">
             Resumen de Trimestre 1
           </div>
-
         </div>
 
-
         <div>
-
-          <button
-            id="backBtn"
-            class="btn ghost">
+          <button id="backBtn" class="btn ghost">
             Cambiar de alumno
           </button>
-
         </div>
 
       </div>
 
-
-
       <div style="margin-top:10px">
 
-        <div
-          class="chips"
-          id="tri-chips">
-        </div>
+        <div class="chips" id="tri-chips"></div>
 
         <div class="hint">
           Puede ver <b>Todo</b> o cambiar entre
@@ -440,1395 +429,865 @@
 
       </div>
 
-
-
-      <div
-        class="stat"
-        style="margin-top:12px">
+      <div class="stat" style="margin-top:12px">
 
         <div>
           <div class="k">
             Cumplimiento (trimestre elegido)
           </div>
-
-          <div
-            class="v"
-            id="stat-cump-tri">
-            –
-          </div>
+          <div class="v" id="stat-cump-tri">–</div>
         </div>
 
-
         <div>
-          <div class="k">
-            Totales — Trimestre
-          </div>
-
-          <div
-            class="v"
-            id="stat-tot-tri">
-            –
-          </div>
+          <div class="k">Totales — Trimestre</div>
+          <div class="v" id="stat-tot-tri">–</div>
         </div>
 
-
         <div>
-          <div class="k">
-            Asistencia — semana
-          </div>
-
-          <div
-            class="v"
-            id="stat-aswk">
-            –
-          </div>
+          <div class="k">Asistencia — semana</div>
+          <div class="v" id="stat-aswk">–</div>
         </div>
 
-
         <div>
-          <div class="k">
-            Asistencia — 30 días
-          </div>
-
-          <div
-            class="v"
-            id="stat-as30">
-            –
-          </div>
+          <div class="k">Asistencia — 30 días</div>
+          <div class="v" id="stat-as30">–</div>
         </div>
 
-
         <div>
-          <div class="k">
-            Asistencia total (histórica)
-          </div>
-
-          <div
-            class="v"
-            id="stat-asHist">
-            –
-          </div>
+          <div class="k">Asistencia total (histórica)</div>
+          <div class="v" id="stat-asHist">–</div>
         </div>
 
-
         <div>
-          <div class="k">
-            Faltas (históricas)
-          </div>
-
-          <div
-            class="v"
-            id="stat-faltHist">
-            –
-          </div>
+          <div class="k">Faltas (históricas)</div>
+          <div class="v" id="stat-faltHist">–</div>
         </div>
 
       </div>
-
-
 
       <div
         class="chart"
         aria-label="Resumen visual del trimestre">
 
-        <div
-          class="bar fal"
-          id="bar-fal">
-
-          <span class="lbl">
-            ⏳ Faltantes
-          </span>
-
-          <span
-            class="val"
-            id="val-fal">
-            0
-          </span>
-
+        <div class="bar fal" id="bar-fal">
+          <span class="lbl">⏳ Faltantes</span>
+          <span class="val" id="val-fal">0</span>
         </div>
 
-
-        <div
-          class="bar tar"
-          id="bar-tar">
-
-          <span class="lbl">
-            🕒 Tarde
-          </span>
-
-          <span
-            class="val"
-            id="val-tar">
-            0
-          </span>
-
+        <div class="bar tar" id="bar-tar">
+          <span class="lbl">🕒 Tarde</span>
+          <span class="val" id="val-tar">0</span>
         </div>
 
-
-        <div
-          class="bar ati"
-          id="bar-ati">
-
-          <span class="lbl">
-            ✅ A tiempo
-          </span>
-
-          <span
-            class="val"
-            id="val-ati">
-            0
-          </span>
-
+        <div class="bar ati" id="bar-ati">
+          <span class="lbl">✅ A tiempo</span>
+          <span class="val" id="val-ati">0</span>
         </div>
 
       </div>
 
-
-      <p
-        class="footer-note"
-        style="margin-top:10px">
-
-        Importante: si alguna inasistencia fue <b>justificada</b>, no se preocupe;
-        aunque aparezca aquí como falta, la escuela la revisa y no afecta indebidamente.
-
+      <p class="footer-note" style="margin-top:10px">
+        Importante: si alguna inasistencia fue
+        <b>justificada</b>, no se preocupe;
+        aunque aparezca aquí como falta, la escuela
+        la revisa y no afecta indebidamente.
       </p>
 
     </div>
 
-
-
-    <div
-      class="grid2"
-      style="margin-top:12px">
+    <div class="grid2" style="margin-top:12px">
 
       <div class="card">
-
-        <h3>
-          ⏳ Trabajos faltantes
-        </h3>
-
-        <div
-          id="faltantes"
-          class="list">
-        </div>
-
+        <h3>⏳ Trabajos faltantes</h3>
+        <div id="faltantes" class="list"></div>
       </div>
 
-
       <div class="card">
-
-        <h3>
-          🕒 Entregados tarde
-        </h3>
-
-        <div
-          id="tarde"
-          class="list">
-        </div>
-
+        <h3>🕒 Entregados tarde</h3>
+        <div id="tarde" class="list"></div>
       </div>
 
     </div>
 
-
-
-    <div
-      class="card"
-      style="margin-top:12px">
-
-      <h3>
-        ✅ Entregados (a tiempo)
-      </h3>
-
-      <div
-        id="atiempo"
-        class="list">
-      </div>
-
+    <div class="card" style="margin-top:12px">
+      <h3>✅ Entregados (a tiempo)</h3>
+      <div id="atiempo" class="list"></div>
     </div>
-
 
     <p class="footer-note">
-      Si detecta algún dato que no coincide, contacte a la escuela para verificar la libreta digital.
+      Si detecta algún dato que no coincide, contacte
+      a la escuela para verificar la libreta digital.
     </p>
 
   </section>
 
 </main>
 
-
-
 <script>
+'use strict';
 
 /* ==================================================
-   CONFIGURACIÓN
+   CONFIGURACIÓN — misma hoja y grupo
 ================================================== */
 
 const SHEET_ID =
-'1MgrR0DQauHSVhEu8WTjKgfLTMhtDPcSdFAibZKSwbo8';
-
+  '1MgrR0DQauHSVhEu8WTjKgfLTMhtDPcSdFAibZKSwbo8';
 
 const GIDS = {
-
-  puntos:'0',
-
-  asistencia:'1076394102',
-
-  registro:'1854056136',
-
-  aliases:'377574741',
-
-  presets:'897365281'
-
+  puntos: '0',
+  asistencia: '1076394102',
+  registro: '1854056136',
+  aliases: '377574741',
+  presets: '897365281'
 };
 
+const GROUP_LABEL = '3ero A';
 
-const GROUP_LABEL =
-'3ero A';
-
-
-/* JSON de enlaces opcional */
-
-const LINKS_JSON =
-'data/links_3A.json';
-
+const LINKS_JSON = 'data/links_3A.json';
 
 let LINKMAP = {};
 
-
-
 /* ==================================================
-   UTILIDADES
+   UTILIDADES Y FECHAS
 ================================================== */
 
-const $ =
-s => document.querySelector(s);
+const $ = s => document.querySelector(s);
 
+const strip = s =>
+  String(s ?? '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
 
-const strip =
-s =>
-String(s || '')
-.normalize('NFD')
-.replace(/[\u0300-\u036f]/g,'');
+const norm = s =>
+  strip(String(s ?? '').toLowerCase())
+    .replace(/\s+/g, ' ')
+    .trim();
 
+const pad = n => String(n).padStart(2, '0');
 
-const norm =
-s =>
-strip(
-  String(s || '').toLowerCase()
-)
-.replace(/\s+/g,' ')
-.trim();
+const ymd = d =>
+  `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 
+const headerKey = s =>
+  norm(s).replace(/[^a-z0-9]/g, '');
 
-const pad =
-n =>
-String(n)
-.padStart(2,'0');
+const colIndex = (cols, ...keys) =>
+  cols.findIndex(c => keys.includes(headerKey(c)));
 
+const cell = (row, i) =>
+  i >= 0 ? String(row[i] ?? '').trim() : '';
 
-const ymd =
-d =>
-`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const escapeHTML = s =>
+  String(s ?? '').replace(/[&<>"']/g, c => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  }[c]));
 
+function normDate(s) {
+  const t = String(s ?? '').trim();
 
+  if (!t) return '';
 
-/* ==================================================
-   FECHAS
-================================================== */
-
-function normDate(s){
-
-  const t =
-  String(s || '')
-  .trim();
-
-
-  if(!t)
-    return '';
-
-
-  /* yyyy-mm-dd / yyyy/mm/dd */
-
-  let m =
-  t.match(
+  let m = t.match(
     /^(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})/
   );
 
-
-  if(m){
-
-    const y =
-    +m[1];
-
-    const mo =
-    +m[2];
-
-    const d =
-    +m[3];
-
-
-    return `${y}-${pad(mo)}-${pad(d)}`;
-
+  if (m) {
+    return `${+m[1]}-${pad(+m[2])}-${pad(+m[3])}`;
   }
 
-
-
-  /* dd-mm-yyyy / dd/mm/yyyy */
-
-  m =
-  t.match(
+  m = t.match(
     /^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/
   );
 
-
-  if(m){
-
-    const d =
-    +m[1];
-
-    const mo =
-    +m[2];
-
-    const y =
-    +m[3];
-
-
-    return `${y}-${pad(mo)}-${pad(d)}`;
-
+  if (m) {
+    return `${+m[3]}-${pad(+m[2])}-${pad(+m[1])}`;
   }
 
-
-
-  /* Formato GViz Date(2026,7,28) */
-
-  m =
-  t.match(
+  m = t.match(
     /^Date\((\d{4})\s*,\s*(\d{1,2})\s*,\s*(\d{1,2})/i
   );
 
-
-  if(m){
-
-    const y =
-    +m[1];
-
-    const mo =
-    +m[2];
-
-    const d =
-    +m[3];
-
-
-    return ymd(
-      new Date(
-        y,
-        mo,
-        d
-      )
-    );
-
+  if (m) {
+    return ymd(new Date(+m[1], +m[2], +m[3]));
   }
 
+  const d = new Date(t);
 
-
-  const d =
-  new Date(t);
-
-
-  if(!isNaN(+d))
-    return ymd(d);
-
-
-  return '';
-
+  return isNaN(+d) ? '' : ymd(d);
 }
 
+function dayNumber(s) {
+  const d = normDate(s);
 
+  if (!d) return NaN;
 
-function isPresent(v){
+  const [y, m, day] = d.split('-').map(Number);
 
-  const s =
-  norm(v);
+  return Date.UTC(y, m - 1, day) / 86400000;
+}
 
+function isPresent(v) {
+  const s = norm(v);
 
-  if(!s)
-    return false;
+  if (!s) return false;
 
+  if (!Number.isNaN(+s)) {
+    return +s > 0;
+  }
 
-  if(
-    !Number.isNaN(+s)
-  )
-    return (+s) > 0;
-
-
-  const s2 =
-  s.replace(/\s+/g,'');
-
-
-  if(
-    /^1\(100%?\)$/.test(s2)
-  )
+  if (/^1\(100%?\)$/.test(s.replace(/\s+/g, ''))) {
     return true;
-
+  }
 
   return [
-
     'x',
     '✓',
     '✔',
     'p',
     'presente',
     'si',
-    'sí',
     's',
     'ok',
     'true',
-    'asistio',
-    'asistió'
-
+    'asistio'
   ].includes(s);
-
 }
 
-
-
-function getDateCols(cols){
-
+function getActiveDateCols(cols, rows) {
   return cols
-  .map(
-    (c,i) =>
-    normDate(
-      String(c).trim()
-    )
-    ? i
-    : -1
-  )
-  .filter(
-    i => i >= 0
-  );
-
+    .map((c, i) => normDate(c) ? i : -1)
+    .filter(i =>
+      i >= 0 &&
+      rows.some(r => r[i] !== '' && r[i] != null)
+    );
 }
-
-
-
-function getActiveDateCols(
-  cols,
-  rows
-){
-
-  const dcols =
-  getDateCols(cols);
-
-
-  return dcols.filter(
-    i =>
-    rows.some(
-      r =>
-      r[i] !== '' &&
-      r[i] != null
-    )
-  );
-
-}
-
-
 
 /* ==================================================
-   GOOGLE SHEETS
+   GOOGLE SHEETS — únicamente lecturas
 ================================================== */
 
 let _cbSeq = 0;
 
+function fetchGViz(sheetId, gid) {
+  return new Promise((resolve, reject) => {
+    const cb = `__cb_${Date.now()}_${++_cbSeq}`;
 
-function fetchGViz(
-  sheetId,
-  sheetName
-){
+    const sc = document.createElement('script');
 
-  return new Promise(
-    (resolve,reject) => {
+    const timeout = setTimeout(() => {
+      cleanup();
 
-      const cb =
-      `__cb_${Date.now()}_${++_cbSeq}`;
-
-
-      const url =
-      `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?headers=1&tqx=out:json;responseHandler:${cb}&sheet=${encodeURIComponent(sheetName)}&ts=${Date.now()}`;
-
-
-      const sc =
-      document.createElement(
-        'script'
+      reject(
+        new Error('La hoja tardó demasiado en responder.')
       );
+    }, 12000);
 
+    function cleanup() {
+      clearTimeout(timeout);
 
-      const timeout =
-      setTimeout(
-        () => {
+      delete window[cb];
 
-          cleanup();
-
-          reject(
-            new Error(
-              'Timeout'
-            )
-          );
-
-        },
-        12000
-      );
-
-
-      function cleanup(){
-
-        clearTimeout(
-          timeout
-        );
-
-
-        delete window[cb];
-
-
-        if(
-          sc.parentNode
-        )
-          sc.parentNode.removeChild(
-            sc
-          );
-
+      if (sc.parentNode) {
+        sc.parentNode.removeChild(sc);
       }
+    }
 
+    window[cb] = json => {
+      cleanup();
 
-      window[cb] =
-      json => {
-
-        cleanup();
-
-
-        try{
-
-          let cols =
-          (
-            json.table?.cols ||
-            []
-          )
-          .map(
-            c =>
-            String(
-              c.label || ''
-            )
-            .trim()
+      try {
+        if (
+          json.status === 'error' ||
+          !json.table ||
+          !Array.isArray(json.table.cols)
+        ) {
+          throw new Error(
+            'No se pudo leer la pestaña de la hoja.'
           );
-
-
-          let rows =
-          (
-            json.table?.rows ||
-            []
-          )
-          .map(
-            r =>
-            (
-              r.c ||
-              []
-            )
-            .map(
-              c =>
-              c?.v ?? ''
-            )
-          );
-
-
-          const empty =
-          cols.filter(
-            c =>
-            !c ||
-            /^[A-Z]$/.test(c)
-          ).length;
-
-
-          if(
-            empty >=
-            Math.ceil(
-              cols.length * 0.5
-            )
-            &&
-            rows.length
-          ){
-
-            cols =
-            rows[0]
-            .map(
-              v =>
-              String(
-                v ?? ''
-              )
-            );
-
-
-            rows =
-            rows.slice(1);
-
-          }
-
-
-          resolve({
-            cols,
-            rows
-          });
-
-        }
-        catch(e){
-
-          reject(e);
-
         }
 
-      };
-
-
-      sc.onerror =
-      () => {
-
-        cleanup();
-
-        reject(
-          new Error(
-            'Error GViz'
-          )
+        let cols = json.table.cols.map(c =>
+          String(c.label || '').trim()
         );
 
-      };
+        let rows = (json.table.rows || []).map(r =>
+          (r.c || []).map(c => c?.v ?? '')
+        );
 
+        const empty = cols.filter(c =>
+          !c || /^[A-Z]+$/.test(c)
+        ).length;
 
-      sc.src =
-      url;
+        if (
+          empty >= Math.ceil(cols.length * .5) &&
+          rows.length
+        ) {
+          cols = rows[0].map(v =>
+            String(v ?? '').trim()
+          );
 
+          rows = rows.slice(1);
+        }
 
-      document.head.appendChild(
-        sc
+        resolve({ cols, rows });
+
+      } catch (e) {
+        reject(e);
+      }
+    };
+
+    sc.onerror = () => {
+      cleanup();
+
+      reject(
+        new Error('Error al consultar Google Sheets.')
       );
+    };
 
-    }
-  );
+    sc.src =
+      `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?headers=1&gid=${encodeURIComponent(gid)}&tqx=out:json;responseHandler:${cb}&ts=${Date.now()}`;
 
+    document.head.appendChild(sc);
+  });
 }
 
+async function fetchCSVByGid(sheetId, gid) {
+  const controller = new AbortController();
 
-
-async function fetchCSVByGid(
-  sheetId,
-  gid
-){
-
-  const url =
-  `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}&ts=${Date.now()}`;
-
-
-  const res =
-  await fetch(
-    url,
-    {
-      cache:'no-store'
-    }
+  const timeout = setTimeout(
+    () => controller.abort(),
+    12000
   );
 
+  try {
+    const url =
+      `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${encodeURIComponent(gid)}&ts=${Date.now()}`;
 
-  if(
-    !res.ok
-  )
-    throw new Error(
-      'CSV ' + gid
+    const res = await fetch(url, {
+      cache: 'no-store',
+      signal: controller.signal
+    });
+
+    if (!res.ok) {
+      throw new Error(
+        'No se pudo descargar la pestaña de la hoja.'
+      );
+    }
+
+    const txt = await res.text();
+
+    if (/^\s*<!doctype html|^\s*<html/i.test(txt)) {
+      throw new Error(
+        'La hoja no está disponible para consulta.'
+      );
+    }
+
+    const rows = parseCSV(txt);
+
+    const cols = (rows.shift() || []).map(v =>
+      String(v ?? '').trim()
     );
 
+    return { cols, rows };
 
-  const txt =
-  await res.text();
-
-
-  const rows =
-  parseCSV(txt);
-
-
-  const cols =
-  (
-    rows.shift() ||
-    []
-  )
-  .map(
-    v =>
-    String(
-      v ?? ''
-    )
-  );
-
-
-  return {
-    cols,
-    rows
-  };
-
+  } finally {
+    clearTimeout(timeout);
+  }
 }
 
-
-
-function parseCSV(t){
-
+function parseCSV(t) {
   const rows = [];
-
 
   let row = [];
   let cur = '';
   let q = false;
 
+  t = t.replace(/^\uFEFF/, '');
 
-  for(
-    let i=0;
-    i<t.length;
-    i++
-  ){
+  for (let i = 0; i < t.length; i++) {
+    const ch = t[i];
+    const nx = t[i + 1];
 
-    const ch =
-    t[i];
-
-
-    const nx =
-    t[i+1];
-
-
-    if(q){
-
-      if(
-        ch === '"' &&
-        nx === '"'
-      ){
-
+    if (q) {
+      if (ch === '"' && nx === '"') {
         cur += '"';
-
         i++;
 
-      }
-      else if(
-        ch === '"'
-      ){
-
+      } else if (ch === '"') {
         q = false;
 
-      }
-      else{
-
+      } else {
         cur += ch;
-
       }
 
-    }
-    else{
-
-      if(
-        ch === '"'
-      ){
-
+    } else {
+      if (ch === '"') {
         q = true;
 
-      }
-      else if(
-        ch === ','
-      ){
-
-        row.push(
-          cur
-        );
-
+      } else if (ch === ',') {
+        row.push(cur);
         cur = '';
 
-      }
-      else if(
-        ch === '\n' ||
-        ch === '\r'
-      ){
-
-        if(
-          cur !== '' ||
-          row.length
-        ){
-
-          row.push(
-            cur
-          );
-
-
-          rows.push(
-            row
-          );
-
+      } else if (ch === '\n' || ch === '\r') {
+        if (cur !== '' || row.length) {
+          row.push(cur);
+          rows.push(row);
 
           row = [];
           cur = '';
-
         }
 
-      }
-      else{
-
+      } else {
         cur += ch;
-
       }
-
     }
-
   }
 
-
-  if(
-    cur !== '' ||
-    row.length
-  ){
-
-    row.push(
-      cur
-    );
-
-
-    rows.push(
-      row
-    );
-
+  if (cur !== '' || row.length) {
+    row.push(cur);
+    rows.push(row);
   }
-
 
   return rows;
-
 }
 
+async function loadBlock(name) {
+  try {
+    return await fetchGViz(
+      SHEET_ID,
+      GIDS[name]
+    );
 
+  } catch {
+    return await fetchCSVByGid(
+      SHEET_ID,
+      GIDS[name]
+    );
+  }
+}
+
+async function loadLinks() {
+  LINKMAP = {};
+
+  const controller = new AbortController();
+
+  const timeout = setTimeout(
+    () => controller.abort(),
+    8000
+  );
+
+  try {
+    const res = await fetch(LINKS_JSON, {
+      cache: 'no-store',
+      signal: controller.signal
+    });
+
+    if (res.ok) {
+      const j = await res.json();
+
+      if (j?.items && typeof j.items === 'object') {
+        LINKMAP = j.items;
+      }
+    }
+
+  } catch {
+    // Los enlaces son opcionales.
+
+  } finally {
+    clearTimeout(timeout);
+  }
+}
 
 /* ==================================================
-   REGISTRO DE TRABAJOS
+   COLUMNAS DEL REGISTRO Y DE LOS PRESETS
+
+   UID_ENTREGA identifica una entrega.
+   UID_PRESET identifica el trabajo.
+   No se intercambian.
 ================================================== */
 
-function parseRegistro(
-  cols,
-  rows
-){
+function workColumns(cols) {
+  return {
+    uid: colIndex(cols, 'uidpreset'),
 
-  const iUID =
-  cols.findIndex(
-    c =>
-    /uid[_ ]?preset/i.test(c)
-  );
+    fecha: colIndex(cols, 'fecha'),
 
+    objetivo: colIndex(cols, 'fechaobjetivo'),
 
-  const iF =
-  cols.findIndex(
-    c =>
-    /^fecha$/i.test(c)
-  );
+    id: cols.findIndex(c =>
+      /^(id|matric)/i.test(String(c).trim())
+    ),
 
+    nombre: colIndex(
+      cols,
+      'nombre',
+      'nombrealumno',
+      'nombredelalumno'
+    ),
 
-  const iFO =
-  cols.findIndex(
-    c =>
-    /fecha.*objetivo/i.test(c)
-  );
+    materia: colIndex(cols, 'materia'),
 
+    numero: colIndex(
+      cols,
+      'ntrabajo',
+      'notrabajo',
+      'numerotrabajo',
+      'numerodetrabajo',
+      'n',
+      'no'
+    ),
 
-  const iID =
-  cols.findIndex(
-    c =>
-    /^(id|matric)/i.test(c)
-  );
+    origen: colIndex(cols, 'origen'),
 
+    pagina: cols.findIndex(c =>
+      /^pagina/.test(headerKey(c))
+    ),
 
-  const iNom =
-  cols.findIndex(
-    c =>
-    /^nombre/i.test(c)
-  );
+    puntos: colIndex(cols, 'puntos'),
 
+    atraso: cols.findIndex(c =>
+      /atraso/.test(headerKey(c))
+    ),
 
-  const iMat =
-  cols.findIndex(
-    c =>
-    /^materia$/i.test(c)
-  );
+    momento: colIndex(cols, 'momento'),
 
+    trabajo: colIndex(
+      cols,
+      'nombretrabajo',
+      'nombredeltrabajo'
+    ),
 
-  const iNum =
-  cols.findIndex(
-    c =>
-    /n.?trabajo|n.? ?°/i.test(c)
-  );
+    evidUrl: cols.findIndex(c =>
+      /url.*evidenc/i.test(c)
+    ),
 
+    evidSheet: cols.findIndex(c =>
+      /(hoja|sheet).*evidenc/i.test(c)
+    )
+  };
+}
 
-  const iOri =
-  cols.findIndex(
-    c =>
-    /^origen$/i.test(c)
-  );
+function parseRegistro(cols, rows) {
+  const i = workColumns(cols);
 
+  if (i.id < 0) {
+    throw new Error(
+      'No se encontró la columna ID en Registro de trabajos.'
+    );
+  }
 
-  const iPag =
-  cols.findIndex(
-    c =>
-    /^p[aá]gina/i.test(c)
-  );
+  return rows
+    .map(r => {
+      const fecha = cell(r, i.fecha);
 
+      const fo = cell(r, i.objetivo) || fecha;
 
-  const iPts =
-  cols.findIndex(
-    c =>
-    /^puntos$/i.test(c)
-  );
+      const atraso = cell(r, i.atraso);
 
-
-  const iAtr =
-  cols.findIndex(
-    c =>
-    /atraso/i.test(c)
-  );
-
-
-  const iMom =
-  cols.findIndex(
-    c =>
-    /^momento$/i.test(c)
-  );
-
-
-  const iNomT =
-  cols.findIndex(
-    c =>
-    /nombre.*trabajo/i.test(c)
-  );
-
-
-  return rows.map(
-    r => {
-
-      const fecha =
-      String(
-        (
-          iF >= 0
-          ? r[iF]
-          : ''
-        )
-        ?? ''
-      )
-      .trim();
-
-
-      const fo =
-      String(
-        (
-          iFO >= 0
-          ? r[iFO]
-          : ''
-        )
-        ?? ''
-      )
-      .trim()
-      ||
-      fecha;
-
-
-      const atraso =
-      (() => {
-
-        if(
-          iAtr >= 0 &&
-          r[iAtr] !== '' &&
-          r[iAtr] != null
-        ){
-
-          return +r[iAtr] || 0;
-
-        }
-
-
-        const d =
-        new Date(fecha);
-
-
-        const o =
-        new Date(fo);
-
-
-        if(
-          isNaN(+d) ||
-          isNaN(+o)
-        )
-          return 0;
-
-
-        return Math.max(
-          0,
-          Math.round(
-            (d-o) /
-            86400000
-          )
-        );
-
-      })();
-
+      const days =
+        dayNumber(fecha) - dayNumber(fo);
 
       return {
-
-        uidPreset:
-        String(
-          (
-            iUID >= 0
-            ? r[iUID]
-            : ''
-          )
-          ?? ''
-        )
-        .trim(),
-
+        uidPreset: cell(r, i.uid),
 
         fecha,
 
+        fechaObjetivo: fo,
 
-        fechaObjetivo:
-        fo,
+        id: cell(r, i.id),
 
+        nombre: cell(r, i.nombre),
 
-        id:
-        String(
-          (
-            iID >= 0
-            ? r[iID]
-            : ''
-          )
-          ?? ''
-        )
-        .trim(),
+        materia: cell(r, i.materia),
 
+        numero: cell(r, i.numero),
 
-        nombre:
-        String(
-          (
-            iNom >= 0
-            ? r[iNom]
-            : ''
-          )
-          ?? ''
-        )
-        .trim(),
+        origen: cell(r, i.origen),
 
+        pagina: cell(r, i.pagina),
 
-        materia:
-        String(
-          (
-            iMat >= 0
-            ? r[iMat]
-            : ''
-          )
-          ?? ''
-        )
-        .trim(),
-
-
-        numero:
-        String(
-          (
-            iNum >= 0
-            ? r[iNum]
-            : ''
-          )
-          ?? ''
-        )
-        .trim(),
-
-
-        origen:
-        String(
-          (
-            iOri >= 0
-            ? r[iOri]
-            : ''
-          )
-          ?? ''
-        )
-        .trim(),
-
-
-        pagina:
-        String(
-          (
-            iPag >= 0
-            ? r[iPag]
-            : ''
-          )
-          ?? ''
-        )
-        .trim(),
-
-
-        puntos:
-        +(
-          (
-            iPts >= 0
-            ? r[iPts]
-            : 0
-          )
-          ?? 0
-        )
-        || 0,
-
+        puntos: +cell(r, i.puntos) || 0,
 
         atrasoDias:
-        atraso,
+          atraso !== ''
+            ? (+atraso || 0)
+            : (
+                Number.isFinite(days)
+                  ? Math.max(0, days)
+                  : 0
+              ),
 
+        momento: cell(r, i.momento),
 
-        momento:
-        String(
-          (
-            iMom >= 0
-            ? r[iMom]
-            : ''
-          )
-          ?? ''
-        )
-        .trim(),
-
-
-        nombreTrabajo:
-        String(
-          (
-            iNomT >= 0
-            ? r[iNomT]
-            : ''
-          )
-          ?? ''
-        )
-        .trim()
-
+        nombreTrabajo: cell(r, i.trabajo)
       };
-
-    }
-  );
-
+    })
+    .filter(t => t.id);
 }
 
+function parsePresets(cols, rows) {
+  const i = workColumns(cols);
 
-
-/* ==================================================
-   PRESETS
-================================================== */
-
-function parsePresets(
-  cols,
-  rows
-){
-
-  const iUID =
-  cols.findIndex(
-    c =>
-    /uid[_ ]?preset/i.test(c)
-  );
-
-
-  const iFO =
-  cols.findIndex(
-    c =>
-    /fecha.*objetivo/i.test(c)
-  );
-
-
-  const iMom =
-  cols.findIndex(
-    c =>
-    /^momento$/i.test(c)
-  );
-
-
-  const iMat =
-  cols.findIndex(
-    c =>
-    /^materia$/i.test(c)
-  );
-
-
-  const iNum =
-  cols.findIndex(
-    c =>
-    /n.?trabajo|n.? ?°/i.test(c)
-  );
-
-
-  const iOri =
-  cols.findIndex(
-    c =>
-    /^origen$/i.test(c)
-  );
-
-
-  const iPag =
-  cols.findIndex(
-    c =>
-    /^p[aá]gina/i.test(c)
-  );
-
-
-  const iNom =
-  cols.findIndex(
-    c =>
-    /nombre.*trabajo/i.test(c)
-  );
-
-
-  const iEUrl =
-  cols.findIndex(
-    c =>
-    /url.*evidenc/i.test(c)
-  );
-
-
-  const iESh =
-  cols.findIndex(
-    c =>
-    /(hoja|sheet).*evidenc/i.test(c)
-  );
-
+  if (i.uid < 0) {
+    throw new Error(
+      'No se encontró la columna UID_PRESET en Presets.'
+    );
+  }
 
   return rows
-  .map(
-    r => ({
+    .map(r => ({
+      uid: cell(r, i.uid),
 
-      uid:
-      String(
-        (
-          iUID >= 0
-          ? r[iUID]
-          : ''
-        )
-        ?? ''
-      )
-      .trim(),
+      fechaObjetivo: cell(r, i.objetivo),
 
+      momento: cell(r, i.momento),
 
-      fechaObjetivo:
-      String(
-        (
-          iFO >= 0
-          ? r[iFO]
-          : ''
-        )
-        ?? ''
-      )
-      .trim(),
+      materia: cell(r, i.materia),
 
+      numero: cell(r, i.numero),
 
-      momento:
-      String(
-        (
-          iMom >= 0
-          ? r[iMom]
-          : ''
-        )
-        ?? ''
-      )
-      .trim(),
+      origen: cell(r, i.origen),
 
+      pagina: cell(r, i.pagina),
 
-      materia:
-      String(
-        (
-          iMat >= 0
-          ? r[iMat]
-          : ''
-        )
-        ?? ''
-      )
-      .trim(),
+      nombreTrabajo: cell(r, i.trabajo),
 
+      evidUrl: cell(r, i.evidUrl),
 
-      numero:
-      String(
-        (
-          iNum >= 0
-          ? r[iNum]
-          : ''
-        )
-        ?? ''
-      )
-      .trim(),
-
-
-      origen:
-      String(
-        (
-          iOri >= 0
-          ? r[iOri]
-          : ''
-        )
-        ?? ''
-      )
-      .trim(),
-
-
-      pagina:
-      String(
-        (
-          iPag >= 0
-          ? r[iPag]
-          : ''
-        )
-        ?? ''
-      )
-      .trim(),
-
-
-      nombreTrabajo:
-      String(
-        (
-          iNom >= 0
-          ? r[iNom]
-          : ''
-        )
-        ?? ''
-      )
-      .trim(),
-
-
-      evidUrl:
-      String(
-        (
-          iEUrl >= 0
-          ? r[iEUrl]
-          : ''
-        )
-        ?? ''
-      )
-      .trim(),
-
-
-      evidSheet:
-      String(
-        (
-          iESh >= 0
-          ? r[iESh]
-          : ''
-        )
-        ?? ''
-      )
-      .trim()
-
-    })
-  )
-  .filter(
-    p =>
-    p.uid
-  );
-
+      evidSheet: cell(r, i.evidSheet)
+    }))
+    .filter(p => p.uid);
 }
 
+/* ==================================================
+   CORRECCIÓN DE LA IDENTIDAD DEL TRABAJO
 
+   1. Una entrega con UID_PRESET solo corresponde
+      a ese UID_PRESET.
+
+   2. Un registro con UID diferente NUNCA entra
+      en la búsqueda alternativa.
+
+   3. Solo registros antiguos SIN UID pueden usar
+      una clave completa con nombre y momento.
+
+   4. El respaldo exige un único preset y un único
+      registro. Si hay ambigüedad, no se acredita.
+================================================== */
+
+const uidKey = v => String(v ?? '').trim();
+
+function claveTrabajoLegacy(t) {
+  const materia = norm(t.materia);
+  const nombre = norm(t.nombreTrabajo);
+  const momento = norm(t.momento);
+  const fecha = normDate(t.fechaObjetivo);
+
+  if (
+    !materia ||
+    !nombre ||
+    !momento ||
+    !fecha
+  ) {
+    return '';
+  }
+
+  return JSON.stringify([
+    materia,
+
+    norm(
+      String(t.numero ?? '')
+        .replace(/^trabajo\s*/i, '')
+    ),
+
+    norm(t.origen),
+
+    norm(t.pagina),
+
+    fecha,
+
+    momento,
+
+    nombre
+  ]);
+}
+
+function crearBuscadorEntregas(presets, entAlumno) {
+  const porUID = new Map();
+
+  const legacy = new Map();
+
+  const cantidadPresets = new Map();
+
+  for (const p of presets) {
+    const key = claveTrabajoLegacy(p);
+
+    if (key) {
+      cantidadPresets.set(
+        key,
+        (cantidadPresets.get(key) || 0) + 1
+      );
+    }
+  }
+
+  for (const e of entAlumno) {
+    const uid = uidKey(e.uidPreset);
+
+    if (uid) {
+      /*
+        Si se repite la entrega del mismo alumno
+        y UID en la hoja, se toma la última fila
+        de ese UID, igual que antes.
+      */
+      porUID.set(uid, e);
+
+    } else {
+      /*
+        Únicamente registros SIN UID.
+        Nunca se incluyen registros con otro UID.
+      */
+      const key = claveTrabajoLegacy(e);
+
+      if (key) {
+        if (!legacy.has(key)) {
+          legacy.set(key, []);
+        }
+
+        legacy.get(key).push(e);
+      }
+    }
+  }
+
+  return p => {
+    /*
+      Primero: coincidencia exacta de UID_PRESET.
+    */
+    const exacta = porUID.get(uidKey(p.uid));
+
+    if (exacta) {
+      return exacta;
+    }
+
+    /*
+      Respaldo para registros antiguos sin UID.
+      Debe haber un solo preset con esta clave.
+    */
+    const key = claveTrabajoLegacy(p);
+
+    if (
+      !key ||
+      cantidadPresets.get(key) !== 1
+    ) {
+      return null;
+    }
+
+    const candidatas = legacy.get(key) || [];
+
+    return candidatas.length === 1
+      ? candidatas[0]
+      : null;
+  };
+}
+
+function clasificarTrabajos(
+  presets,
+  entAlumno,
+  today
+) {
+  /*
+    Comprobar unicidad usando TODOS los presets,
+    antes de ocultar futuros o filtrar trimestre.
+  */
+  const buscarEntrega = crearBuscadorEntregas(
+    presets,
+    entAlumno
+  );
+
+  const visibles = presets.filter(p => {
+    const f = normDate(p.fechaObjetivo);
+
+    if (!f || f <= today) {
+      return true;
+    }
+
+    const texto = [
+      p.nombreTrabajo,
+      p.origen,
+      p.materia,
+      p.numero
+    ].join(' ').toUpperCase();
+
+    /*
+      Conservar la regla original:
+      los trabajos futuros solo se muestran
+      si contienen la palabra TAREA.
+    */
+    return texto.includes('TAREA');
+  });
+
+  const faltantes = [];
+  const tarde = [];
+  const atiempo = [];
+
+  for (const p of visibles) {
+    const e = buscarEntrega(p);
+
+    if (!e) {
+      faltantes.push(p);
+
+    } else if (e.atrasoDias > 0) {
+      tarde.push(p);
+
+    } else {
+      atiempo.push(p);
+    }
+  }
+
+  /*
+    El total usa exactamente los trabajos
+    que sí se muestran.
+  */
+  return {
+    faltantes,
+    tarde,
+    atiempo,
+    presets: visibles
+  };
+}
 
 /* ==================================================
-   ASISTENCIA
+   ASISTENCIA — misma forma de cálculo
 ================================================== */
+
+function filaAsistencia(cols, rows, ref) {
+  const iId = cols.findIndex(c =>
+    /^(id|matric)/i.test(String(c).trim())
+  );
+
+  const iNom = cols.findIndex(c =>
+    /^nombre/i.test(String(c).trim())
+  );
+
+  let row = null;
+
+  if (iId >= 0 && ref.id) {
+    row = rows.find(r =>
+      norm(r[iId]) === norm(ref.id)
+    );
+  }
+
+  if (!row && iNom >= 0 && ref.nombre) {
+    row = rows.find(r =>
+      norm(r[iNom]) === norm(ref.nombre)
+    );
+  }
+
+  return row || null;
+}
 
 function asistenciaAlumno(
   cols,
@@ -1836,872 +1295,267 @@ function asistenciaAlumno(
   ref,
   start,
   end
-){
+) {
+  const row = filaAsistencia(cols, rows, ref);
 
-  const iId =
-  cols.findIndex(
-    c =>
-    /^(id|matric)/i.test(c)
-  );
-
-
-  const iNom =
-  cols.findIndex(
-    c =>
-    /^nombre/i.test(c)
-  );
-
-
-  let row =
-  null;
-
-
-  if(
-    iId >= 0 &&
-    ref.id
-  ){
-
-    row =
-    rows.find(
-      r =>
-      norm(r[iId]) ===
-      norm(ref.id)
-    );
-
-  }
-
-
-  if(
-    !row &&
-    iNom >= 0 &&
-    ref.nombre
-  ){
-
-    row =
-    rows.find(
-      r =>
-      norm(r[iNom]) ===
-      norm(ref.nombre)
-    );
-
-  }
-
-
-  if(!row)
+  if (!row) {
     return {
-      present:0,
-      total:0,
-      row:null
+      present: 0,
+      total: 0,
+      row: null
     };
+  }
 
+  const active = getActiveDateCols(cols, rows)
+    .filter(i => {
+      const d = normDate(cols[i]);
 
-  const activeCols =
-  getActiveDateCols(
-    cols,
-    rows
-  )
-  .filter(
-    i => {
+      return d && d >= start && d <= end;
+    });
 
-      const d =
-      normDate(
-        cols[i]
-      );
-
-
-      return (
-        d &&
-        d >= start &&
-        d <= end
-      );
-
-    }
-  );
-
-
-  const present =
-  activeCols.reduce(
-    (acc,i) =>
-    acc +
-    (
-      isPresent(
-        row[i]
-      )
-      ? 1
-      : 0
-    ),
+  const present = active.reduce(
+    (a, i) => a + (isPresent(row[i]) ? 1 : 0),
     0
   );
 
-
-  const total =
-  activeCols.length;
-
-
   return {
     present,
-    total,
+    total: active.length,
     row
   };
-
 }
 
+function asistenciaHistorica(cols, rows, ref) {
+  const row = filaAsistencia(cols, rows, ref);
 
-
-function asistenciaHistorica(
-  cols,
-  rows,
-  ref
-){
-
-  const iId =
-  cols.findIndex(
-    c =>
-    /^(id|matric)/i.test(c)
-  );
-
-
-  const iNom =
-  cols.findIndex(
-    c =>
-    /^nombre/i.test(c)
-  );
-
-
-  let row =
-  null;
-
-
-  if(
-    iId >= 0 &&
-    ref.id
-  ){
-
-    row =
-    rows.find(
-      r =>
-      norm(r[iId]) ===
-      norm(ref.id)
-    );
-
-  }
-
-
-  if(
-    !row &&
-    iNom >= 0 &&
-    ref.nombre
-  ){
-
-    row =
-    rows.find(
-      r =>
-      norm(r[iNom]) ===
-      norm(ref.nombre)
-    );
-
-  }
-
-
-  if(!row)
+  if (!row) {
     return {
-      present:0,
-      total:0
+      present: 0,
+      total: 0
     };
+  }
 
+  const active = getActiveDateCols(cols, rows);
 
-  const activeCols =
-  getActiveDateCols(
-    cols,
-    rows
-  );
-
-
-  const present =
-  activeCols.reduce(
-    (acc,i) =>
-    acc +
-    (
-      isPresent(
-        row[i]
-      )
-      ? 1
-      : 0
-    ),
+  const present = active.reduce(
+    (a, i) => a + (isPresent(row[i]) ? 1 : 0),
     0
   );
-
-
-  const total =
-  activeCols.length;
-
 
   return {
     present,
-    total
+    total: active.length
   };
-
 }
 
+function weekRange(d) {
+  const day = d.getDay();
 
-
-function asistenciaRelativa(
-  cols,
-  rows,
-  ref
-){
-
-  const iId =
-  cols.findIndex(
-    c =>
-    /^(id|matric)/i.test(c)
-  );
-
-
-  const iNom =
-  cols.findIndex(
-    c =>
-    /^nombre/i.test(c)
-  );
-
-
-  let ri =
-  -1;
-
-
-  if(
-    iId >= 0 &&
-    ref.id
-  ){
-
-    ri =
-    rows.findIndex(
-      r =>
-      norm(r[iId]) ===
-      norm(ref.id)
-    );
-
-  }
-
-
-  if(
-    ri < 0 &&
-    iNom >= 0 &&
-    ref.nombre
-  ){
-
-    ri =
-    rows.findIndex(
-      r =>
-      norm(r[iNom]) ===
-      norm(ref.nombre)
-    );
-
-  }
-
-
-  const dcols =
-  getActiveDateCols(
-    cols,
-    rows
-  );
-
-
-  if(
-    ri < 0 ||
-    !dcols.length
-  )
-    return {
-      present:0,
-      max:0,
-      text:'0 (0%)'
-    };
-
-
-  const count =
-  r =>
-  dcols.reduce(
-    (a,i) =>
-    a +
-    (
-      isPresent(
-        r[i]
-      )
-      ? 1
-      : 0
-    ),
-    0
-  );
-
-
-  const presentRow =
-  count(
-    rows[ri]
-  );
-
-
-  const maxDays =
-  rows.reduce(
-    (m,r) =>
-    Math.max(
-      m,
-      count(r)
-    ),
-    0
-  );
-
-
-  if(
-    maxDays <= 0
-  )
-    return {
-      present:0,
-      max:0,
-      text:'0 (0%)'
-    };
-
-
-  const pct =
-  Math.min(
-    100,
-    Math.round(
-      presentRow /
-      maxDays *
-      100
-    )
-  );
-
-
-  return {
-
-    present:
-    presentRow,
-
-    max:
-    maxDays,
-
-    text:
-    `${presentRow} (${pct}%)`
-
-  };
-
-}
-
-
-
-function weekRange(d){
-
-  const day =
-  d.getDay();
-
-
-  const diff =
-  (
-    day === 0
-    ? -6
-    : 1-day
-  );
-
-
-  const mon =
-  new Date(d);
-
+  const mon = new Date(d);
 
   mon.setDate(
-    d.getDate() +
-    diff
+    d.getDate() + (day === 0 ? -6 : 1 - day)
   );
 
+  mon.setHours(0, 0, 0, 0);
 
-  mon.setHours(
-    0,0,0,0
-  );
+  const fri = new Date(mon);
 
-
-  const fri =
-  new Date(mon);
-
-
-  fri.setDate(
-    mon.getDate() +
-    4
-  );
-
+  fri.setDate(mon.getDate() + 4);
 
   return [
     ymd(mon),
     ymd(fri)
   ];
-
 }
-
-
 
 /* ==================================================
-   CARGA DE PESTAÑAS
-================================================== */
-
-async function loadBlock(name){
-
-  const names = {
-
-    puntos:
-    'Puntos',
-
-    asistencia:
-    'Asistencia',
-
-    registro:
-    'Registro de trabajos',
-
-    aliases:
-    'Trabajos_Aliases',
-
-    presets:
-    'Presets'
-
-  };
-
-
-  try{
-
-    return await fetchGViz(
-      SHEET_ID,
-      names[name]
-    );
-
-  }
-  catch{
-
-    return await fetchCSVByGid(
-      SHEET_ID,
-      GIDS[name]
-    );
-
-  }
-
-}
-
-
-
-async function loadLinks(){
-
-  try{
-
-    const res =
-    await fetch(
-      LINKS_JSON,
-      {
-        cache:'no-store'
-      }
-    );
-
-
-    if(
-      res.ok
-    ){
-
-      const j =
-      await res.json();
-
-
-      if(
-        j?.items
-      )
-        LINKMAP =
-        j.items;
-
-    }
-
-  }
-  catch{}
-
-}
-
-
-
-/* ==================================================
-   TRIMESTRES
+   TRIMESTRES, GRÁFICA Y EVIDENCIAS
 ================================================== */
 
 let ALL = {
-
-  faltantes:[],
-
-  tarde:[],
-
-  atiempo:[],
-
-  presets:[]
-
+  faltantes: [],
+  tarde: [],
+  atiempo: [],
+  presets: []
 };
 
+let TRI = 'M1';
 
-/* Trimestre 1 por defecto */
-
-let TRI =
-'M1';
-
-
-
-function setTriChips(){
-
-  const host =
-  $('#tri-chips');
-
+function setTriChips() {
+  const host = $('#tri-chips');
 
   const opts = [
-
-    [
-      'ALL',
-      'Todo'
-    ],
-
-    [
-      'M1',
-      'Trimestre 1'
-    ],
-
-    [
-      'M2',
-      'Trimestre 2'
-    ],
-
-    [
-      'M3',
-      'Trimestre 3'
-    ]
-
+    ['ALL', 'Todo'],
+    ['M1', 'Trimestre 1'],
+    ['M2', 'Trimestre 2'],
+    ['M3', 'Trimestre 3']
   ];
 
+  host.innerHTML = opts.map(([v, l]) =>
+    `<button
+      class="chip ${TRI === v ? 'active' : ''}"
+      data-v="${v}"
+      aria-pressed="${TRI === v}">
+      ${l}
+    </button>`
+  ).join('');
 
-  host.innerHTML =
-  opts
-  .map(
-    ([v,l]) =>
-    `<button class="chip ${TRI===v?'active':''}" data-v="${v}">${l}</button>`
-  )
-  .join('');
-
-
-  for(
-    const b of
-    host.querySelectorAll(
-      '.chip'
-    )
-  ){
-
-    b.onclick =
-    () => {
-
-      TRI =
-      b.getAttribute(
-        'data-v'
-      );
-
+  for (const b of host.querySelectorAll('.chip')) {
+    b.onclick = () => {
+      TRI = b.getAttribute('data-v');
 
       setTriChips();
-
-
       renderLists();
-
     };
-
   }
 
-
   $('#tri-subtitle').textContent =
-  'Resumen de ' +
-  ({
-    ALL:'Todo',
-    M1:'Trimestre 1',
-    M2:'Trimestre 2',
-    M3:'Trimestre 3'
-  }[TRI]);
-
+    'Resumen de ' + ({
+      ALL: 'Todo',
+      M1: 'Trimestre 1',
+      M2: 'Trimestre 2',
+      M3: 'Trimestre 3'
+    }[TRI]);
 }
 
-
-
-function byTri(list){
-
-  if(
-    TRI === 'ALL'
-  )
-    return list;
-
-
-  return list.filter(
-    x =>
-    String(
-      x.momento || ''
-    )
-    .toUpperCase() ===
-    TRI
-  );
-
+function byTri(list) {
+  return TRI === 'ALL'
+    ? list
+    : list.filter(x =>
+        String(x.momento || '')
+          .trim()
+          .toUpperCase() === TRI
+      );
 }
-
-
-
-/* ==================================================
-   GRÁFICA
-================================================== */
 
 function renderBarChart({
   faltantes,
   tarde,
   atiempo
-}){
-
-  const max =
-  Math.max(
+}) {
+  const max = Math.max(
     faltantes,
     tarde,
     atiempo,
     1
   );
 
-
-  const set =
-  (id,val) => {
-
-    const el =
-    $(id);
-
+  const set = (id, val) => {
+    const el = $(id);
 
     el.style.setProperty(
       '--pct',
-      (
-        val /
-        max
-      )
-      .toFixed(3)
+      (val / max).toFixed(3)
     );
 
-
-    el
-    .querySelector(
-      '.val'
-    )
-    .textContent =
-    val;
-
+    el.querySelector('.val').textContent = val;
   };
 
-
-  set(
-    '#bar-fal',
-    faltantes
-  );
-
-
-  set(
-    '#bar-tar',
-    tarde
-  );
-
-
-  set(
-    '#bar-ati',
-    atiempo
-  );
-
+  set('#bar-fal', faltantes);
+  set('#bar-tar', tarde);
+  set('#bar-ati', atiempo);
 }
 
+function linksFor(uid, preset) {
+  const urls = [];
 
+  const rec = Object.prototype.hasOwnProperty.call(
+    LINKMAP,
+    uid
+  )
+    ? LINKMAP[uid]
+    : null;
 
-/* ==================================================
-   EVIDENCIAS
-================================================== */
+  if (rec) {
+    if (Array.isArray(rec.urls)) {
+      urls.push(...rec.urls);
 
-function linksFor(
-  uid,
-  preset
-){
-
-  const urls =
-  [];
-
-
-  const rec =
-  LINKMAP?.[uid];
-
-
-  if(rec){
-
-    if(
-      Array.isArray(
-        rec.urls
-      )
-    ){
-
-      urls.push(
-        ...rec.urls
-      );
-
+    } else if (rec.url) {
+      urls.push(rec.url);
     }
-    else if(
-      rec.url
-    ){
-
-      urls.push(
-        rec.url
-      );
-
-    }
-
   }
 
-
-  if(
-    preset?.evidUrl
-  ){
-
-    urls.push(
-      String(
-        preset.evidUrl
-      )
-    );
-
+  if (preset?.evidUrl) {
+    urls.push(String(preset.evidUrl));
   }
 
-
-  const uniq =
-  [
+  const uniq = [
     ...new Set(
       urls
-      .map(
-        u =>
-        String(
-          u || ''
-        )
-        .trim()
-      )
-      .filter(
-        Boolean
-      )
+        .map(u => String(u || '').trim())
+        .filter(Boolean)
     )
-  ];
+  ].filter(u => {
+    try {
+      return ['https:', 'http:'].includes(
+        new URL(u, document.baseURI).protocol
+      );
 
-
-  if(
-    !uniq.length
-  )
-    return '';
-
-
-  return uniq
-  .map(
-    (u,i) =>
-    `<a class="linkbtn" href="${u}" target="_blank" rel="noopener">📷 Ver evidencia ${uniq.length>1?i+1:''}</a>`
-  )
-  .join('');
-
-}
-
-
-
-/* ==================================================
-   RENDER
-================================================== */
-
-function renderLists(){
-
-  const falt =
-  byTri(
-    ALL.faltantes
-  );
-
-
-  const tar =
-  byTri(
-    ALL.tarde
-  );
-
-
-  const ati =
-  byTri(
-    ALL.atiempo
-  );
-
-
-  const totalTri =
-  byTri(
-    ALL.presets
-  ).length;
-
-
-  const hechosTri =
-  tar.length +
-  ati.length;
-
-
-  $('#stat-cump-tri').textContent =
-  totalTri
-  ? `${Math.round(hechosTri/totalTri*100)}%`
-  : '–';
-
-
-  $('#stat-tot-tri').textContent =
-  `Faltantes ${falt.length} · Tarde ${tar.length} · A tiempo ${ati.length} · Trabajos totales ${totalTri}`;
-
-
-  renderBarChart({
-
-    faltantes:
-    falt.length,
-
-    tarde:
-    tar.length,
-
-    atiempo:
-    ati.length
-
+    } catch {
+      return false;
+    }
   });
 
+  return uniq.map((u, i) =>
+    `<a
+      class="linkbtn"
+      href="${escapeHTML(u)}"
+      target="_blank"
+      rel="noopener noreferrer">
+      📷 Ver evidencia ${uniq.length > 1 ? i + 1 : ''}
+    </a>`
+  ).join('');
+}
 
-  const renderItem =
-  t => {
+function renderLists() {
+  const falt = byTri(ALL.faltantes);
+  const tar = byTri(ALL.tarde);
+  const ati = byTri(ALL.atiempo);
 
-    const mom =
-    t.momento
-    ? ` · ${t.momento}`
-    : '';
+  const totalTri = byTri(ALL.presets).length;
 
+  const hechosTri = tar.length + ati.length;
 
-    const fecha =
-    t.fechaObjetivo
-    ? ` · ${normDate(t.fechaObjetivo)}`
-    : '';
+  $('#stat-cump-tri').textContent = totalTri
+    ? `${Math.round(hechosTri / totalTri * 100)}%`
+    : '–';
 
+  $('#stat-tot-tri').textContent =
+    `Faltantes ${falt.length} · Tarde ${tar.length} · A tiempo ${ati.length} · Trabajos totales ${totalTri}`;
 
-    const nom =
-    t.nombreTrabajo
-    ? ` · <i>${t.nombreTrabajo}</i>`
-    : '';
+  renderBarChart({
+    faltantes: falt.length,
+    tarde: tar.length,
+    atiempo: ati.length
+  });
 
+  const renderItem = t => {
+    const mom = t.momento
+      ? ` · ${escapeHTML(t.momento)}`
+      : '';
 
-    const kLink =
-    linksFor(
-      t.uid,
-      t
-    );
+    const fecha = t.fechaObjetivo
+      ? ` · ${escapeHTML(normDate(t.fechaObjetivo))}`
+      : '';
 
+    const nom = t.nombreTrabajo
+      ? ` · <i>${escapeHTML(t.nombreTrabajo)}</i>`
+      : '';
 
-    const kSheet =
-    t.evidSheet
-    ? ` <span class="badgeb">📄 ${t.evidSheet}</span>`
-    : '';
+    const kLink = linksFor(t.uid, t);
 
+    const kSheet = t.evidSheet
+      ? ` <span class="badgeb">📄 ${escapeHTML(t.evidSheet)}</span>`
+      : '';
 
     return `
       <details>
         <summary>
-          <b>${t.materia || '–'}</b>
+          <b>${escapeHTML(t.materia || '–')}</b>
           —
-          ${t.numero || '–'}
-          (${t.origen || '–'}${t.pagina ? ' · p.'+t.pagina : ''})
+          ${escapeHTML(t.numero || '–')}
+          (${escapeHTML(t.origen || '–')}${t.pagina ? ' · p.' + escapeHTML(t.pagina) : ''})
           ${nom}
           ${fecha}
           ${mom}
@@ -2710,879 +1564,335 @@ function renderLists(){
         </summary>
       </details>
     `;
-
   };
 
+  $('#faltantes').innerHTML = falt.length
+    ? falt.map(renderItem).join('')
+    : '<div class="hint">No hay trabajos faltantes 💙</div>';
 
-  $('#faltantes').innerHTML =
-  falt.length
-  ? falt.map(
-      renderItem
-    ).join('')
-  : '<div class="hint">No hay trabajos faltantes 💙</div>';
+  $('#tarde').innerHTML = tar.length
+    ? tar.map(renderItem).join('')
+    : '<div class="hint">No hay entregas tarde</div>';
 
-
-  $('#tarde').innerHTML =
-  tar.length
-  ? tar.map(
-      renderItem
-    ).join('')
-  : '<div class="hint">No hay entregas tarde</div>';
-
-
-  $('#atiempo').innerHTML =
-  ati.length
-  ? ati.map(
-      renderItem
-    ).join('')
-  : '<div class="hint">Aún no hay entregas registradas</div>';
-
+  $('#atiempo').innerHTML = ati.length
+    ? ati.map(renderItem).join('')
+    : '<div class="hint">Aún no hay entregas registradas</div>';
 }
-
-
-
-/* ==================================================
-   CLAVE ALTERNATIVA DE TRABAJO
-================================================== */
-
-function claveTrabajo(t){
-
-  return [
-
-    norm(
-      t.materia
-    ),
-
-    norm(
-      String(
-        t.numero || ''
-      )
-      .replace(
-        /^trabajo\s*/i,
-        ''
-      )
-    ),
-
-    norm(
-      t.origen
-    ),
-
-    norm(
-      t.pagina
-    ),
-
-    normDate(
-      t.fechaObjetivo
-    )
-
-  ]
-  .join('|');
-
-}
-
-
 
 /* ==================================================
    CARGA DEL ALUMNO
 ================================================== */
 
-async function cargarAlumnoPorID(id){
+let loadGeneration = 0;
 
-  $('#student-view').style.display =
-  'none';
+async function cargarAlumnoPorID(id) {
+  const generation = ++loadGeneration;
 
+  $('#student-view').style.display = 'none';
 
-  $('#alumno-nombre').textContent =
-  'Cargando…';
+  $('#alumno-nombre').textContent = 'Cargando…';
 
+  $('#alumno-id').textContent = '';
 
-  $('#alumno-id').textContent =
-  '';
-
-
-  await loadLinks();
-
-
-  const [
-    asis,
-    reg,
-    pre
-  ] =
-  await Promise.all([
-
-    loadBlock(
-      'asistencia'
-    ),
-
-    loadBlock(
-      'registro'
-    ),
-
-    loadBlock(
-      'presets'
-    )
-
+  const [asis, reg, pre] = await Promise.all([
+    loadBlock('asistencia'),
+    loadBlock('registro'),
+    loadBlock('presets'),
+    loadLinks()
   ]);
 
+  if (generation !== loadGeneration) {
+    return;
+  }
 
-  const entregas =
-  parseRegistro(
+  const entregas = parseRegistro(
     reg.cols,
     reg.rows
   );
 
-
-  const presets =
-  parsePresets(
+  const presets = parsePresets(
     pre.cols,
     pre.rows
   );
 
-
-  const entAlumno =
-  entregas.filter(
-    t =>
-    norm(t.id) ===
-    norm(id)
+  const entAlumno = entregas.filter(t =>
+    norm(t.id) === norm(id)
   );
 
+  /*
+    Mantener la fecha efectiva original:
+    antes de las 6:00 se considera el día anterior.
+  */
+  const now = new Date();
 
+  const effective = new Date(now);
 
-  /* ==================================================
-     FECHA EFECTIVA
-  ================================================== */
-
-  const now =
-  new Date();
-
-
-  const effective =
-  new Date(now);
-
-
-  if(
-    now.getHours() <
-    6
-  ){
-
+  if (now.getHours() < 6) {
     effective.setDate(
-      effective.getDate() -
-      1
+      effective.getDate() - 1
     );
-
   }
 
+  const today = ymd(effective);
 
-  const today =
-  ymd(
-    effective
-  );
-
-
-
-  /* ==================================================
-     TRABAJOS FUTUROS
-  ================================================== */
-
-  const isFutureNonTarea =
-  p => {
-
-    const f =
-    normDate(
-      p.fechaObjetivo
-    );
-
-
-    if(
-      !f
-    )
-      return false;
-
-
-    if(
-      f <= today
-    )
-      return false;
-
-
-    const txt =
-    (
-      (p.nombreTrabajo || '') +
-      ' ' +
-      (p.origen || '') +
-      ' ' +
-      (p.materia || '') +
-      ' ' +
-      (p.numero || '')
-    )
-    .toUpperCase();
-
-
-    /*
-      Si es futura y NO contiene la palabra
-      TAREA, no se muestra todavía.
-    */
-
-    return !txt.includes(
-      'TAREA'
-    );
-
-  };
-
-
-
-  /* ==================================================
-     MAPA POR UID
-  ================================================== */
-
-  const uids =
-  new Map(
-
-    entAlumno
-    .filter(
-      t =>
-      t.uidPreset
-    )
-    .map(
-      t => [
-
-        norm(
-          t.uidPreset
-        ),
-
-        t
-
-      ]
-    )
-
-  );
-
-
-
-  /* ==================================================
-     MAPA ALTERNATIVO
-     Todos los trabajos se incluyen aquí.
-  ================================================== */
-
-  const claves =
-  new Map(
-
-    entAlumno.map(
-      t => [
-
-        claveTrabajo(t),
-
-        t
-
-      ]
-    )
-
-  );
-
-
-
-  const faltantes =
-  [];
-
-
-  const tarde =
-  [];
-
-
-  const atiempo =
-  [];
-
-
-
-  for(
-    const p of presets
-  ){
-
-    if(
-      isFutureNonTarea(p)
-    )
-      continue;
-
-
-    /*
-      Primero intenta UID.
-    */
-
-    let e =
-    p.uid
-    ? uids.get(
-        norm(p.uid)
-      )
-    : null;
-
-
-
-    /*
-      Si UID no coincide,
-      intenta materia+número+origen+página+fecha.
-    */
-
-    if(
-      !e
-    ){
-
-      e =
-      claves.get(
-        claveTrabajo(p)
-      );
-
-    }
-
-
-
-    if(e){
-
-      if(
-        e.atrasoDias > 0
-      ){
-
-        tarde.push(
-          p
-        );
-
-      }
-      else{
-
-        atiempo.push(
-          p
-        );
-
-      }
-
-    }
-    else{
-
-      faltantes.push(
-        p
-      );
-
-    }
-
-  }
-
-
-
-  ALL = {
-
-    faltantes,
-
-    tarde,
-
-    atiempo,
-
-    presets
-
-  };
-
-
-
-  /* ==================================================
-     NOMBRE + ASISTENCIA SEMANAL
-  ================================================== */
-
-  const [
-    w0,
-    w1
-  ] =
-  weekRange(
-    new Date()
-  );
-
+  const [w0, w1] = weekRange(now);
 
   const nombreDeRegistro =
-  entAlumno.find(
-    e =>
-    e.nombre
-  )?.nombre || '';
+    entAlumno.find(e => e.nombre)?.nombre || '';
 
-
-  const aw =
-  asistenciaAlumno(
-
+  const aw = asistenciaAlumno(
     asis.cols,
-
     asis.rows,
-
     {
       id,
-      nombre:
-      nombreDeRegistro
+      nombre: nombreDeRegistro
     },
-
     w0,
-
     w1
-
   );
 
-
-  const iNom =
-  asis.cols.findIndex(
-    c =>
-    /^nombre/i.test(c)
+  const iNom = asis.cols.findIndex(c =>
+    /^nombre/i.test(String(c).trim())
   );
 
+  const nombre =
+    (
+      aw.row && iNom >= 0
+        ? String(aw.row[iNom] || '')
+        : ''
+    ) || nombreDeRegistro;
 
-  let nombre =
-  nombreDeRegistro;
-
-
-  if(
-    aw.row &&
-    iNom >= 0
-  ){
-
-    nombre =
-    String(
-      aw.row[iNom] ||
-      ''
-    );
-
-  }
-
-
-
-  if(
-    !nombre
-  ){
-
-    const iId =
-    asis.cols.findIndex(
-      c =>
-      /^(id|matric)/i.test(c)
-    );
-
-
-    if(
-      iId >= 0 &&
-      iNom >= 0
-    ){
-
-      const r =
-      asis.rows.find(
-        r =>
-        norm(r[iId]) ===
-        norm(id)
-      );
-
-
-      if(r){
-
-        nombre =
-        String(
-          r[iNom] ||
-          ''
-        );
-
-      }
-
-    }
-
-  }
-
-
-
-  if(
-    !nombre
-  ){
-
-    alert(
+  if (!nombre) {
+    throw new Error(
       'No encontramos ese ID. Verifique que esté correcto (sin espacios) o contacte a la escuela.'
     );
-
-    return;
-
   }
 
+  /*
+    Clasificación corregida de los trabajos.
+  */
+  ALL = clasificarTrabajos(
+    presets,
+    entAlumno,
+    today
+  );
 
+  $('#alumno-nombre').textContent = nombre;
 
-  /* ==================================================
-     DATOS DEL ALUMNO
-  ================================================== */
-
-  $('#alumno-nombre').textContent =
-  nombre;
-
-
-  $('#alumno-id').textContent =
-  'ID: ' +
-  id;
-
+  $('#alumno-id').textContent = 'ID: ' + id;
 
   $('#grupo-label').innerHTML =
-  `<span class="badgeb">👩‍🏫 Grupo: <b>${GROUP_LABEL}</b></span>`;
+    `<span class="badgeb">👩‍🏫 Grupo: <b>${escapeHTML(GROUP_LABEL)}</b></span>`;
 
-
-
-  /* ==================================================
-     ASISTENCIA
-  ================================================== */
-
-  const hoy =
-  new Date();
-
-
-  const a30 =
-  asistenciaAlumno(
-
+  const a30 = asistenciaAlumno(
     asis.cols,
-
     asis.rows,
-
-    {
-      id,
-      nombre
-    },
-
+    { id, nombre },
     ymd(
       new Date(
-        hoy.getFullYear(),
-        hoy.getMonth(),
-        hoy.getDate()-30
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate() - 30
       )
     ),
-
-    ymd(hoy)
-
+    ymd(now)
   );
 
-
-  const ah =
-  asistenciaHistorica(
-
+  const ah = asistenciaHistorica(
     asis.cols,
-
     asis.rows,
-
-    {
-      id,
-      nombre
-    }
-
+    { id, nombre }
   );
 
+  const porcentaje = a => a.total
+    ? `${Math.round(a.present / a.total * 100)}%  (${a.present}/${a.total})`
+    : '–';
 
-  const rel =
-  asistenciaRelativa(
+  $('#stat-aswk').textContent = porcentaje(aw);
 
-    asis.cols,
+  $('#stat-as30').textContent = porcentaje(a30);
 
-    asis.rows,
+  $('#stat-asHist').textContent = porcentaje(ah);
 
-    {
-      id,
-      nombre
-    }
+  $('#stat-faltHist').textContent = ah.total
+    ? `${ah.total - ah.present}`
+    : '–';
 
-  );
-
-
-
-  $('#stat-aswk').textContent =
-  aw.total
-  ? `${Math.round(aw.present/aw.total*100)}%  (${aw.present}/${aw.total})`
-  : '–';
-
-
-
-  $('#stat-as30').textContent =
-  a30.total
-  ? `${Math.round(a30.present/a30.total*100)}%  (${a30.present}/${a30.total})`
-  : '–';
-
-
-
-  $('#stat-asHist').textContent =
-  ah.total
-  ? `${Math.round(ah.present/ah.total*100)}%  (${ah.present}/${ah.total})`
-  : '–';
-
-
-
-  $('#stat-faltHist').textContent =
-  ah.total
-  ? `${ah.total-ah.present}`
-  : '–';
-
-
-
-  const relEl =
-  document.getElementById(
-    'stat-asSheet'
-  );
-
-
-  if(
-    relEl
-  )
-    relEl.textContent =
-    rel.text;
-
-
-
-  /* ==================================================
-     ABRIR TRIMESTRE 1
-  ================================================== */
-
-  TRI =
-  'M1';
-
+  /*
+    Abrir siempre en Trimestre 1.
+  */
+  TRI = 'M1';
 
   setTriChips();
 
-
   renderLists();
 
-
-
-  $('#student-view').style.display =
-  'block';
-
+  $('#student-view').style.display = 'block';
 
   window.scrollTo({
-
-    top:
-    document.body.offsetTop,
-
-    behavior:
-    'smooth'
-
+    top: 0,
+    behavior: 'smooth'
   });
-
 }
 
-
-
 /* ==================================================
-   TEMA
+   TEMA, ID GUARDADO Y CONTROLES
 ================================================== */
 
-const themeBtn =
-$('#themeBtn');
+function readPreference(key) {
+  try {
+    return localStorage.getItem(key);
 
+  } catch {
+    return null;
+  }
+}
 
-function applyTheme(t){
+function savePreference(key, value) {
+  try {
+    localStorage.setItem(key, value);
+    return true;
 
-  document.documentElement
-  .setAttribute(
+  } catch {
+    return false;
+  }
+}
+
+const themeBtn = $('#themeBtn');
+
+function applyTheme(t) {
+  t = t === 'dark' ? 'dark' : 'light';
+
+  document.documentElement.setAttribute(
     'data-theme',
     t
   );
 
-
-  themeBtn.textContent =
-  (
-    t === 'dark'
+  themeBtn.textContent = t === 'dark'
     ? '☀️ Claro'
-    : '🌙 Oscuro'
-  );
+    : '🌙 Oscuro';
 
-
-  localStorage.setItem(
-    'familias_theme',
-    t
-  );
-
+  savePreference('familias_theme', t);
 }
 
-
-
 applyTheme(
-
-  localStorage.getItem(
-    'familias_theme'
-  )
-  ||
-  'light'
-
+  readPreference('familias_theme') || 'light'
 );
 
-
-
-themeBtn.onclick =
-() => {
-
+themeBtn.onclick = () => {
   const actual =
-  document.documentElement
-  .getAttribute(
-    'data-theme'
-  );
-
-
-  applyTheme(
-    actual === 'dark'
-    ? 'light'
-    : 'dark'
-  );
-
-};
-
-
-
-/* ==================================================
-   GUARDAR ID
-================================================== */
-
-$('#saveBtn').onclick =
-() => {
-
-  const v =
-  $('#idInput')
-  .value
-  .trim();
-
-
-  if(
-    !v
-  ){
-
-    alert(
-      'Escriba el ID escolar.'
+    document.documentElement.getAttribute(
+      'data-theme'
     );
 
-    return;
+  applyTheme(
+    actual === 'dark' ? 'light' : 'dark'
+  );
+};
 
+/* GUARDAR ID */
+
+$('#saveBtn').onclick = () => {
+  const v = $('#idInput')
+    .value
+    .trim()
+    .toUpperCase();
+
+  if (!v) {
+    alert('Escriba el ID escolar.');
+    return;
   }
 
-
-  localStorage.setItem(
+  const ok = savePreference(
     'familias_id',
     v
   );
 
-
   alert(
-    'Listo. Guardado en este dispositivo.'
+    ok
+      ? 'Listo. Guardado en este dispositivo.'
+      : 'Este navegador no permite recordar el ID. Puede seguir consultándolo.'
   );
-
 };
 
+/* BUSCAR ALUMNO */
 
+$('#goBtn').onclick = async () => {
+  const id = $('#idInput')
+    .value
+    .trim()
+    .toUpperCase();
 
-/* ==================================================
-   BUSCAR ALUMNO
-================================================== */
-
-$('#goBtn').onclick =
-async () => {
-
-  const id =
-  $('#idInput')
-  .value
-  .trim()
-  .toUpperCase();
-
-
-  if(
-    !/^ID[A-Z0-9]{6,}$/.test(id)
-  ){
-
+  if (!/^ID[A-Z0-9]{6,}$/.test(id)) {
     alert(
       'ID no válido. Revise que no tenga espacios.'
     );
 
     return;
-
   }
 
+  const btn = $('#goBtn');
 
-  try{
+  btn.disabled = true;
+  btn.textContent = 'Buscando…';
 
-    await cargarAlumnoPorID(
-      id
-    );
+  $('#idInput').value = id;
 
-  }
-  catch(e){
+  $('#search-status').textContent =
+    'Consultando tareas y asistencia…';
 
+  try {
+    await cargarAlumnoPorID(id);
+
+    $('#search-status').textContent = '';
+
+  } catch (e) {
     console.error(e);
 
+    $('#search-status').textContent =
+      'No fue posible leer los datos: ' + e.message;
 
-    alert(
-      'No fue posible leer los datos: ' +
-      e.message
-    );
-
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Buscar alumno';
   }
-
 };
-
-
 
 /* ENTER */
 
-$('#idInput')
-.addEventListener(
-  'keydown',
-  e => {
-
-    if(
-      e.key ===
-      'Enter'
-    ){
-
-      $('#goBtn')
-      .click();
-
-    }
-
+$('#idInput').addEventListener('keydown', e => {
+  if (
+    e.key === 'Enter' &&
+    !$('#goBtn').disabled
+  ) {
+    $('#goBtn').click();
   }
-);
+});
 
+/* ID GUARDADO */
 
+const saved = readPreference('familias_id');
 
-/* ==================================================
-   ID GUARDADO
-================================================== */
-
-const saved =
-localStorage.getItem(
-  'familias_id'
-);
-
-
-if(
-  saved
-){
-
-  $('#idInput').value =
-  saved;
-
+if (saved) {
+  $('#idInput').value = saved;
 }
 
+/* CAMBIAR ALUMNO */
 
+$('#backBtn').addEventListener('click', () => {
+  loadGeneration++;
 
-/* ==================================================
-   CAMBIAR ALUMNO
-================================================== */
+  $('#student-view').style.display = 'none';
 
-$('#backBtn')
-?.addEventListener(
-  'click',
-  () => {
+  $('#search-status').textContent = '';
 
-    $('#student-view')
-    .style
-    .display =
-    'none';
+  $('#idInput').focus();
 
-
-    window.scrollTo({
-
-      top:0,
-
-      behavior:
-      'smooth'
-
-    });
-
-  }
-);
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth'
+  });
+});
 
 </script>
 
