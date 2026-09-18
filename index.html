@@ -2,1899 +2,1221 @@
 <html lang="es" data-theme="light">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Aula Digital — Consulta para familias</title>
-
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>Aula Digital — Familias</title>
 <style>
-  :root{
-    --bg:#f7f9ff;
-    --card:#ffffff;
-    --text:#0b1020;
-    --muted:#526072;
-    --accent:#2b6bff;
-    --bd:#d9e3ff;
-    --ok:#0ea371;
-    --warn:#f0b429;
-    --bad:#ef4444;
-    --barbg:color-mix(in oklab,var(--card) 80%,transparent);
-  }
-
-  [data-theme="dark"]{
-    --bg:#0c1220;
-    --card:#101a34;
-    --text:#eaf3ff;
-    --muted:#93a6bc;
-    --accent:#6aa9ff;
-    --bd:#223056;
-    --ok:#1ec48d;
-    --warn:#ffce3a;
-    --bad:#ff7a7a;
-    --barbg:#0a1330;
-  }
-
-  *{
-    box-sizing:border-box;
-  }
-
-  body{
-    margin:0;
-    font-family:system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial;
-    background:var(--bg);
-    color:var(--text);
-  }
-
-  header{
-    position:sticky;
-    top:0;
-    z-index:10;
-    background:color-mix(in oklab,var(--card) 90%,transparent);
-    backdrop-filter:blur(6px);
-    border-bottom:1px solid var(--bd);
-    padding:14px 16px;
-    display:flex;
-    gap:12px;
-    align-items:center;
-  }
-
-  header h1{
-    font-size:18px;
-    margin:0;
-  }
-
-  header .right{
-    margin-left:auto;
-    display:flex;
-    gap:8px;
-    align-items:center;
-  }
-
-  .btn{
-    border:0;
-    border-radius:12px;
-    padding:12px 16px;
-    font-weight:700;
-    cursor:pointer;
-    touch-action:manipulation;
-  }
-
-  .btn.primary{
-    background:var(--accent);
-    color:white;
-  }
-
-  .btn.ghost{
-    background:transparent;
-    border:1px solid var(--bd);
-    color:var(--text);
-  }
-
-  .btn.small{
-    padding:8px 10px;
-    border-radius:10px;
-  }
-
-  .btn:disabled{
-    cursor:wait;
-    opacity:.7;
-  }
-
-  main{
-    max-width:960px;
-    margin:auto;
-    padding:18px;
-  }
-
-  .card{
-    background:var(--card);
-    border:1px solid var(--bd);
-    border-radius:16px;
-    padding:16px;
-  }
-
-  .hero{
-    display:grid;
-    gap:12px;
-  }
-
-  .input{
-    display:grid;
-    grid-template-columns:1fr auto auto;
-    gap:8px;
-  }
-
-  .input input{
-    min-width:0;
-    padding:14px 16px;
-    border:1px solid var(--bd);
-    border-radius:12px;
-    background:white;
-    font-size:16px;
-  }
-
-  [data-theme="dark"] .input input{
-    background:#0d152b;
-    color:var(--text);
-  }
-
-  .hint{
-    color:var(--muted);
-    font-size:13px;
-  }
-
-  h2{
-    margin:8px 0 6px 0;
-  }
-
-  h3{
-    margin:10px 0 8px 0;
-  }
-
-  .grid2{
-    display:grid;
-    grid-template-columns:1fr;
-    gap:12px;
-  }
-
-  .list{
-    display:grid;
-    gap:8px;
-  }
-
-  details{
-    border:1px solid var(--bd);
-    border-radius:12px;
-    padding:8px 10px;
-    background:color-mix(in oklab,var(--card) 94%,transparent);
-    overflow-wrap:anywhere;
-  }
-
-  summary{
-    cursor:pointer;
-    font-weight:700;
-  }
-
-  .stat{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:12px;
-  }
-
-  .k{
-    color:var(--muted);
-    font-size:14px;
-  }
-
-  .v{
-    font-weight:900;
-    font-size:20px;
-  }
-
-  .chips{
-    display:flex;
-    gap:8px;
-    flex-wrap:wrap;
-    margin-top:4px;
-  }
-
-  .chip{
-    border:1px solid var(--bd);
-    background:transparent;
-    color:var(--text);
-    border-radius:999px;
-    padding:10px 14px;
-    font-weight:700;
-    cursor:pointer;
-  }
-
-  .chip.active{
-    background:var(--accent);
-    color:#fff;
-    border-color:var(--accent);
-  }
-
-  .topbar{
-    display:flex;
-    gap:8px;
-    align-items:center;
-    justify-content:space-between;
-    flex-wrap:wrap;
-  }
-
-  .badgeb{
-    display:inline-flex;
-    gap:6px;
-    align-items:center;
-    border:1px solid var(--bd);
-    border-radius:999px;
-    padding:6px 10px;
-    font-size:12px;
-  }
-
-  .footer-note{
-    margin-top:12px;
-    font-size:12px;
-    color:var(--muted);
-  }
-
-  .chart{
-    display:grid;
-    gap:10px;
-    margin-top:14px;
-  }
-
-  .bar{
-    position:relative;
-    border-radius:12px;
-    border:1px solid var(--bd);
-    background:var(--barbg);
-    height:44px;
-    display:flex;
-    align-items:center;
-    overflow:hidden;
-  }
-
-  .bar::before{
-    content:"";
-    position:absolute;
-    inset:0;
-    transform-origin:left center;
-    transform:scaleX(var(--pct,0));
-  }
-
-  .bar.fal::before{
-    background:linear-gradient(90deg,var(--bad),#ff9b9b);
-  }
-
-  .bar.tar::before{
-    background:linear-gradient(90deg,var(--warn),#ffe08a);
-  }
-
-  .bar.ati::before{
-    background:linear-gradient(90deg,var(--ok),#a7efd5);
-  }
-
-  .bar .lbl{
-    position:relative;
-    z-index:1;
-    padding-left:12px;
-    font-weight:800;
-  }
-
-  .bar .val{
-    position:absolute;
-    right:10px;
-    z-index:1;
-    font-weight:900;
-  }
-
-  .linkbtn{
-    display:inline-block;
-    margin-left:8px;
-    border:1px solid var(--bd);
-    padding:4px 8px;
-    border-radius:999px;
-    font-size:12px;
-    text-decoration:none;
-    color:var(--accent);
-  }
-
-  @media(max-width:640px){
-    .input,
-    .stat{
-      grid-template-columns:1fr;
-    }
-  }
-
-  @media(min-width:840px){
-    .grid2{
-      grid-template-columns:1fr 1fr;
-    }
-  }
+:root{
+  --bg:#f4f6fa;--surface:#fff;--soft:#f7f9fc;--ink:#1b2b45;--muted:#5b6b81;
+  --line:#e1e7f0;--accent:#3855cf;--accent-soft:#edf1ff;--accent-text:#304ab4;
+  --navy:#203762;--on-navy:#fff;--good:#126b55;--good-bg:#e9f6ef;
+  --pending:#8b510c;--pending-bg:#fff4df;--late:#6553a1;--late-bg:#f0ecfa;
+  --error:#b33332;--error-bg:#fff0ef;--shadow:0 6px 26px rgba(31,52,87,.035);
+  --radius:20px;--blue-bg:#edf3ff;--blue:#2554a8;--red-bg:#fff0ec;--red:#9c4437;
+  --green-bg:#ebf5ee;--green:#386b42;--pink-bg:#fcecf5;--pink:#96436e;
+}
+[data-theme="dark"]{
+  --bg:#0e1521;--surface:#162130;--soft:#1b293b;--ink:#edf2fa;--muted:#b0bfd2;
+  --line:#35465e;--accent:#6280f4;--accent-soft:#26365d;--accent-text:#bbc9ff;
+  --navy:#283e63;--on-navy:#fff;--good:#8ce0b8;--good-bg:#173a30;
+  --pending:#ffcf83;--pending-bg:#3b2d1b;--late:#d1bdfd;--late-bg:#312a48;
+  --error:#ffb0a9;--error-bg:#462825;--shadow:none;
+  --blue-bg:#203653;--blue:#b5d1ff;--red-bg:#412e2d;--red:#ffc0ac;
+  --green-bg:#243c2b;--green:#b2dfb6;--pink-bg:#432e42;--pink:#f6badf;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{scroll-padding-top:98px;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
+button,input,select{font:inherit}
+button,a,input,select,summary{-webkit-tap-highlight-color:transparent}
+button{cursor:pointer}button:disabled{cursor:default;opacity:.5}
+a{color:var(--accent-text)}
+:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+h1,h2,h3,h4,p{margin:0}h1,h2,h3,h4{line-height:1.2}
+.icon{width:20px;height:20px;stroke:currentColor;stroke-width:1.75;fill:none;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.skip{position:fixed;top:-100px;left:12px;z-index:100;background:var(--surface);padding:12px;border:2px solid var(--accent);border-radius:10px}.skip:focus{top:10px}
+.header{background:var(--surface);border-bottom:1px solid var(--line)}
+.header-inner{max-width:1176px;margin:auto;padding:17px 28px;display:flex;align-items:center;gap:12px}
+.brand{display:flex;align-items:center;gap:12px}
+.brand-mark{display:grid;place-items:center;background:var(--navy);color:#fff;width:43px;height:43px;border-radius:13px}
+.brand-mark .icon{width:25px;height:25px}
+.brand-name{font-weight:800;font-size:18px;letter-spacing:-.6px}
+.brand-description{font-size:12px;color:var(--muted);margin-top:1px}
+.header-right{margin-left:auto;display:flex;align-items:center;gap:14px}
+.header-tag{font-size:12px;border-left:1px solid var(--line);padding-left:14px;color:var(--muted)}
+.btn{min-height:44px;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 15px;border:1px solid var(--line);border-radius:11px;background:var(--surface);color:var(--ink);font-weight:650;font-size:14px;text-decoration:none;touch-action:manipulation;line-height:1.3}
+.btn:hover{background:var(--soft)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}.btn.primary:hover{filter:brightness(.94)}
+.btn.subtle{background:transparent;border-color:transparent;color:var(--muted)}
+.btn.compact{padding:8px 11px}.btn.icon-only{width:44px;min-width:44px;padding:10px}
+.text-button{border:0;background:transparent;color:var(--accent-text);font-size:13px;font-weight:650;min-height:44px;padding:8px 4px;text-decoration:underline;text-underline-offset:3px}
+.page{max-width:1176px;padding:26px 28px 40px;margin:auto}
+.eyebrow{font-size:11px;font-weight:750;letter-spacing:1.4px;text-transform:uppercase;color:var(--muted)}
+.muted{color:var(--muted)}.small{font-size:13px}.section-gap{margin-top:24px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+.login{min-height:calc(100svh - 160px);display:grid;grid-template-columns:1fr 430px;align-items:center;gap:72px;max-width:1020px;margin:auto}
+.login-copy h1{font-size:clamp(36px,4.5vw,54px);font-weight:780;letter-spacing:-2.3px;line-height:1.1;margin:18px 0 20px;max-width:540px}
+.login-copy h1 span{color:var(--accent-text)}
+.login-copy>p{color:var(--muted);font-size:17px;max-width:450px;line-height:1.75}
+.login-benefits{display:grid;gap:18px;margin-top:32px}
+.benefit{display:flex;gap:13px;align-items:center;font-size:14px}
+.benefit-icon{width:38px;height:38px;border:1px solid var(--line);border-radius:11px;display:grid;place-items:center;background:var(--surface);color:var(--accent-text)}
+.login-card{padding:32px}
+.login-card h2{font-size:24px;letter-spacing:-.7px;margin:11px 0}
+.field-label{display:block;font-size:13px;font-weight:700;margin-bottom:8px}
+.field{width:100%;min-width:0;min-height:50px;border:1px solid var(--line);border-radius:11px;background:var(--surface);color:var(--ink);padding:12px 14px;font-size:16px}
+.field[aria-invalid="true"]{border-color:var(--error)}
+.login-card .field-label{margin-top:26px}
+.login-card .btn.primary{width:100%;margin-top:22px;min-height:50px;font-size:15px}
+.check-label{display:flex;align-items:center;gap:10px;min-height:44px;font-size:13px;margin-top:10px;color:var(--muted);cursor:pointer}
+.check-label input{width:19px;height:19px;accent-color:var(--accent);flex-shrink:0}
+.login-foot{font-size:12px;line-height:1.6;color:var(--muted);border-top:1px solid var(--line);padding-top:18px;margin-top:18px}
+.feedback:not(:empty){padding:12px 14px;background:var(--accent-soft);border-radius:11px;color:var(--accent-text);font-size:13px;margin-top:12px}
+.feedback.error{background:var(--error-bg);color:var(--error)}
+.profile{display:flex;gap:16px;align-items:center;padding:20px 24px}
+.avatar{width:52px;height:52px;display:grid;place-items:center;border-radius:16px;color:var(--accent-text);background:var(--accent-soft);font-size:18px;font-weight:750;flex-shrink:0}
+.student-info{min-width:0;flex:1}.student-info h1{font-size:20px;letter-spacing:-.5px;overflow-wrap:anywhere;margin:4px 0 6px}
+.student-line{display:flex;gap:8px 12px;align-items:center;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+.group-label{color:var(--accent-text);background:var(--accent-soft);border-radius:6px;padding:2px 7px;font-size:11px;font-weight:700}
+.profile-actions{display:flex;gap:8px;flex-wrap:wrap}
+.page-tabs{display:flex;gap:28px;border-bottom:1px solid var(--line);margin:22px 0 24px}
+.page-tab{position:relative;display:flex;align-items:center;gap:8px;min-height:50px;border:0;background:transparent;color:var(--muted);font-size:14px;font-weight:700;padding:10px 3px 16px}
+.page-tab.active{color:var(--accent-text)}.page-tab.active:after{content:"";position:absolute;bottom:-1px;left:0;right:0;height:3px;background:var(--accent);border-radius:3px 3px 0 0}
+.nav-refresh{margin-left:auto;align-self:center;margin-bottom:8px;font-size:12px}
+.tab-count{font-size:11px;border-radius:6px;min-width:21px;padding:1px 6px;background:var(--pending-bg);color:var(--pending)}
+.page-heading{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:20px}
+.page-heading h2{font-size:30px;letter-spacing:-1.1px;margin-bottom:7px}.page-heading p{font-size:14px;color:var(--muted)}
+.period-wrap{display:flex;align-items:center;gap:10px;flex-shrink:0}.period-wrap label{font-size:12px;color:var(--muted)}
+select{min-height:44px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);padding:8px 30px 8px 12px;font-size:13px;font-weight:650;max-width:100%}
+.summary-scope{font-size:11px;color:var(--muted);margin-bottom:8px}
+.summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.metric{padding:18px 20px;background:var(--surface);border:1px solid var(--line);border-radius:16px;min-width:0}
+button.metric{text-align:left;color:var(--ink);font:inherit;cursor:pointer}
+.metric.attention{background:var(--pending-bg);border-color:transparent}
+.metric-top{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:13px;font-weight:650}
+.metric-top .icon{color:var(--muted);width:18px;height:18px}.metric.attention .metric-top .icon{color:var(--pending)}
+.metric-number{font-weight:780;font-size:34px;letter-spacing:-1.2px;line-height:1.15;display:inline-block;margin-top:9px}
+.metric.attention .metric-number{color:var(--pending)}
+.metric-sub{font-size:12px;color:var(--muted);display:block;margin-top:5px}
+.metric-small{font-size:14px;color:var(--muted);font-weight:500;letter-spacing:0}
+.progress-track{height:5px;background:var(--line);border-radius:8px;overflow:hidden;margin-top:12px}.progress-fill{height:100%;width:0;background:var(--accent);border-radius:8px}
+.publish-note{display:flex;align-items:flex-start;gap:9px;color:var(--muted);font-size:12px;margin:14px 0 24px;line-height:1.6}.publish-note .icon{width:16px;height:16px;margin-top:2px}
+.board{display:grid;grid-template-columns:minmax(0,1fr) 336px;grid-template-areas:"filters calendar" "agenda calendar";gap:18px 24px;align-items:start}
+.filters{grid-area:filters;min-width:0}.agenda{grid-area:agenda;min-width:0}.calendar-panel{grid-area:calendar;min-width:0}
+.status-filters{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));padding:5px;gap:4px;border:1px solid var(--line);border-radius:13px;background:var(--surface)}
+.filter-button{min-width:0;flex-wrap:wrap;min-height:44px;border:0;border-radius:9px;background:transparent;color:var(--muted);display:flex;align-items:center;justify-content:center;gap:8px;font-size:13px;font-weight:700;padding:8px}
+.filter-button.active{background:var(--navy);color:var(--on-navy)}
+.filter-count{font-size:11px;border-radius:5px;padding:1px 5px;background:var(--soft);color:var(--muted)}
+.filter-button.active .filter-count{background:rgba(255,255,255,.17);color:#fff}
+.search-row{margin-top:12px;display:flex;gap:10px}.search-box{flex:1;position:relative;min-width:0}
+.search-box>.icon{position:absolute;left:13px;top:15px;color:var(--muted);width:18px;height:18px}
+.search-box input{padding:12px 45px 12px 41px;min-height:48px;font-size:14px}
+.search-clear{position:absolute;right:2px;top:2px;border:0;background:transparent;color:var(--muted);width:44px;height:44px;display:grid;place-items:center}
+.date-filters{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:12px}
+.date-chip{min-height:44px;padding:8px 12px;border:1px solid transparent;border-radius:9px;background:transparent;color:var(--muted);font-size:12px;font-weight:650}
+.date-chip.active{color:var(--accent-text);background:var(--accent-soft);border-color:transparent}
+.calendar-toggle{display:none}
+.compact-label,.calendar-close{display:none}
+.calendar-title-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.results-header{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:14px}
+.results-header h3{font-size:17px;letter-spacing:-.4px}.results-header p{font-size:12px;color:var(--muted);margin-top:6px}
+.results-header .text-button{margin-top:-10px;flex-shrink:0;font-size:12px}
+.other-pending{display:flex;gap:12px;justify-content:space-between;align-items:center;padding:10px 14px;border:1px solid var(--line);border-radius:12px;background:var(--surface);font-size:12px;margin-bottom:14px}
+.other-pending .text-button{white-space:nowrap;font-size:12px}
+.day-groups{display:grid;gap:12px}
+.day-block{background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);overflow:hidden}
+.day-summary{display:flex;align-items:center;gap:14px;padding:17px 18px;cursor:pointer;list-style:none;min-height:88px}
+.day-summary::-webkit-details-marker{display:none}
+.date-tile{width:47px;min-width:47px;border:1px solid var(--line);border-radius:11px;padding:5px 2px;text-align:center;background:var(--soft)}
+.date-tile .day-number{font-weight:750;font-size:21px;line-height:1.1;display:block;letter-spacing:-.6px}
+.date-tile .day-month{font-size:9px;font-weight:750;text-transform:uppercase;letter-spacing:.8px;display:block;margin-top:3px;color:var(--muted)}
+.day-title{flex:1;min-width:0}.date-heading{display:block;font-size:14px;font-weight:750;letter-spacing:-.2px}
+.day-title .day-sub{font-size:11px;color:var(--muted);display:block;margin-top:5px}
+.day-summary .chevron{width:18px;height:18px;transition:transform .15s;color:var(--muted)}
+.day-block[open] .day-summary .chevron{transform:rotate(180deg)}
+.day-count{font-size:11px;font-weight:650;padding:4px 8px;border-radius:7px;background:var(--pending-bg);color:var(--pending);white-space:nowrap}
+.day-count.done{background:var(--good-bg);color:var(--good)}
+.day-count.all{background:var(--soft);color:var(--muted)}
+.day-block[open] .day-summary{border-bottom:1px solid var(--line)}
+.work-list{padding:0 18px}.work-item{padding:17px 0;border-bottom:1px solid var(--line);overflow-wrap:anywhere}.work-item:last-child{border-bottom:0}
+.work-top{display:flex;gap:10px;justify-content:space-between;align-items:flex-start;flex-wrap:wrap}
+.subject{font-size:10px;font-weight:700;letter-spacing:.15px;color:var(--muted);background:var(--soft);padding:4px 7px;border-radius:6px;max-width:100%;line-height:1.5}
+.subject.language{background:var(--blue-bg);color:var(--blue)}.subject.science{background:var(--red-bg);color:var(--red)}.subject.ethics{background:var(--green-bg);color:var(--green)}.subject.community{background:var(--pink-bg);color:var(--pink)}
+.work-status{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:650;white-space:nowrap;color:var(--pending);padding:3px 0;line-height:1.5}
+.work-status .icon{width:13px;height:13px}.work-status.ontime{color:var(--good)}.work-status.late{color:var(--late)}
+.work-title{font-size:15px;font-weight:700;line-height:1.5;margin-top:9px;letter-spacing:-.2px}
+.work-meta{font-size:12px;color:var(--muted);display:flex;gap:5px 13px;flex-wrap:wrap;margin-top:4px}
+.evidence{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.evidence a{font-size:12px;padding:8px 10px;min-height:44px}.evidence .icon{width:15px;height:15px}
+.more-works{width:100%;border:0;border-top:1px solid var(--line);min-height:48px;font-size:12px;font-weight:700;color:var(--accent-text);background:var(--soft)}
+.pagination{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-top:17px}.pagination p{font-size:12px;color:var(--muted)}
+.empty-state{padding:32px 24px;text-align:center;border:1px dashed var(--line);border-radius:16px;background:var(--surface)}
+.empty-icon{width:48px;height:48px;display:grid;place-items:center;border-radius:15px;background:var(--accent-soft);color:var(--accent-text);margin:0 auto 14px}
+.empty-state h4{font-size:17px;margin-bottom:10px}.empty-state p{font-size:13px;color:var(--muted);line-height:1.7;max-width:390px;margin:auto}.empty-state .btn{margin-top:18px}
+.calendar-card{padding:19px;background:var(--surface);border:1px solid var(--line);border-radius:18px}
+.calendar-heading{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:750;letter-spacing:-.3px}
+.calendar-heading .icon{width:18px;height:18px;color:var(--accent-text)}
+.calendar-caption{font-size:12px;color:var(--muted);margin-top:6px}
+.month-navigation{display:flex;align-items:center;gap:3px;margin:15px -5px 8px}
+.month-select{min-width:0;flex:1;border-color:transparent;background:transparent;padding-left:5px;font-size:13px;font-weight:700}
+.month-navigation .btn{border:0;background:transparent}
+.weekdays,.calendar-days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px}
+.weekdays span{font-size:10px;font-weight:650;text-align:center;color:var(--muted);padding:6px 0 10px}
+.calendar-days{row-gap:5px}
+.calendar-day{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;width:100%;min-height:48px;border:1px solid transparent;border-radius:9px;background:transparent;color:var(--ink);font-size:12px;line-height:1.15;padding:5px 1px}
+.calendar-day.has-pending{background:var(--pending-bg);color:var(--pending)}
+.calendar-day.complete{background:var(--good-bg);color:var(--good)}
+.calendar-day.is-today{border-color:var(--accent);font-weight:800}
+.calendar-day.selected{background:var(--navy);border-color:var(--navy);color:#fff}
+.calendar-day:disabled{opacity:.35}.calendar-mark{font-size:8px;min-height:10px;font-weight:700;line-height:1}
+.calendar-key{display:flex;gap:10px;flex-wrap:wrap;font-size:10px;margin-top:16px;color:var(--muted);padding-top:14px;border-top:1px solid var(--line)}
+.calendar-key span{display:flex;gap:5px;align-items:center}.key-symbol{font-weight:750;border-radius:3px;padding:2px 4px;background:var(--pending-bg);color:var(--pending)}.key-symbol.done{background:var(--good-bg);color:var(--good)}
+.calendar-scope{font-size:10px;color:var(--muted);line-height:1.6;margin-top:12px}
+.help-card{margin-top:16px;border:1px solid var(--line);border-radius:15px;padding:0 17px;background:transparent}
+.help-card summary{min-height:52px;cursor:pointer;font-size:12px;font-weight:700;display:flex;gap:10px;align-items:center;list-style:none}.help-card summary::-webkit-details-marker{display:none}.help-card summary>.icon{width:16px;height:16px;color:var(--muted)}
+.help-card p{font-size:12px;color:var(--muted);line-height:1.75;margin:0 0 15px}.help-card strong{color:var(--ink)}
+.attendance-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:24px}
+.attendance-grid .metric-number{color:var(--good)}
+.attendance-history{padding:22px;margin-top:22px;max-width:750px}.attendance-history h3{font-size:17px;letter-spacing:-.4px}.attendance-history>p{font-size:12px;color:var(--muted);margin-top:6px}
+.attendance-row{display:flex;gap:10px;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--line);font-size:13px}.attendance-row:last-child{border:0}
+.attendance-status{padding:4px 9px;border-radius:7px;font-size:11px;font-weight:650;background:var(--good-bg);color:var(--good);white-space:nowrap}.attendance-status.absent{background:var(--pending-bg);color:var(--pending)}
+.attendance-note{max-width:750px;display:flex;align-items:flex-start;gap:12px;padding:16px 18px;background:var(--accent-soft);color:var(--accent-text);border-radius:12px;margin-top:16px;font-size:12px;line-height:1.7}
+.footer{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;padding-top:26px;margin-top:28px;border-top:1px solid var(--line);color:var(--muted);font-size:11px}
+.loading .refresh-icon{animation:turn 1s linear infinite}@keyframes turn{to{transform:rotate(360deg)}}
+@media(hover:hover){.day-summary:hover{background:var(--soft)}.calendar-day:not(:disabled):hover{outline:1px solid var(--accent)}button.metric:hover{box-shadow:inset 0 0 0 1px var(--pending)}}
+@media(max-width:900px){
+  .page{padding:20px}.header-inner{padding:14px 20px}.login{gap:35px;grid-template-columns:1fr 390px}.login-copy h1{font-size:40px}
+  .board{grid-template-columns:minmax(0,1fr) 305px;gap:18px}.calendar-card{padding:15px}.metric{padding:16px}.header-tag{display:none}
+}
+@media(max-width:760px){
+  html{scroll-padding-top:calc(78px + env(safe-area-inset-top,0px))}
+  .page{padding:16px max(16px,env(safe-area-inset-right,0px)) max(30px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+  .header-inner{padding:12px max(16px,env(safe-area-inset-right,0px)) 12px max(16px,env(safe-area-inset-left,0px))}.brand-name{font-size:17px}.brand-description{font-size:11px}.brand-mark{width:37px;height:37px;border-radius:11px}.brand-mark .icon{width:22px;height:22px}
+  .login{min-height:auto;display:block;max-width:460px;padding-top:12px}.login-copy h1{font-size:34px;letter-spacing:-1.3px;margin:13px 0}.login-copy>p{font-size:15px;line-height:1.65}.login-benefits{display:none}.login-card{margin-top:22px;padding:22px}.login-card h2{font-size:22px}.login-card .field-label{margin-top:20px}
+  .profile{padding:14px;gap:11px;display:grid;grid-template-columns:42px minmax(0,1fr) auto;align-items:start}.avatar{width:42px;height:42px;border-radius:13px;font-size:15px}.student-info h1{font-size:17px;line-height:1.35;margin-top:0}.student-line{font-size:11px;gap:6px 8px;overflow-wrap:anywhere}.group-label{font-size:11px}#last-update{flex-basis:100%}
+  .profile-actions{padding:0;border:0}.profile-actions .btn{font-size:12px;padding:8px 2px;min-height:44px}.profile .eyebrow{display:none}
+  .page-tabs{position:sticky;top:0;z-index:20;background:var(--bg);padding-top:env(safe-area-inset-top,0px);margin:10px 0 16px;gap:14px;box-shadow:0 5px 10px var(--bg)}.nav-refresh{width:44px;min-width:44px;padding:10px;margin-bottom:3px}.nav-refresh>span{display:none}.page-tab{font-size:14px;min-height:54px;padding:12px 2px;gap:6px}.page-tab>.icon{width:18px;height:18px}
+  .page-heading{align-items:center;gap:12px;margin-bottom:12px}.page-heading>div:first-child{min-width:0}.page-heading h2{font-size:23px;letter-spacing:-.7px;margin:0}.page-heading p{font-size:13px;line-height:1.65;margin-top:7px}#works-panel>.page-heading p{display:none}
+  .period-wrap{min-width:0;max-width:53%;flex-shrink:1}.period-wrap label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}.period-wrap select{width:100%;min-width:0;padding:9px 24px 9px 10px;font-size:16px}
+  .summary{gap:8px}.metric{padding:12px 10px;border-radius:13px}.metric-top{font-size:12px;overflow-wrap:anywhere}.metric-top>.icon{display:none}.metric-number{font-size:29px;margin-top:7px}.metric-sub{font-size:12px;line-height:1.5}.summary .metric:first-child .metric-sub,.summary .metric:last-child .metric-sub{display:none}.metric-small{font-size:12px}.summary-scope{font-size:11px;margin-bottom:9px}.progress-track{margin-top:10px}
+  .publish-note{font-size:12px;margin:12px 0 18px}.board{grid-template-columns:minmax(0,1fr);grid-template-areas:"filters" "calendar" "agenda";gap:16px}
+  .calendar-panel{display:none}.calendar-open .calendar-panel{display:block}.calendar-toggle{display:inline-flex;font-size:12px;padding:8px 4px;gap:4px;min-width:0;background:var(--surface)}.calendar-toggle .icon{width:15px;height:15px}.calendar-toggle.active,.calendar-toggle[aria-expanded="true"]{color:var(--accent-text);background:var(--accent-soft);border-color:var(--accent)}
+  .calendar-close{display:inline-flex}.calendar-card{max-width:440px;margin:auto;padding:14px}.calendar-day{min-height:50px;font-size:15px}.calendar-mark{font-size:10px}.weekdays span{font-size:12px}.calendar-caption{font-size:13px}.calendar-key,.calendar-scope{font-size:12px}.calendar-panel .help-card{display:none}.month-select{font-size:16px}
+  .filter-button{font-size:13px;gap:5px;padding:8px 4px;min-height:46px}.filter-count{font-size:11px}.date-filters{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;margin-top:10px}.date-chip{font-size:13px;padding:8px 4px;min-width:0}.compact-label{display:inline}.wide-label{display:none}.search-row{margin-top:10px}.search-box input{font-size:16px}.search-box input::-webkit-search-cancel-button{-webkit-appearance:none}
+  .results-header{gap:10px}.results-header>div{min-width:0}.results-header h3{font-size:17px}.results-header p{font-size:13px;overflow-wrap:anywhere}.results-header .text-button{font-size:12px;max-width:84px;white-space:normal}.other-pending{font-size:13px;flex-wrap:wrap;gap:2px 10px;padding:10px 12px}
+  .day-summary{display:grid;grid-template-columns:44px minmax(0,1fr) 18px;grid-template-areas:"date title arrow" "date count arrow";gap:7px 11px;padding:14px;min-height:94px}.date-tile{grid-area:date;width:44px;min-width:44px}.day-title{grid-area:title}.day-summary .chevron{grid-area:arrow;width:18px;height:18px}.date-heading{font-size:15px;line-height:1.4;overflow-wrap:anywhere}.day-title .day-sub{display:none}.day-count{grid-area:count;justify-self:start;font-size:12px;padding:3px 7px;white-space:normal}.date-tile .day-number{font-size:22px}.date-tile .day-month{font-size:10px}
+  .work-list{padding:0 15px}.work-item{padding:18px 0}.work-title{font-size:16px;line-height:1.5;margin-top:10px}.work-status,.subject{font-size:12px}.work-status{white-space:nowrap;flex-shrink:0;overflow-wrap:normal}.work-status .icon{width:15px;height:15px}.work-top{gap:7px 10px}.work-meta{font-size:13px;line-height:1.6;margin-top:6px}.evidence a{font-size:13px;min-height:46px;padding:10px 12px}.more-works{font-size:13px;padding:12px}
+  .pagination{justify-content:center;flex-direction:column}.pagination .btn{width:100%;min-height:48px}.attendance-grid{grid-template-columns:1fr;gap:10px}.attendance-grid .metric{padding:20px}.attendance-grid .metric-top{font-size:14px}.attendance-grid .metric-sub{font-size:13px}.attendance-grid .metric-number{font-size:32px}.attendance-history{padding:18px}.attendance-row{font-size:14px}.attendance-status{font-size:12px}.attendance-note{font-size:13px}.help-card summary,.help-card p{font-size:13px}.footer{font-size:11px;line-height:1.7}
+}
+@media(max-width:360px){.page{padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px))}.header-inner{gap:8px}.brand{gap:8px}.header-right{gap:0}#themeBtn>span{display:none}#themeBtn{min-width:44px}.profile{grid-template-columns:34px minmax(0,1fr) auto;gap:8px;padding:12px}.avatar{width:34px;height:38px;font-size:13px}.student-info h1{font-size:16px}.page-tabs{gap:10px}.page-tab{font-size:13px}.page-heading h2{font-size:21px}.metric{padding:10px 8px}.metric-number{font-size:27px}.day-summary{gap:7px 9px;padding:12px}.calendar-card{padding:12px}.login-card{padding:20px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 </style>
 </head>
-
 <body>
-
-<header>
-  <h1>👪 Aula Digital — Consulta para familias</h1>
-
-  <div class="right">
-    <button
-      id="themeBtn"
-      class="btn ghost small"
-      title="Cambiar tema">
-      🌙 Oscuro
-    </button>
-  </div>
-</header>
-
-<main>
-
-  <!-- ACCESO -->
-
-  <section class="card hero" id="search-card">
-
-    <div>
-      <h2>Encuentre el progreso de su hijo(a)</h2>
-
-      <p class="hint">
-        Escriba el <b>ID escolar</b> que le proporcionó la escuela
-        para consultar tareas y asistencia.
-      </p>
+<!-- Los SVG son iconos locales: no se descargan fuentes, imágenes ni librerías. -->
+<svg xmlns="http://www.w3.org/2000/svg" style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true"><defs>
+<symbol id="i-book" viewBox="0 0 24 24"><path d="M12 5v15M12 5C8 2 4 3 2 4v15c3-1 7-1 10 1 3-2 7-2 10-1V4c-2-1-6-2-10 1Z"/></symbol>
+<symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M7 3v4m10-4v4M3 11h18M7 15h2m6 0h2m-10 3h2"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+<symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+<symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14m-5-5 5 5-5 5"/></symbol>
+<symbol id="i-chevron" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+<symbol id="i-left" viewBox="0 0 24 24"><path d="m15 6-6 6 6 6"/></symbol>
+<symbol id="i-right" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></symbol>
+<symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4 4"/></symbol>
+<symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M6 18 18 6"/></symbol>
+<symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 7v5h-5M4 17v-5h5M5.5 7a7.5 7.5 0 0 1 12-2L20 8M4 16l2.5 3a7.5 7.5 0 0 0 12-2"/></symbol>
+<symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8" cy="8" r="1.5"/><path d="m3 17 5-5 4 4 4-6 5 7"/></symbol>
+<symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6m0-10v1"/></symbol>
+<symbol id="i-moon" viewBox="0 0 24 24"><path d="M20.5 14A8.5 8.5 0 0 1 10 3.5 8.5 8.5 0 1 0 20.5 14Z"/></symbol>
+<symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/></symbol>
+<symbol id="i-list" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="3"/><path d="M9 8h6m-6 4h6m-6 4h4"/></symbol>
+<symbol id="i-shield" viewBox="0 0 24 24"><path d="m12 3 8 3v5c0 5-4 8-8 10-4-2-8-5-8-10V6l8-3Z"/><path d="m8 12 3 3 5-6"/></symbol>
+</defs></svg>
+<a class="skip" href="#main">Ir al contenido</a>
+<header class="header"><div class="header-inner">
+  <div class="brand"><div class="brand-mark"><svg class="icon" aria-hidden="true"><use href="#i-book"/></svg></div><div><div class="brand-name">Aula Digital</div><div class="brand-description">Un espacio para las familias</div></div></div>
+  <div class="header-right"><span class="header-tag">Primaria Los Insurgentes</span><button class="btn subtle compact" id="themeBtn" type="button" aria-label="Activar tema oscuro"><svg class="icon" aria-hidden="true"><use href="#i-moon"/></svg><span>Oscuro</span></button></div>
+</div></header>
+<main class="page" id="main">
+  <section id="search-card" class="login" aria-labelledby="welcome-title">
+    <div class="login-copy"><div class="eyebrow">Cerca de su aprendizaje</div><h1 id="welcome-title">Su día en la escuela,<br><span>más claro.</span></h1><p>Los trabajos, las entregas y la asistencia de su hijo(a), en un solo lugar y a su ritmo.</p>
+      <div class="login-benefits"><div class="benefit"><span class="benefit-icon"><svg class="icon" aria-hidden="true"><use href="#i-calendar"/></svg></span>Trabajos organizados por día</div><div class="benefit"><span class="benefit-icon"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span>Identifique fácilmente qué falta entregar</div><div class="benefit"><span class="benefit-icon"><svg class="icon" aria-hidden="true"><use href="#i-image"/></svg></span>Consulte las evidencias disponibles</div></div>
     </div>
-
-    <div class="input">
-
-      <input
-        id="idInput"
-        autocomplete="off"
-        autocapitalize="characters"
-        spellcheck="false"
-        aria-label="ID escolar"
-        placeholder="Pegue aquí el ID entregado por la escuela"
-        inputmode="text">
-
-      <button id="goBtn" class="btn primary">
-        Buscar alumno
-      </button>
-
-      <button id="saveBtn" class="btn ghost">
-        Recordar ID en este dispositivo
-      </button>
-
+    <div class="panel login-card"><div class="eyebrow">Consulta para familias</div><h2>Comencemos</h2><p class="small muted">Escriba el ID que le compartió el maestro.</p>
+      <form id="search-form" novalidate><label class="field-label" for="idInput">ID escolar</label><input id="idInput" class="field" placeholder="Escriba o pegue el ID" autocomplete="off" autocapitalize="characters" spellcheck="false" inputmode="text" enterkeyhint="go" aria-describedby="id-help search-status"><p id="id-help" class="small muted" style="margin-top:8px">Lo encontrará en el mensaje de la escuela.</p><label class="check-label"><input id="rememberCheck" type="checkbox">Recordar ID en este dispositivo</label><button class="btn primary" id="goBtn" type="submit"><span>Ver el progreso</span><svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></button></form>
+      <div id="search-status" class="feedback" role="status" aria-live="polite"></div><button id="forgetBtn" class="text-button" type="button" hidden>Olvidar el ID guardado</button>
+      <p class="login-foot">La información la registra el maestro.<br>Si necesita su ID escolar, solicítelo a la escuela.</p>
     </div>
-
-    <div class="hint">
-      Este sitio <u>solo lee</u> los datos.
-      No modifica nada en la libreta digital.
-    </div>
-
-    <div
-      id="search-status"
-      class="hint"
-      role="status"
-      aria-live="polite">
-    </div>
-
   </section>
 
-  <!-- RESULTADOS -->
+  <section id="student-view" hidden aria-label="Progreso del alumno">
+    <div class="panel profile"><div class="avatar" id="student-avatar" aria-hidden="true"></div><div class="student-info"><div class="eyebrow">Acompañamos su aprendizaje</div><h1 id="alumno-nombre" tabindex="-1">Alumno</h1><div class="student-line"><span class="group-label" id="grupo-label"></span><span id="alumno-id"></span><span id="last-update"></span></div></div><div class="profile-actions"><button class="btn subtle" id="backBtn" type="button" aria-label="Cambiar alumno">Cambiar</button></div></div>
+    <div id="view-status" class="feedback" role="status" aria-live="polite"></div>
+    <nav class="page-tabs" aria-label="Secciones de la consulta"><button id="worksTab" class="page-tab active" type="button" aria-pressed="true" aria-controls="works-panel"><svg class="icon" aria-hidden="true"><use href="#i-book"/></svg>Trabajos <span class="tab-count" id="nav-pending">0</span></button><button id="attendanceTab" class="page-tab" type="button" aria-pressed="false" aria-controls="attendance-panel"><svg class="icon" aria-hidden="true"><use href="#i-calendar"/></svg>Asistencia</button><button class="btn nav-refresh" id="refreshBtn" type="button" aria-label="Actualizar datos" title="Actualizar datos"><svg class="icon refresh-icon" aria-hidden="true"><use href="#i-refresh"/></svg><span>Actualizar</span></button></nav>
 
-  <section
-    id="student-view"
-    style="display:none;margin-top:14px">
+    <section id="works-panel" aria-labelledby="works-title">
+      <div class="page-heading"><div><h2 id="works-title" tabindex="-1">Trabajos por día</h2><p>Empiece por los pendientes. Abra una fecha para ver sus trabajos.</p></div><div class="period-wrap"><label for="triSelect">Periodo escolar</label><select id="triSelect"><option value="M1">Trimestre 1</option><option value="M2">Trimestre 2</option><option value="M3">Trimestre 3</option><option value="ALL">Todos los trimestres</option></select></div></div>
+      <p class="summary-scope" id="summary-scope"></p>
+      <div class="summary"><button class="metric attention" id="pendingShortcut" type="button" title="Ver todos los pendientes del periodo"><span class="metric-top">Pendientes<svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></span><span class="metric-number" id="stat-pending">0</span><span class="metric-sub">Ver pendientes</span></button><div class="metric"><div class="metric-top">Entregados<svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></div><span class="metric-number" id="stat-delivered">0</span><span class="metric-sub" id="stat-total">de 0 trabajos</span></div><div class="metric"><div class="metric-top">Avance<svg class="icon" aria-hidden="true"><use href="#i-list"/></svg></div><span class="metric-number" id="stat-cump-tri">–</span><div class="progress-track" aria-hidden="true"><div class="progress-fill" id="completion-fill"></div></div><span class="metric-sub">Del total de trabajos</span></div></div>
+      <div class="publish-note"><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg><p id="publication-notice"></p></div>
 
-    <div class="card">
-
-      <div class="topbar">
-
-        <div>
-          <h2 id="alumno-nombre">Alumno</h2>
-
-          <div class="hint" id="alumno-id"></div>
-
-          <div
-            class="hint"
-            id="grupo-label"
-            style="margin-top:4px">
-          </div>
-
-          <div
-            id="tri-subtitle"
-            class="hint"
-            style="margin-top:6px">
-            Resumen de Trimestre 1
-          </div>
+      <div class="board" id="work-board">
+        <div class="filters">
+          <div class="status-filters" role="group" aria-label="Mostrar trabajos por estado"><button type="button" class="filter-button active" data-status="pending" aria-pressed="true">Pendientes <span class="filter-count" id="filter-pending">0</span></button><button type="button" class="filter-button" data-status="delivered" aria-pressed="false">Entregados <span class="filter-count" id="filter-delivered">0</span></button><button type="button" class="filter-button" data-status="all" aria-pressed="false">Todos <span class="filter-count" id="filter-all">0</span></button></div>
+          <div class="search-row"><div class="search-box"><label class="sr-only" for="workSearch">Buscar por nombre, materia o página</label><svg class="icon" aria-hidden="true"><use href="#i-search"/></svg><input class="field" id="workSearch" type="search" placeholder="Buscar un trabajo…" autocomplete="off" enterkeyhint="search" spellcheck="false"><button class="search-clear" id="clearSearch" type="button" aria-label="Borrar búsqueda" hidden><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button></div></div>
+          <div class="date-filters" role="group" aria-label="Filtrar por fecha"><button class="date-chip active" data-range="all" type="button" aria-pressed="true" aria-label="Todas las fechas"><span class="wide-label">Todas las fechas</span><span class="compact-label">Todas</span></button><button class="date-chip" data-range="today" type="button" aria-pressed="false">Hoy</button><button class="date-chip" data-range="week" type="button" aria-pressed="false" aria-label="Esta semana"><span class="wide-label">Esta semana</span><span class="compact-label">Semana</span></button><button class="btn calendar-toggle" id="calendarToggle" type="button" aria-label="Elegir una fecha en el calendario" aria-expanded="false" aria-controls="calendar-panel"><svg class="icon" aria-hidden="true"><use href="#i-calendar"/></svg><span id="calendarToggleLabel">Fecha</span></button></div>
         </div>
-
-        <div>
-          <button id="backBtn" class="btn ghost">
-            Cambiar de alumno
-          </button>
+        <aside class="calendar-panel" id="calendar-panel" aria-label="Elegir un día">
+          <div class="calendar-card"><div class="calendar-title-row"><h3 class="calendar-heading"><svg class="icon" aria-hidden="true"><use href="#i-calendar"/></svg>Encuentre un día</h3><button class="btn icon-only calendar-close" id="calendarClose" type="button" aria-label="Cerrar calendario"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button></div><p class="calendar-caption">Toque una fecha para consultar sus trabajos.</p><div class="month-navigation"><button id="prevMonth" class="btn icon-only" type="button" aria-label="Mes anterior" title="Mes anterior"><svg class="icon" aria-hidden="true"><use href="#i-left"/></svg></button><select id="monthSelect" class="month-select" aria-label="Mes del calendario"></select><button id="nextMonth" class="btn icon-only" type="button" aria-label="Mes siguiente" title="Mes siguiente"><svg class="icon" aria-hidden="true"><use href="#i-right"/></svg></button></div><div class="weekdays" aria-hidden="true"><span>Lun</span><span>Mar</span><span>Mié</span><span>Jue</span><span>Vie</span><span>Sáb</span><span>Dom</span></div><div class="calendar-days" id="calendar-days" role="group" aria-label="Días del mes"></div><div class="calendar-key"><span><b class="key-symbol">2 p.</b> Pendientes</span><span><b class="key-symbol done">✓</b> Todo entregado</span></div><p class="calendar-scope" id="calendar-scope"></p></div>
+          <details class="help-card"><summary><svg class="icon" aria-hidden="true"><use href="#i-info"/></svg>¿Qué significa cada estado?</summary><p><strong>Pendiente:</strong> aún no está registrado como entregado.<br><strong>Entregado a tiempo:</strong> se registró dentro de la fecha.<br><strong>Entregado fuera de fecha:</strong> ya cuenta como entregado.</p><p>Si un trabajo ya se entregó y sigue pendiente, consulte al maestro.</p></details>
+        </aside>
+        <div class="agenda">
+          <div class="results-header"><div><h3 id="results-title" tabindex="-1">Pendientes por fecha</h3><p id="results-description"></p></div><button class="text-button" id="resetFilters" type="button" hidden>Quitar filtros</button></div>
+          <div id="other-pending" class="other-pending" hidden><span id="other-pending-text"></span><button id="allPendingBtn" class="text-button" type="button">Ver todos</button></div>
+          <div id="day-groups" class="day-groups"></div>
+          <div class="pagination" id="pagination" hidden><p id="page-description"></p><button class="btn" id="loadMoreDays" type="button">Ver más fechas<svg class="icon" aria-hidden="true"><use href="#i-chevron"/></svg></button></div>
+          <p class="sr-only" role="status" aria-live="polite" id="results-announcement"></p>
         </div>
-
       </div>
+      <details class="help-card section-gap" id="mobile-help"><summary><svg class="icon" aria-hidden="true"><use href="#i-info"/></svg>Un trabajo ya se entregó, ¿por qué sigue pendiente?</summary><p>Puede estar pendiente de registro. Consulte al maestro para revisar el dato. Aquí se muestra la información de la libreta digital.</p></details>
+    </section>
 
-      <div style="margin-top:10px">
-
-        <div class="chips" id="tri-chips"></div>
-
-        <div class="hint">
-          Puede ver <b>Todo</b> o cambiar entre
-          <b>Trimestre 1</b>,
-          <b>Trimestre 2</b> y
-          <b>Trimestre 3</b>.
-          Por defecto abre en <b>Trimestre 1</b>.
-        </div>
-
-      </div>
-
-      <div class="stat" style="margin-top:12px">
-
-        <div>
-          <div class="k">
-            Cumplimiento (trimestre elegido)
-          </div>
-          <div class="v" id="stat-cump-tri">–</div>
-        </div>
-
-        <div>
-          <div class="k">Totales — Trimestre</div>
-          <div class="v" id="stat-tot-tri">–</div>
-        </div>
-
-        <div>
-          <div class="k">Asistencia — semana</div>
-          <div class="v" id="stat-aswk">–</div>
-        </div>
-
-        <div>
-          <div class="k">Asistencia — 30 días</div>
-          <div class="v" id="stat-as30">–</div>
-        </div>
-
-        <div>
-          <div class="k">Asistencia total (histórica)</div>
-          <div class="v" id="stat-asHist">–</div>
-        </div>
-
-        <div>
-          <div class="k">Faltas (históricas)</div>
-          <div class="v" id="stat-faltHist">–</div>
-        </div>
-
-      </div>
-
-      <div
-        class="chart"
-        aria-label="Resumen visual del trimestre">
-
-        <div class="bar fal" id="bar-fal">
-          <span class="lbl">⏳ Faltantes</span>
-          <span class="val" id="val-fal">0</span>
-        </div>
-
-        <div class="bar tar" id="bar-tar">
-          <span class="lbl">🕒 Tarde</span>
-          <span class="val" id="val-tar">0</span>
-        </div>
-
-        <div class="bar ati" id="bar-ati">
-          <span class="lbl">✅ A tiempo</span>
-          <span class="val" id="val-ati">0</span>
-        </div>
-
-      </div>
-
-      <p class="footer-note" style="margin-top:10px">
-        Importante: si alguna inasistencia fue
-        <b>justificada</b>, no se preocupe;
-        aunque aparezca aquí como falta, la escuela
-        la revisa y no afecta indebidamente.
-      </p>
-
-    </div>
-
-    <div class="grid2" style="margin-top:12px">
-
-      <div class="card">
-        <h3>⏳ Trabajos faltantes</h3>
-        <div id="faltantes" class="list"></div>
-      </div>
-
-      <div class="card">
-        <h3>🕒 Entregados tarde</h3>
-        <div id="tarde" class="list"></div>
-      </div>
-
-    </div>
-
-    <div class="card" style="margin-top:12px">
-      <h3>✅ Entregados (a tiempo)</h3>
-      <div id="atiempo" class="list"></div>
-    </div>
-
-    <p class="footer-note">
-      Si detecta algún dato que no coincide, contacte
-      a la escuela para verificar la libreta digital.
-    </p>
-
+    <section id="attendance-panel" aria-labelledby="attendance-title" hidden>
+      <div class="page-heading"><div><h2 id="attendance-title" tabindex="-1">Cada día cuenta.</h2><p>Consulte los días de asistencia registrados por el maestro.</p></div></div>
+      <div class="attendance-grid"><div class="metric"><div class="metric-top">Esta semana</div><div class="metric-number" id="stat-aswk">–</div><span class="metric-sub" id="aswk-detail"></span></div><div class="metric"><div class="metric-top">Últimos 30 días</div><div class="metric-number" id="stat-as30">–</div><span class="metric-sub" id="as30-detail"></span></div><div class="metric"><div class="metric-top">Asistencia acumulada</div><div class="metric-number" id="stat-asHist">–</div><span class="metric-sub" id="asHist-detail"></span><span class="metric-sub" id="stat-faltHist"></span></div></div>
+      <div class="panel attendance-history"><h3>Los días más recientes</h3><p id="attendance-history-note">Días con registro de asistencia.</p><div id="attendance-rows"></div></div>
+      <div class="attendance-note"><svg class="icon" aria-hidden="true"><use href="#i-info"/></svg><p>Las faltas justificadas las revisa el maestro. Si tiene un comprobante o detecta un error, comuníquelo a la escuela. La asistencia se consulta por estos periodos y es independiente del trimestre de trabajos.</p></div>
+    </section>
+    <footer class="footer"><span>Aula Digital · Consulta para familias</span><span>¿Algún dato no coincide? Consulte al maestro.</span></footer>
   </section>
-
+  <noscript><p class="panel" style="padding:24px">Active JavaScript en su navegador para consultar los trabajos y la asistencia.</p></noscript>
 </main>
-
 <script>
+
 'use strict';
 
-/* ==================================================
-   CONFIGURACIÓN — misma hoja y grupo
-================================================== */
-
-const SHEET_ID =
-  '1MgrR0DQauHSVhEu8WTjKgfLTMhtDPcSdFAibZKSwbo8';
-
-const GIDS = {
-  puntos: '0',
-  asistencia: '1076394102',
-  registro: '1854056136',
-  aliases: '377574741',
-  presets: '897365281'
-};
-
+/* CONFIGURACIÓN. Misma hoja, pestañas, grupo y enlaces. */
+const SHEET_ID = '1MgrR0DQauHSVhEu8WTjKgfLTMhtDPcSdFAibZKSwbo8';
+const GIDS = {puntos:'0',asistencia:'1076394102',registro:'1854056136',aliases:'377574741',presets:'897365281'};
 const GROUP_LABEL = '3ero A';
-
 const LINKS_JSON = 'data/links_3A.json';
 
+/* Cada trabajo se publica EN SU FECHA OBJETIVO, desde las 12:45 p. m.
+   America/Matamoros es la zona IANA de Nuevo Laredo, incluido horario estacional.
+   Referencia: https://data.iana.org/time-zones/tzdb/northamerica
+   El filtro se aplica a todos los trabajos, incluidas las TAREAS.
+   Este horario controla la visualización; no modifica la hoja. */
+const SCHOOL_TIME_ZONE = 'America/Matamoros';
+const PUBLICATION_HOUR = 12;
+const PUBLICATION_MINUTE = 45;
 let LINKMAP = {};
 
-/* ==================================================
-   UTILIDADES Y FECHAS
-================================================== */
-
 const $ = s => document.querySelector(s);
+const strip = s => String(s ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+const norm = s => strip(String(s ?? '').toLowerCase()).replace(/\s+/g,' ').trim();
+const pad = n => String(n).padStart(2,'0');
+const headerKey = s => norm(s).replace(/[^a-z0-9]/g,'');
+const colIndex = (cols,...keys) => cols.findIndex(c => keys.includes(headerKey(c)));
+const cell = (row,i) => i >= 0 ? String(row[i] ?? '').trim() : '';
+const escapeHTML = s => String(s ?? '').replace(/[&<>"']/g,c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const ymd = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
 
-const strip = s =>
-  String(s ?? '')
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '');
-
-const norm = s =>
-  strip(String(s ?? '').toLowerCase())
-    .replace(/\s+/g, ' ')
-    .trim();
-
-const pad = n => String(n).padStart(2, '0');
-
-const ymd = d =>
-  `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-
-const headerKey = s =>
-  norm(s).replace(/[^a-z0-9]/g, '');
-
-const colIndex = (cols, ...keys) =>
-  cols.findIndex(c => keys.includes(headerKey(c)));
-
-const cell = (row, i) =>
-  i >= 0 ? String(row[i] ?? '').trim() : '';
-
-const escapeHTML = s =>
-  String(s ?? '').replace(/[&<>"']/g, c => ({
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#39;'
-  }[c]));
-
-function normDate(s) {
+function normDate(s){
   const t = String(s ?? '').trim();
-
-  if (!t) return '';
-
-  let m = t.match(
-    /^(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})/
-  );
-
-  if (m) {
-    return `${+m[1]}-${pad(+m[2])}-${pad(+m[3])}`;
-  }
-
-  m = t.match(
-    /^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/
-  );
-
-  if (m) {
-    return `${+m[3]}-${pad(+m[2])}-${pad(+m[1])}`;
-  }
-
-  m = t.match(
-    /^Date\((\d{4})\s*,\s*(\d{1,2})\s*,\s*(\d{1,2})/i
-  );
-
-  if (m) {
-    return ymd(new Date(+m[1], +m[2], +m[3]));
-  }
-
+  if(!t) return '';
+  let m = t.match(/^(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})/);
+  if(m) return `${+m[1]}-${pad(+m[2])}-${pad(+m[3])}`;
+  m = t.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/);
+  if(m) return `${+m[3]}-${pad(+m[2])}-${pad(+m[1])}`;
+  m = t.match(/^Date\((\d{4})\s*,\s*(\d{1,2})\s*,\s*(\d{1,2})/i);
+  if(m) return `${+m[1]}-${pad(+m[2]+1)}-${pad(+m[3])}`;
   const d = new Date(t);
-
   return isNaN(+d) ? '' : ymd(d);
 }
 
-function dayNumber(s) {
+function dayNumber(s){
   const d = normDate(s);
-
-  if (!d) return NaN;
-
-  const [y, m, day] = d.split('-').map(Number);
-
-  return Date.UTC(y, m - 1, day) / 86400000;
+  if(!d) return NaN;
+  const [y,m,day] = d.split('-').map(Number);
+  return Date.UTC(y,m-1,day)/86400000;
 }
 
-function isPresent(v) {
+function shiftDay(iso,offset){
+  const d = new Date((dayNumber(iso)+offset)*86400000);
+  return `${d.getUTCFullYear()}-${pad(d.getUTCMonth()+1)}-${pad(d.getUTCDate())}`;
+}
+
+const schoolClock = new Intl.DateTimeFormat('en-CA',{
+  timeZone:SCHOOL_TIME_ZONE,year:'numeric',month:'2-digit',day:'2-digit',
+  hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'
+});
+
+function schoolNow(now = new Date()){
+  const p = Object.fromEntries(schoolClock.formatToParts(now).map(x => [x.type,x.value]));
+  return {date:`${p.year}-${p.month}-${p.day}`,hour:+p.hour,minute:+p.minute,second:+p.second};
+}
+
+function publicationCutoff(now = new Date()){
+  const local = schoolNow(now);
+  const released = local.hour*60+local.minute >= PUBLICATION_HOUR*60+PUBLICATION_MINUTE;
+  return released ? local.date : shiftDay(local.date,-1);
+}
+
+function prettyDate(s){
+  const date = normDate(s);
+  if(!date) return 'Sin fecha';
+  const value = new Date(dayNumber(date)*86400000);
+  return new Intl.DateTimeFormat('es-MX',{
+    timeZone:'UTC',weekday:'long',day:'numeric',month:'long',year:'numeric'
+  }).format(value);
+}
+
+function timeLabel(now){
+  return new Intl.DateTimeFormat('es-MX',{
+    timeZone:SCHOOL_TIME_ZONE,day:'numeric',month:'short',hour:'numeric',minute:'2-digit',hour12:true
+  }).format(now);
+}
+
+function isPresent(v){
   const s = norm(v);
-
-  if (!s) return false;
-
-  if (!Number.isNaN(+s)) {
-    return +s > 0;
-  }
-
-  if (/^1\(100%?\)$/.test(s.replace(/\s+/g, ''))) {
-    return true;
-  }
-
-  return [
-    'x',
-    '✓',
-    '✔',
-    'p',
-    'presente',
-    'si',
-    's',
-    'ok',
-    'true',
-    'asistio'
-  ].includes(s);
+  if(!s) return false;
+  if(!Number.isNaN(+s)) return +s > 0;
+  if(/^1\(100%?\)$/.test(s.replace(/\s+/g,''))) return true;
+  return ['x','✓','✔','p','presente','si','s','ok','true','asistio'].includes(s);
 }
 
-function getActiveDateCols(cols, rows) {
-  return cols
-    .map((c, i) => normDate(c) ? i : -1)
-    .filter(i =>
-      i >= 0 &&
-      rows.some(r => r[i] !== '' && r[i] != null)
-    );
+function getActiveDateCols(cols,rows){
+  return cols.map((c,i) => normDate(c) ? i : -1)
+    .filter(i => i >= 0 && rows.some(r => r[i] !== '' && r[i] != null));
 }
 
-/* ==================================================
-   GOOGLE SHEETS — únicamente lecturas
-================================================== */
-
+/* GOOGLE SHEETS: únicamente lecturas, con respaldo CSV. */
 let _cbSeq = 0;
-
-function fetchGViz(sheetId, gid) {
-  return new Promise((resolve, reject) => {
+function fetchGViz(sheetId,gid){
+  return new Promise((resolve,reject) => {
     const cb = `__cb_${Date.now()}_${++_cbSeq}`;
-
     const sc = document.createElement('script');
-
-    const timeout = setTimeout(() => {
-      cleanup();
-
-      reject(
-        new Error('La hoja tardó demasiado en responder.')
-      );
-    }, 12000);
-
-    function cleanup() {
-      clearTimeout(timeout);
-
-      delete window[cb];
-
-      if (sc.parentNode) {
-        sc.parentNode.removeChild(sc);
-      }
-    }
-
+    const timeout = setTimeout(() => {cleanup();reject(new Error('La hoja tardó demasiado en responder.'));},12000);
+    function cleanup(){clearTimeout(timeout);delete window[cb];sc.remove();}
     window[cb] = json => {
       cleanup();
-
-      try {
-        if (
-          json.status === 'error' ||
-          !json.table ||
-          !Array.isArray(json.table.cols)
-        ) {
-          throw new Error(
-            'No se pudo leer la pestaña de la hoja.'
-          );
+      try{
+        if(json.status === 'error' || !json.table || !Array.isArray(json.table.cols)){
+          throw new Error('No se pudo leer la pestaña de la hoja.');
         }
-
-        let cols = json.table.cols.map(c =>
-          String(c.label || '').trim()
-        );
-
-        let rows = (json.table.rows || []).map(r =>
-          (r.c || []).map(c => c?.v ?? '')
-        );
-
-        const empty = cols.filter(c =>
-          !c || /^[A-Z]+$/.test(c)
-        ).length;
-
-        if (
-          empty >= Math.ceil(cols.length * .5) &&
-          rows.length
-        ) {
-          cols = rows[0].map(v =>
-            String(v ?? '').trim()
-          );
-
-          rows = rows.slice(1);
+        let cols = json.table.cols.map(c => String(c.label || '').trim());
+        let rows = (json.table.rows || []).map(r => (r.c || []).map(c => c?.v ?? ''));
+        const empty = cols.filter(c => !c || /^[A-Z]+$/.test(c)).length;
+        if(empty >= Math.ceil(cols.length*.5) && rows.length){
+          cols = rows[0].map(v => String(v ?? '').trim()); rows = rows.slice(1);
         }
-
-        resolve({ cols, rows });
-
-      } catch (e) {
-        reject(e);
-      }
+        resolve({cols,rows});
+      }catch(e){reject(e);}
     };
-
-    sc.onerror = () => {
-      cleanup();
-
-      reject(
-        new Error('Error al consultar Google Sheets.')
-      );
-    };
-
-    sc.src =
-      `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?headers=1&gid=${encodeURIComponent(gid)}&tqx=out:json;responseHandler:${cb}&ts=${Date.now()}`;
-
+    sc.onerror = () => {cleanup();reject(new Error('Error al consultar Google Sheets.'));};
+    sc.src = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?headers=1&gid=${encodeURIComponent(gid)}&tqx=out:json;responseHandler:${cb}&ts=${Date.now()}`;
     document.head.appendChild(sc);
   });
 }
 
-async function fetchCSVByGid(sheetId, gid) {
-  const controller = new AbortController();
-
-  const timeout = setTimeout(
-    () => controller.abort(),
-    12000
-  );
-
-  try {
-    const url =
-      `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${encodeURIComponent(gid)}&ts=${Date.now()}`;
-
-    const res = await fetch(url, {
-      cache: 'no-store',
-      signal: controller.signal
-    });
-
-    if (!res.ok) {
-      throw new Error(
-        'No se pudo descargar la pestaña de la hoja.'
-      );
-    }
-
-    const txt = await res.text();
-
-    if (/^\s*<!doctype html|^\s*<html/i.test(txt)) {
-      throw new Error(
-        'La hoja no está disponible para consulta.'
-      );
-    }
-
-    const rows = parseCSV(txt);
-
-    const cols = (rows.shift() || []).map(v =>
-      String(v ?? '').trim()
-    );
-
-    return { cols, rows };
-
-  } finally {
-    clearTimeout(timeout);
-  }
-}
-
-function parseCSV(t) {
-  const rows = [];
-
-  let row = [];
-  let cur = '';
-  let q = false;
-
-  t = t.replace(/^\uFEFF/, '');
-
-  for (let i = 0; i < t.length; i++) {
-    const ch = t[i];
-    const nx = t[i + 1];
-
-    if (q) {
-      if (ch === '"' && nx === '"') {
-        cur += '"';
-        i++;
-
-      } else if (ch === '"') {
-        q = false;
-
-      } else {
-        cur += ch;
-      }
-
-    } else {
-      if (ch === '"') {
-        q = true;
-
-      } else if (ch === ',') {
-        row.push(cur);
-        cur = '';
-
-      } else if (ch === '\n' || ch === '\r') {
-        if (cur !== '' || row.length) {
-          row.push(cur);
-          rows.push(row);
-
-          row = [];
-          cur = '';
-        }
-
-      } else {
-        cur += ch;
-      }
+function parseCSV(t){
+  const rows = []; let row = [], cur = '', q = false;
+  t = t.replace(/^\uFEFF/,'');
+  for(let i=0;i<t.length;i++){
+    const ch=t[i], nx=t[i+1];
+    if(q){
+      if(ch === '"' && nx === '"'){cur+='"';i++;}
+      else if(ch === '"'){q=false;}
+      else{cur+=ch;}
+    }else{
+      if(ch === '"'){q=true;}
+      else if(ch === ','){row.push(cur);cur='';}
+      else if(ch === '\n' || ch === '\r'){
+        if(cur !== '' || row.length){row.push(cur);rows.push(row);row=[];cur='';}
+      }else{cur+=ch;}
     }
   }
-
-  if (cur !== '' || row.length) {
-    row.push(cur);
-    rows.push(row);
-  }
-
+  if(cur !== '' || row.length){row.push(cur);rows.push(row);}
   return rows;
 }
 
-async function loadBlock(name) {
-  try {
-    return await fetchGViz(
-      SHEET_ID,
-      GIDS[name]
-    );
-
-  } catch {
-    return await fetchCSVByGid(
-      SHEET_ID,
-      GIDS[name]
-    );
-  }
+async function fetchCSVByGid(sheetId,gid){
+  const controller=new AbortController();
+  const timeout=setTimeout(() => controller.abort(),12000);
+  try{
+    const url=`https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${encodeURIComponent(gid)}&ts=${Date.now()}`;
+    const res=await fetch(url,{cache:'no-store',signal:controller.signal});
+    if(!res.ok) throw new Error('No se pudo descargar la pestaña de la hoja.');
+    const txt=await res.text();
+    if(/^\s*<!doctype html|^\s*<html/i.test(txt)) throw new Error('La hoja no está disponible para consulta.');
+    const rows=parseCSV(txt);
+    const cols=(rows.shift() || []).map(v => String(v ?? '').trim());
+    return {cols,rows};
+  }finally{clearTimeout(timeout);}
 }
 
-async function loadLinks() {
-  LINKMAP = {};
-
-  const controller = new AbortController();
-
-  const timeout = setTimeout(
-    () => controller.abort(),
-    8000
-  );
-
-  try {
-    const res = await fetch(LINKS_JSON, {
-      cache: 'no-store',
-      signal: controller.signal
-    });
-
-    if (res.ok) {
-      const j = await res.json();
-
-      if (j?.items && typeof j.items === 'object') {
-        LINKMAP = j.items;
-      }
-    }
-
-  } catch {
-    // Los enlaces son opcionales.
-
-  } finally {
-    clearTimeout(timeout);
-  }
+async function loadBlock(name){
+  try{return await fetchGViz(SHEET_ID,GIDS[name]);}
+  catch{return await fetchCSVByGid(SHEET_ID,GIDS[name]);}
 }
 
-/* ==================================================
-   COLUMNAS DEL REGISTRO Y DE LOS PRESETS
+async function loadLinks(){
+  const controller=new AbortController();
+  const timeout=setTimeout(() => controller.abort(),8000);
+  try{
+    const res=await fetch(LINKS_JSON,{cache:'no-store',signal:controller.signal});
+    if(res.ok){const j=await res.json();if(j?.items && typeof j.items === 'object') return j.items;}
+  }catch{/* Las evidencias son opcionales. */}
+  finally{clearTimeout(timeout);}
+  return {};
+}
 
-   UID_ENTREGA identifica una entrega.
-   UID_PRESET identifica el trabajo.
-   No se intercambian.
-================================================== */
-
-function workColumns(cols) {
+/* COLUMNAS. UID_ENTREGA y UID_PRESET no se intercambian. */
+function workColumns(cols){
   return {
-    uid: colIndex(cols, 'uidpreset'),
-
-    fecha: colIndex(cols, 'fecha'),
-
-    objetivo: colIndex(cols, 'fechaobjetivo'),
-
-    id: cols.findIndex(c =>
-      /^(id|matric)/i.test(String(c).trim())
-    ),
-
-    nombre: colIndex(
-      cols,
-      'nombre',
-      'nombrealumno',
-      'nombredelalumno'
-    ),
-
-    materia: colIndex(cols, 'materia'),
-
-    numero: colIndex(
-      cols,
-      'ntrabajo',
-      'notrabajo',
-      'numerotrabajo',
-      'numerodetrabajo',
-      'n',
-      'no'
-    ),
-
-    origen: colIndex(cols, 'origen'),
-
-    pagina: cols.findIndex(c =>
-      /^pagina/.test(headerKey(c))
-    ),
-
-    puntos: colIndex(cols, 'puntos'),
-
-    atraso: cols.findIndex(c =>
-      /atraso/.test(headerKey(c))
-    ),
-
-    momento: colIndex(cols, 'momento'),
-
-    trabajo: colIndex(
-      cols,
-      'nombretrabajo',
-      'nombredeltrabajo'
-    ),
-
-    evidUrl: cols.findIndex(c =>
-      /url.*evidenc/i.test(c)
-    ),
-
-    evidSheet: cols.findIndex(c =>
-      /(hoja|sheet).*evidenc/i.test(c)
-    )
+    uid:colIndex(cols,'uidpreset'),fecha:colIndex(cols,'fecha'),objetivo:colIndex(cols,'fechaobjetivo'),
+    id:cols.findIndex(c => /^(id|matric)/i.test(String(c).trim())),
+    nombre:colIndex(cols,'nombre','nombrealumno','nombredelalumno'),materia:colIndex(cols,'materia'),
+    numero:colIndex(cols,'ntrabajo','notrabajo','numerotrabajo','numerodetrabajo','n','no'),
+    origen:colIndex(cols,'origen'),pagina:cols.findIndex(c => /^pagina/.test(headerKey(c))),
+    puntos:colIndex(cols,'puntos'),atraso:cols.findIndex(c => /atraso/.test(headerKey(c))),
+    momento:colIndex(cols,'momento'),trabajo:colIndex(cols,'nombretrabajo','nombredeltrabajo'),
+    evidUrl:cols.findIndex(c => /url.*evidenc/i.test(c)),
+    evidSheet:cols.findIndex(c => /(hoja|sheet).*evidenc/i.test(c))
   };
 }
 
-function parseRegistro(cols, rows) {
-  const i = workColumns(cols);
-
-  if (i.id < 0) {
-    throw new Error(
-      'No se encontró la columna ID en Registro de trabajos.'
-    );
-  }
-
-  return rows
-    .map(r => {
-      const fecha = cell(r, i.fecha);
-
-      const fo = cell(r, i.objetivo) || fecha;
-
-      const atraso = cell(r, i.atraso);
-
-      const days =
-        dayNumber(fecha) - dayNumber(fo);
-
-      return {
-        uidPreset: cell(r, i.uid),
-
-        fecha,
-
-        fechaObjetivo: fo,
-
-        id: cell(r, i.id),
-
-        nombre: cell(r, i.nombre),
-
-        materia: cell(r, i.materia),
-
-        numero: cell(r, i.numero),
-
-        origen: cell(r, i.origen),
-
-        pagina: cell(r, i.pagina),
-
-        puntos: +cell(r, i.puntos) || 0,
-
-        atrasoDias:
-          atraso !== ''
-            ? (+atraso || 0)
-            : (
-                Number.isFinite(days)
-                  ? Math.max(0, days)
-                  : 0
-              ),
-
-        momento: cell(r, i.momento),
-
-        nombreTrabajo: cell(r, i.trabajo)
-      };
-    })
-    .filter(t => t.id);
+function parseRegistro(cols,rows){
+  const i=workColumns(cols);
+  if(i.id < 0) throw new Error('No se encontró la columna ID en Registro de trabajos.');
+  return rows.map(r => {
+    const fecha=cell(r,i.fecha), fo=cell(r,i.objetivo) || fecha, atraso=cell(r,i.atraso);
+    const days=dayNumber(fecha)-dayNumber(fo);
+    return {
+      uidPreset:cell(r,i.uid),fecha,fechaObjetivo:fo,id:cell(r,i.id),nombre:cell(r,i.nombre),
+      materia:cell(r,i.materia),numero:cell(r,i.numero),origen:cell(r,i.origen),pagina:cell(r,i.pagina),
+      puntos:+cell(r,i.puntos) || 0,
+      atrasoDias:atraso !== '' ? (+atraso || 0) : (Number.isFinite(days) ? Math.max(0,days) : 0),
+      momento:cell(r,i.momento),nombreTrabajo:cell(r,i.trabajo)
+    };
+  }).filter(t => t.id);
 }
 
-function parsePresets(cols, rows) {
-  const i = workColumns(cols);
-
-  if (i.uid < 0) {
-    throw new Error(
-      'No se encontró la columna UID_PRESET en Presets.'
-    );
-  }
-
-  return rows
-    .map(r => ({
-      uid: cell(r, i.uid),
-
-      fechaObjetivo: cell(r, i.objetivo),
-
-      momento: cell(r, i.momento),
-
-      materia: cell(r, i.materia),
-
-      numero: cell(r, i.numero),
-
-      origen: cell(r, i.origen),
-
-      pagina: cell(r, i.pagina),
-
-      nombreTrabajo: cell(r, i.trabajo),
-
-      evidUrl: cell(r, i.evidUrl),
-
-      evidSheet: cell(r, i.evidSheet)
-    }))
-    .filter(p => p.uid);
+function parsePresets(cols,rows){
+  const i=workColumns(cols);
+  if(i.uid < 0) throw new Error('No se encontró la columna UID_PRESET en Presets.');
+  return rows.map(r => ({
+    uid:cell(r,i.uid),fechaObjetivo:cell(r,i.objetivo),momento:cell(r,i.momento),
+    materia:cell(r,i.materia),numero:cell(r,i.numero),origen:cell(r,i.origen),pagina:cell(r,i.pagina),
+    nombreTrabajo:cell(r,i.trabajo),evidUrl:cell(r,i.evidUrl),evidSheet:cell(r,i.evidSheet)
+  })).filter(p => p.uid);
 }
 
-/* ==================================================
-   CORRECCIÓN DE LA IDENTIDAD DEL TRABAJO
+/* IDENTIDAD DEL TRABAJO: se conserva la coincidencia estricta del original.
+   1. Coincidencia exacta de UID_PRESET.
+   2. Otro UID nunca se usa como respaldo.
+   3. Solo registros SIN UID usan la clave completa y única.
+   4. La unicidad se comprueba contra TODOS los presets, incluso los aún ocultos. */
+const uidKey=v => String(v ?? '').trim();
 
-   1. Una entrega con UID_PRESET solo corresponde
-      a ese UID_PRESET.
-
-   2. Un registro con UID diferente NUNCA entra
-      en la búsqueda alternativa.
-
-   3. Solo registros antiguos SIN UID pueden usar
-      una clave completa con nombre y momento.
-
-   4. El respaldo exige un único preset y un único
-      registro. Si hay ambigüedad, no se acredita.
-================================================== */
-
-const uidKey = v => String(v ?? '').trim();
-
-function claveTrabajoLegacy(t) {
-  const materia = norm(t.materia);
-  const nombre = norm(t.nombreTrabajo);
-  const momento = norm(t.momento);
-  const fecha = normDate(t.fechaObjetivo);
-
-  if (
-    !materia ||
-    !nombre ||
-    !momento ||
-    !fecha
-  ) {
-    return '';
-  }
-
+function claveTrabajoLegacy(t){
+  const materia=norm(t.materia), nombre=norm(t.nombreTrabajo), momento=norm(t.momento);
+  const fecha=normDate(t.fechaObjetivo);
+  if(!materia || !nombre || !momento || !fecha) return '';
   return JSON.stringify([
-    materia,
-
-    norm(
-      String(t.numero ?? '')
-        .replace(/^trabajo\s*/i, '')
-    ),
-
-    norm(t.origen),
-
-    norm(t.pagina),
-
-    fecha,
-
-    momento,
-
-    nombre
+    materia,norm(String(t.numero ?? '').replace(/^trabajo\s*/i,'')),
+    norm(t.origen),norm(t.pagina),fecha,momento,nombre
   ]);
 }
 
-function crearBuscadorEntregas(presets, entAlumno) {
-  const porUID = new Map();
-
-  const legacy = new Map();
-
-  const cantidadPresets = new Map();
-
-  for (const p of presets) {
-    const key = claveTrabajoLegacy(p);
-
-    if (key) {
-      cantidadPresets.set(
-        key,
-        (cantidadPresets.get(key) || 0) + 1
-      );
+function crearBuscadorEntregas(presets,entAlumno){
+  const porUID=new Map(),legacy=new Map(),cantidadPresets=new Map();
+  for(const p of presets){
+    const key=claveTrabajoLegacy(p);
+    if(key) cantidadPresets.set(key,(cantidadPresets.get(key) || 0)+1);
+  }
+  for(const e of entAlumno){
+    const uid=uidKey(e.uidPreset);
+    if(uid){porUID.set(uid,e);} // Si se repite el UID, conserva la última fila.
+    else{
+      const key=claveTrabajoLegacy(e);
+      if(key){if(!legacy.has(key)) legacy.set(key,[]);legacy.get(key).push(e);}
     }
   }
-
-  for (const e of entAlumno) {
-    const uid = uidKey(e.uidPreset);
-
-    if (uid) {
-      /*
-        Si se repite la entrega del mismo alumno
-        y UID en la hoja, se toma la última fila
-        de ese UID, igual que antes.
-      */
-      porUID.set(uid, e);
-
-    } else {
-      /*
-        Únicamente registros SIN UID.
-        Nunca se incluyen registros con otro UID.
-      */
-      const key = claveTrabajoLegacy(e);
-
-      if (key) {
-        if (!legacy.has(key)) {
-          legacy.set(key, []);
-        }
-
-        legacy.get(key).push(e);
-      }
-    }
-  }
-
   return p => {
-    /*
-      Primero: coincidencia exacta de UID_PRESET.
-    */
-    const exacta = porUID.get(uidKey(p.uid));
-
-    if (exacta) {
-      return exacta;
-    }
-
-    /*
-      Respaldo para registros antiguos sin UID.
-      Debe haber un solo preset con esta clave.
-    */
-    const key = claveTrabajoLegacy(p);
-
-    if (
-      !key ||
-      cantidadPresets.get(key) !== 1
-    ) {
-      return null;
-    }
-
-    const candidatas = legacy.get(key) || [];
-
-    return candidatas.length === 1
-      ? candidatas[0]
-      : null;
+    const exacta=porUID.get(uidKey(p.uid));
+    if(exacta) return exacta;
+    const key=claveTrabajoLegacy(p);
+    if(!key || cantidadPresets.get(key) !== 1) return null;
+    const candidatas=legacy.get(key) || [];
+    return candidatas.length === 1 ? candidatas[0] : null;
   };
 }
 
-function clasificarTrabajos(
-  presets,
-  entAlumno,
-  today
-) {
-  /*
-    Comprobar unicidad usando TODOS los presets,
-    antes de ocultar futuros o filtrar trimestre.
-  */
-  const buscarEntrega = crearBuscadorEntregas(
-    presets,
-    entAlumno
-  );
-
-  const visibles = presets.filter(p => {
-    const f = normDate(p.fechaObjetivo);
-
-    if (!f || f <= today) {
-      return true;
-    }
-
-    const texto = [
-      p.nombreTrabajo,
-      p.origen,
-      p.materia,
-      p.numero
-    ].join(' ').toUpperCase();
-
-    /*
-      Conservar la regla original:
-      los trabajos futuros solo se muestran
-      si contienen la palabra TAREA.
-    */
-    return texto.includes('TAREA');
+function clasificarTrabajos(presets,entAlumno,cutoff){
+  const buscarEntrega=crearBuscadorEntregas(presets,entAlumno);
+  const visibles=presets.filter(p => {
+    const fecha=normDate(p.fechaObjetivo);
+    // Antes de las 12:45, cutoff es ayer; desde las 12:45, es hoy.
+    // Sin excepción por la palabra TAREA. Los trabajos sin fecha conservan
+    // su visibilidad original porque no tienen una fecha de publicación.
+    return !fecha || fecha <= cutoff;
   });
-
-  const faltantes = [];
-  const tarde = [];
-  const atiempo = [];
-
-  for (const p of visibles) {
-    const e = buscarEntrega(p);
-
-    if (!e) {
-      faltantes.push(p);
-
-    } else if (e.atrasoDias > 0) {
-      tarde.push(p);
-
-    } else {
-      atiempo.push(p);
-    }
+  const faltantes=[],tarde=[],atiempo=[];
+  for(const p of visibles){
+    const e=buscarEntrega(p);
+    if(!e) faltantes.push(p);
+    else if(e.atrasoDias > 0) tarde.push(p);
+    else atiempo.push(p);
   }
-
-  /*
-    El total usa exactamente los trabajos
-    que sí se muestran.
-  */
-  return {
-    faltantes,
-    tarde,
-    atiempo,
-    presets: visibles
-  };
+  return {faltantes,tarde,atiempo,presets:visibles};
 }
 
-/* ==================================================
-   ASISTENCIA — misma forma de cálculo
-================================================== */
-
-function filaAsistencia(cols, rows, ref) {
-  const iId = cols.findIndex(c =>
-    /^(id|matric)/i.test(String(c).trim())
-  );
-
-  const iNom = cols.findIndex(c =>
-    /^nombre/i.test(String(c).trim())
-  );
-
-  let row = null;
-
-  if (iId >= 0 && ref.id) {
-    row = rows.find(r =>
-      norm(r[iId]) === norm(ref.id)
-    );
-  }
-
-  if (!row && iNom >= 0 && ref.nombre) {
-    row = rows.find(r =>
-      norm(r[iNom]) === norm(ref.nombre)
-    );
-  }
-
+/* ASISTENCIA: conserva la lectura de marcas y los registros del original. */
+function filaAsistencia(cols,rows,ref){
+  const iId=cols.findIndex(c => /^(id|matric)/i.test(String(c).trim()));
+  const iNom=cols.findIndex(c => /^nombre/i.test(String(c).trim()));
+  let row=null;
+  if(iId >= 0 && ref.id) row=rows.find(r => norm(r[iId]) === norm(ref.id));
+  if(!row && iNom >= 0 && ref.nombre) row=rows.find(r => norm(r[iNom]) === norm(ref.nombre));
   return row || null;
 }
 
-function asistenciaAlumno(
-  cols,
-  rows,
-  ref,
-  start,
-  end
-) {
-  const row = filaAsistencia(cols, rows, ref);
-
-  if (!row) {
-    return {
-      present: 0,
-      total: 0,
-      row: null
-    };
-  }
-
-  const active = getActiveDateCols(cols, rows)
-    .filter(i => {
-      const d = normDate(cols[i]);
-
-      return d && d >= start && d <= end;
-    });
-
-  const present = active.reduce(
-    (a, i) => a + (isPresent(row[i]) ? 1 : 0),
-    0
-  );
-
-  return {
-    present,
-    total: active.length,
-    row
-  };
-}
-
-function asistenciaHistorica(cols, rows, ref) {
-  const row = filaAsistencia(cols, rows, ref);
-
-  if (!row) {
-    return {
-      present: 0,
-      total: 0
-    };
-  }
-
-  const active = getActiveDateCols(cols, rows);
-
-  const present = active.reduce(
-    (a, i) => a + (isPresent(row[i]) ? 1 : 0),
-    0
-  );
-
-  return {
-    present,
-    total: active.length
-  };
-}
-
-function weekRange(d) {
-  const day = d.getDay();
-
-  const mon = new Date(d);
-
-  mon.setDate(
-    d.getDate() + (day === 0 ? -6 : 1 - day)
-  );
-
-  mon.setHours(0, 0, 0, 0);
-
-  const fri = new Date(mon);
-
-  fri.setDate(mon.getDate() + 4);
-
-  return [
-    ymd(mon),
-    ymd(fri)
-  ];
-}
-
-/* ==================================================
-   TRIMESTRES, GRÁFICA Y EVIDENCIAS
-================================================== */
-
-let ALL = {
-  faltantes: [],
-  tarde: [],
-  atiempo: [],
-  presets: []
-};
-
-let TRI = 'M1';
-
-function setTriChips() {
-  const host = $('#tri-chips');
-
-  const opts = [
-    ['ALL', 'Todo'],
-    ['M1', 'Trimestre 1'],
-    ['M2', 'Trimestre 2'],
-    ['M3', 'Trimestre 3']
-  ];
-
-  host.innerHTML = opts.map(([v, l]) =>
-    `<button
-      class="chip ${TRI === v ? 'active' : ''}"
-      data-v="${v}"
-      aria-pressed="${TRI === v}">
-      ${l}
-    </button>`
-  ).join('');
-
-  for (const b of host.querySelectorAll('.chip')) {
-    b.onclick = () => {
-      TRI = b.getAttribute('data-v');
-
-      setTriChips();
-      renderLists();
-    };
-  }
-
-  $('#tri-subtitle').textContent =
-    'Resumen de ' + ({
-      ALL: 'Todo',
-      M1: 'Trimestre 1',
-      M2: 'Trimestre 2',
-      M3: 'Trimestre 3'
-    }[TRI]);
-}
-
-function byTri(list) {
-  return TRI === 'ALL'
-    ? list
-    : list.filter(x =>
-        String(x.momento || '')
-          .trim()
-          .toUpperCase() === TRI
-      );
-}
-
-function renderBarChart({
-  faltantes,
-  tarde,
-  atiempo
-}) {
-  const max = Math.max(
-    faltantes,
-    tarde,
-    atiempo,
-    1
-  );
-
-  const set = (id, val) => {
-    const el = $(id);
-
-    el.style.setProperty(
-      '--pct',
-      (val / max).toFixed(3)
-    );
-
-    el.querySelector('.val').textContent = val;
-  };
-
-  set('#bar-fal', faltantes);
-  set('#bar-tar', tarde);
-  set('#bar-ati', atiempo);
-}
-
-function linksFor(uid, preset) {
-  const urls = [];
-
-  const rec = Object.prototype.hasOwnProperty.call(
-    LINKMAP,
-    uid
-  )
-    ? LINKMAP[uid]
-    : null;
-
-  if (rec) {
-    if (Array.isArray(rec.urls)) {
-      urls.push(...rec.urls);
-
-    } else if (rec.url) {
-      urls.push(rec.url);
-    }
-  }
-
-  if (preset?.evidUrl) {
-    urls.push(String(preset.evidUrl));
-  }
-
-  const uniq = [
-    ...new Set(
-      urls
-        .map(u => String(u || '').trim())
-        .filter(Boolean)
-    )
-  ].filter(u => {
-    try {
-      return ['https:', 'http:'].includes(
-        new URL(u, document.baseURI).protocol
-      );
-
-    } catch {
-      return false;
-    }
+function asistenciaAlumno(cols,rows,ref,start,end){
+  const row=filaAsistencia(cols,rows,ref);
+  if(!row) return {present:0,total:0,row:null};
+  const active=getActiveDateCols(cols,rows).filter(i => {
+    const d=normDate(cols[i]);return d && d >= start && d <= end;
   });
-
-  return uniq.map((u, i) =>
-    `<a
-      class="linkbtn"
-      href="${escapeHTML(u)}"
-      target="_blank"
-      rel="noopener noreferrer">
-      📷 Ver evidencia ${uniq.length > 1 ? i + 1 : ''}
-    </a>`
-  ).join('');
+  return {present:active.reduce((a,i) => a+(isPresent(row[i]) ? 1 : 0),0),total:active.length,row};
 }
 
-function renderLists() {
-  const falt = byTri(ALL.faltantes);
-  const tar = byTri(ALL.tarde);
-  const ati = byTri(ALL.atiempo);
+function asistenciaHistorica(cols,rows,ref){
+  const row=filaAsistencia(cols,rows,ref);
+  if(!row) return {present:0,total:0};
+  const active=getActiveDateCols(cols,rows);
+  return {present:active.reduce((a,i) => a+(isPresent(row[i]) ? 1 : 0),0),total:active.length};
+}
 
-  const totalTri = byTri(ALL.presets).length;
+function weekRange(date){
+  const day=new Date(dayNumber(date)*86400000).getUTCDay();
+  const monday=shiftDay(date,day === 0 ? -6 : 1-day);
+  return [monday,shiftDay(monday,4)];
+}
 
-  const hechosTri = tar.length + ati.length;
+/* EXPERIENCIA PARA FAMILIAS
+   Bloques diarios + calendario complementario; información de detalle a demanda.
+   https://www.nngroup.com/articles/progressive-disclosure/
+   https://www.nngroup.com/articles/recognition-and-recall/
+   https://www.w3.org/WAI/WCAG22/Understanding/use-of-color.html
+   https://www.w3.org/WAI/WCAG22/Understanding/target-size-minimum.html
+   La clasificación por UID y el corte de publicación se conservan en el núcleo. */
 
-  $('#stat-cump-tri').textContent = totalTri
-    ? `${Math.round(hechosTri / totalTri * 100)}%`
-    : '–';
+let ALL={faltantes:[],tarde:[],atiempo:[],presets:[]};
+let TRI='M1';
+let CURRENT=null;
+let loadGeneration=0;
+let busy=false;
+let publicationTimer=null;
+const TRI_LABELS={M1:'Trimestre 1',M2:'Trimestre 2',M3:'Trimestre 3',ALL:'Todos los trimestres'};
+const STATE_LABELS={pending:'Pendientes',delivered:'Entregados',all:'Todos los trabajos'};
+const STATUS_TEXT={pending:'Pendiente',ontime:'Entregado a tiempo',late:'Entregado fuera de fecha'};
+const PAGE_DAYS=6, PAGE_WORKS=6;
+const UI={section:'works',status:'pending',range:'all',date:'',query:'',month:'',dayLimit:PAGE_DAYS,openDays:new Set(),workLimits:new Map()};
+const dateFormatters=new Map();
+const entryCache={source:null,periods:new Map()};
+let searchCache=new WeakMap();
+const icon=(name,extra='') => `<svg class="icon ${extra}" aria-hidden="true"><use href="#i-${name}"/></svg>`;
+const cap=s => s ? s.charAt(0).toUpperCase()+s.slice(1) : '';
+const plural=(n,one,many) => `${n} ${n===1 ? one : many}`;
 
-  $('#stat-tot-tri').textContent =
-    `Faltantes ${falt.length} · Tarde ${tar.length} · A tiempo ${ati.length} · Trabajos totales ${totalTri}`;
+function byTri(list){
+  return TRI==='ALL' ? list : list.filter(x=>String(x.momento||'').trim().toUpperCase()===TRI);
+}
 
-  renderBarChart({
-    faltantes: falt.length,
-    tarde: tar.length,
-    atiempo: ati.length
+function workDate(t){
+  const iso=normDate(t.fechaObjetivo);
+  return /^\d{4}-\d{2}-\d{2}$/.test(iso) && shiftDay(iso,0)===iso ? iso : '';
+}
+
+function formatDate(date,options){
+  const key=JSON.stringify(options);
+  if(!dateFormatters.has(key)) dateFormatters.set(key,new Intl.DateTimeFormat('es-MX',{timeZone:'UTC',...options}));
+  return dateFormatters.get(key).format(new Date(dayNumber(date)*86400000));
+}
+
+function shortDate(date){
+  if(!date) return 'Sin fecha indicada';
+  const opts={day:'numeric',month:'long'};
+  if(date.slice(0,4)!==schoolNow().date.slice(0,4)) opts.year='numeric';
+  return formatDate(date,opts);
+}
+
+function dayHeading(date){
+  if(!date) return 'Sin fecha indicada';
+  const today=schoolNow().date;
+  const lead=date===today ? 'Hoy' : date===shiftDay(today,-1) ? 'Ayer' : cap(formatDate(date,{weekday:'long'}));
+  return `${lead} · ${shortDate(date)}`;
+}
+
+function monthLabel(month){return cap(formatDate(month+'-01',{month:'long',year:'numeric'}));}
+function addMonth(month,offset){
+  const [y,m]=month.split('-').map(Number);
+  const d=new Date(Date.UTC(y,m-1+offset,1));
+  return `${d.getUTCFullYear()}-${pad(d.getUTCMonth()+1)}`;
+}
+
+function sourceEntries(){
+  if(entryCache.source!==ALL){entryCache.source=ALL;entryCache.periods.clear();searchCache=new WeakMap();}
+  if(entryCache.periods.has(TRI)) return entryCache.periods.get(TRI);
+  const entries=[
+    ...byTri(ALL.faltantes).map(work=>({work,status:'pending',date:workDate(work)})),
+    ...byTri(ALL.atiempo).map(work=>({work,status:'ontime',date:workDate(work)})),
+    ...byTri(ALL.tarde).map(work=>({work,status:'late',date:workDate(work)}))
+  ];
+  entryCache.periods.set(TRI,entries);
+  return entries;
+}
+
+function countsFor(entries){
+  const total=entries.length,pending=entries.filter(e=>e.status==='pending').length;
+  const late=entries.filter(e=>e.status==='late').length;
+  return {total,pending,late,ontime:total-pending-late,delivered:total-pending};
+}
+
+function matchesRange(e){
+  if(UI.range==='all') return true;
+  if(!e.date) return false;
+  const today=schoolNow().date;
+  if(UI.range==='today') return e.date===today;
+  if(UI.range==='date') return e.date===UI.date;
+  const [start,end]=weekRange(today);
+  return e.date>=start && e.date<=end;
+}
+
+function matchesStatus(e){
+  return UI.status==='all' || (UI.status==='pending' ? e.status==='pending' : e.status!=='pending');
+}
+
+function filteredEntries(){
+  const query=norm(UI.query);
+  return sourceEntries().filter(e=>{
+    if(!matchesRange(e)||!matchesStatus(e)) return false;
+    if(!query) return true;
+    const t=e.work;
+    if(!searchCache.has(t)) searchCache.set(t,norm([t.nombreTrabajo,t.materia,t.numero,t.origen,t.pagina,t.pagina ? 'página '+t.pagina : '',e.date,shortDate(e.date)].join(' ')));
+    return searchCache.get(t).includes(query);
   });
-
-  const renderItem = t => {
-    const mom = t.momento
-      ? ` · ${escapeHTML(t.momento)}`
-      : '';
-
-    const fecha = t.fechaObjetivo
-      ? ` · ${escapeHTML(normDate(t.fechaObjetivo))}`
-      : '';
-
-    const nom = t.nombreTrabajo
-      ? ` · <i>${escapeHTML(t.nombreTrabajo)}</i>`
-      : '';
-
-    const kLink = linksFor(t.uid, t);
-
-    const kSheet = t.evidSheet
-      ? ` <span class="badgeb">📄 ${escapeHTML(t.evidSheet)}</span>`
-      : '';
-
-    return `
-      <details>
-        <summary>
-          <b>${escapeHTML(t.materia || '–')}</b>
-          —
-          ${escapeHTML(t.numero || '–')}
-          (${escapeHTML(t.origen || '–')}${t.pagina ? ' · p.' + escapeHTML(t.pagina) : ''})
-          ${nom}
-          ${fecha}
-          ${mom}
-          ${kLink ? ' ' + kLink : ''}
-          ${kSheet}
-        </summary>
-      </details>
-    `;
-  };
-
-  $('#faltantes').innerHTML = falt.length
-    ? falt.map(renderItem).join('')
-    : '<div class="hint">No hay trabajos faltantes 💙</div>';
-
-  $('#tarde').innerHTML = tar.length
-    ? tar.map(renderItem).join('')
-    : '<div class="hint">No hay entregas tarde</div>';
-
-  $('#atiempo').innerHTML = ati.length
-    ? ati.map(renderItem).join('')
-    : '<div class="hint">Aún no hay entregas registradas</div>';
 }
 
-/* ==================================================
-   CARGA DEL ALUMNO
-================================================== */
-
-let loadGeneration = 0;
-
-async function cargarAlumnoPorID(id) {
-  const generation = ++loadGeneration;
-
-  $('#student-view').style.display = 'none';
-
-  $('#alumno-nombre').textContent = 'Cargando…';
-
-  $('#alumno-id').textContent = '';
-
-  const [asis, reg, pre] = await Promise.all([
-    loadBlock('asistencia'),
-    loadBlock('registro'),
-    loadBlock('presets'),
-    loadLinks()
-  ]);
-
-  if (generation !== loadGeneration) {
-    return;
+function groupedEntries(entries=filteredEntries()){
+  const groups=new Map();
+  for(const entry of entries){
+    const key=entry.date||'undated';
+    if(!groups.has(key)) groups.set(key,{key,date:entry.date,items:[]});
+    groups.get(key).items.push(entry);
   }
+  return [...groups.values()].sort((a,b)=>{
+    if(!a.date) return 1;if(!b.date) return -1;
+    return b.date.localeCompare(a.date);
+  }).map(g=>({...g,items:[...g.items].sort((a,b)=>{
+    const rank={pending:0,ontime:1,late:2};
+    return rank[a.status]-rank[b.status] || String(a.work.numero||'').localeCompare(String(b.work.numero||''),'es',{numeric:true});
+  })}));
+}
 
-  const entregas = parseRegistro(
-    reg.cols,
-    reg.rows
-  );
+function rangeLabel(){
+  if(UI.range==='today') return 'Hoy · '+shortDate(schoolNow().date);
+  if(UI.range==='week') return 'Esta semana';
+  if(UI.range==='date') return cap(shortDate(UI.date));
+  return 'Todas las fechas';
+}
 
-  const presets = parsePresets(
-    pre.cols,
-    pre.rows
-  );
-
-  const entAlumno = entregas.filter(t =>
-    norm(t.id) === norm(id)
-  );
-
-  /*
-    Mantener la fecha efectiva original:
-    antes de las 6:00 se considera el día anterior.
-  */
-  const now = new Date();
-
-  const effective = new Date(now);
-
-  if (now.getHours() < 6) {
-    effective.setDate(
-      effective.getDate() - 1
-    );
-  }
-
-  const today = ymd(effective);
-
-  const [w0, w1] = weekRange(now);
-
-  const nombreDeRegistro =
-    entAlumno.find(e => e.nombre)?.nombre || '';
-
-  const aw = asistenciaAlumno(
-    asis.cols,
-    asis.rows,
-    {
-      id,
-      nombre: nombreDeRegistro
-    },
-    w0,
-    w1
-  );
-
-  const iNom = asis.cols.findIndex(c =>
-    /^nombre/i.test(String(c).trim())
-  );
-
-  const nombre =
-    (
-      aw.row && iNom >= 0
-        ? String(aw.row[iNom] || '')
-        : ''
-    ) || nombreDeRegistro;
-
-  if (!nombre) {
-    throw new Error(
-      'No encontramos ese ID. Verifique que esté correcto (sin espacios) o contacte a la escuela.'
-    );
-  }
-
-  /*
-    Clasificación corregida de los trabajos.
-  */
-  ALL = clasificarTrabajos(
-    presets,
-    entAlumno,
-    today
-  );
-
-  $('#alumno-nombre').textContent = nombre;
-
-  $('#alumno-id').textContent = 'ID: ' + id;
-
-  $('#grupo-label').innerHTML =
-    `<span class="badgeb">👩‍🏫 Grupo: <b>${escapeHTML(GROUP_LABEL)}</b></span>`;
-
-  const a30 = asistenciaAlumno(
-    asis.cols,
-    asis.rows,
-    { id, nombre },
-    ymd(
-      new Date(
-        now.getFullYear(),
-        now.getMonth(),
-        now.getDate() - 30
-      )
-    ),
-    ymd(now)
-  );
-
-  const ah = asistenciaHistorica(
-    asis.cols,
-    asis.rows,
-    { id, nombre }
-  );
-
-  const porcentaje = a => a.total
-    ? `${Math.round(a.present / a.total * 100)}%  (${a.present}/${a.total})`
-    : '–';
-
-  $('#stat-aswk').textContent = porcentaje(aw);
-
-  $('#stat-as30').textContent = porcentaje(a30);
-
-  $('#stat-asHist').textContent = porcentaje(ah);
-
-  $('#stat-faltHist').textContent = ah.total
-    ? `${ah.total - ah.present}`
-    : '–';
-
-  /*
-    Abrir siempre en Trimestre 1.
-  */
-  TRI = 'M1';
-
-  setTriChips();
-
+function resetResults(){
+  UI.dayLimit=PAGE_DAYS;UI.workLimits.clear();UI.openDays.clear();
+  const first=groupedEntries()[0];
+  if(first) UI.openDays.add(first.key);
   renderLists();
+}
 
-  $('#student-view').style.display = 'block';
+function selectPending(){
+  UI.status='pending';UI.range='all';UI.date='';UI.query='';
+  $('#workSearch').value='';setSection('works');resetResults();
+  $('#results-title').focus({preventScroll:true});
+  $('#results-title').scrollIntoView({block:'start',behavior:'auto'});
+}
 
-  window.scrollTo({
-    top: 0,
-    behavior: 'smooth'
+function subjectClass(s){
+  const t=norm(s);
+  if(/lenguaje|espanol|lectura/.test(t)) return 'language';
+  if(/saberes|cientifico|matematica/.test(t)) return 'science';
+  if(/etica|naturaleza|sociedades/.test(t)) return 'ethics';
+  if(/humano|comunitario/.test(t)) return 'community';
+  return '';
+}
+
+function linksFor(uid,preset){
+  const urls=[];
+  const rec=Object.prototype.hasOwnProperty.call(LINKMAP,uid) ? LINKMAP[uid] : null;
+  if(rec){if(Array.isArray(rec.urls)) urls.push(...rec.urls);else if(rec.url) urls.push(rec.url);}
+  if(preset?.evidUrl) urls.push(String(preset.evidUrl));
+  const uniq=[...new Set(urls.map(u=>String(u||'').trim()).filter(Boolean))].filter(u=>{
+    try{return ['https:','http:'].includes(new URL(u,document.baseURI).protocol);}catch{return false;}
   });
+  return uniq.map((u,i)=>`<a class="btn" href="${escapeHTML(u)}" target="_blank" rel="noopener noreferrer">${icon('image')}Ver evidencia${uniq.length>1 ? ' '+(i+1) : ''}<span class="sr-only"> de ${escapeHTML(preset.nombreTrabajo||'este trabajo')} (abre otra pestaña)</span></a>`).join('');
 }
 
-/* ==================================================
-   TEMA, ID GUARDADO Y CONTROLES
-================================================== */
+function renderWork(entry){
+  const t=entry.work,title=t.nombreTrabajo||`${t.materia||'Trabajo'}${t.numero ? ' '+t.numero : ''}`;
+  const meta=[t.origen,t.pagina ? 'Página '+t.pagina : '',t.numero ? 'Trabajo '+t.numero : ''];
+  if(TRI==='ALL') meta.push(TRI_LABELS[String(t.momento||'').trim().toUpperCase()]||t.momento);
+  const links=linksFor(t.uid,t);
+  return `<article class="work-item" data-work-uid="${escapeHTML(t.uid)}">
+    <div class="work-top"><span class="subject ${subjectClass(t.materia)}">${escapeHTML(t.materia||'Trabajo escolar')}</span><span class="work-status ${entry.status}">${icon(entry.status==='pending' ? 'clock' : 'check')}${STATUS_TEXT[entry.status]}</span></div>
+    <h4 class="work-title">${escapeHTML(title)}</h4>
+    <div class="work-meta">${meta.filter(Boolean).map(v=>`<span>${escapeHTML(v)}</span>`).join('')}</div>
+    ${links ? `<div class="evidence">${links}</div>` : ''}
+    ${t.evidSheet ? `<p class="small muted" style="margin-top:8px">${escapeHTML(t.evidSheet)}</p>` : ''}
+  </article>`;
+}
 
-function readPreference(key) {
-  try {
-    return localStorage.getItem(key);
+function renderDay(group){
+  const c=countsFor(group.items),limit=UI.workLimits.get(group.key)||PAGE_WORKS;
+  const visible=group.items.slice(0,limit),remaining=group.items.length-visible.length;
+  let badge=plural(c.pending,'pendiente','pendientes'),badgeClass='';
+  if(UI.status==='delivered'){badge=plural(c.delivered,'entregado','entregados');badgeClass='done';}
+  if(UI.status==='all'){badge=plural(c.total,'trabajo','trabajos');badgeClass='all';}
+  const subtitle=UI.query ? plural(c.total,'coincidencia','coincidencias') :
+    UI.status==='pending' ? 'Por registrar como entregados' :
+    UI.status==='delivered' ? (c.late ? plural(c.late,'fuera de fecha','fuera de fecha') : 'Todos a tiempo') :
+    `${plural(c.pending,'pendiente','pendientes')} · ${plural(c.delivered,'entregado','entregados')}`;
+  const day=group.date ? String(Number(group.date.slice(-2))) : '—';
+  const month=group.date ? formatDate(group.date,{month:'short'}).replace('.','') : 'Fecha';
+  return `<details class="day-block" data-day="${group.key}"${UI.openDays.has(group.key) ? ' open' : ''}>
+    <summary class="day-summary"><span class="date-tile" aria-hidden="true"><span class="day-number">${day}</span><span class="day-month">${escapeHTML(month)}</span></span><span class="day-title"><span class="date-heading">${escapeHTML(dayHeading(group.date))}</span><span class="day-sub">${escapeHTML(subtitle)}</span></span><span class="day-count ${badgeClass}">${badge}</span>${icon('chevron','chevron')}</summary>
+    <div class="work-list">${visible.map(renderWork).join('')}</div>
+    ${remaining ? `<button class="more-works" data-more-works="${group.key}" type="button">Ver ${Math.min(PAGE_WORKS,remaining)} trabajos más de este día · quedan ${remaining}</button>` : ''}
+  </details>`;
+}
 
-  } catch {
-    return null;
+function emptyState(){
+  const source=sourceEntries(),inDates=source.filter(matchesRange),before=publicationCutoff()!==schoolNow().date;
+  const askingToday=UI.range==='today'||(UI.range==='date'&&UI.date===schoolNow().date);
+  let title='',description='',action='',button='',symbol='search';
+  if(askingToday&&before){
+    title='Los trabajos de hoy aparecen a las 12:45 p. m.';
+    description='El maestro podrá registrar los trabajos durante la mañana. La consulta se actualizará al llegar la hora, en Nuevo Laredo.';symbol='clock';
+  }else if(UI.query){
+    title='No encontramos ese trabajo en esta selección.';
+    description='Pruebe con una palabra del nombre, la materia o el número de página.';
+    const alreadyAll=UI.status==='all'&&UI.range==='all';
+    action=alreadyAll ? 'clearSearch' : 'searchAll';button=alreadyAll ? 'Borrar búsqueda' : 'Buscar en todo el periodo';
+  }else if(!source.length){
+    title='Aún no hay trabajos publicados en este periodo.';
+    description='Puede elegir otro trimestre. Los trabajos se muestran en su fecha, desde las 12:45 p. m.';symbol='book';
+  }else if(!inDates.length){
+    title='No hay trabajos publicados en estas fechas.';
+    description='Elija otro día en el calendario o consulte todas las fechas del periodo.';
+    action='allDates';button='Ver todas las fechas';symbol='calendar';
+  }else if(UI.status==='pending'){
+    title=UI.range==='all' ? 'Todos los trabajos publicados están entregados.' : 'Sin pendientes en estas fechas.';
+    description='Puede abrir los trabajos entregados para consultar su detalle y las evidencias disponibles.';
+    action='delivered';button='Ver entregados';symbol='check';
+  }else{
+    title='Aún no hay entregas registradas en esta selección.';
+    description='Los trabajos pendientes aparecerán cuando elija “Todos” o “Pendientes”.';
+    action='allStatus';button='Ver todos los trabajos';symbol='book';
+  }
+  return `<div class="empty-state"><div class="empty-icon">${icon(symbol)}</div><h4>${title}</h4><p>${description}</p>${action ? `<button class="btn" type="button" data-empty-action="${action}">${button}</button>` : ''}</div>`;
+}
+
+function renderSummary(){
+  const c=countsFor(sourceEntries());
+  $('#summary-scope').textContent=`Resumen de ${TRI_LABELS[TRI].toLowerCase()} · trabajos publicados`;
+  $('#stat-pending').textContent=c.pending;
+  $('#stat-delivered').textContent=c.delivered;
+  $('#stat-total').textContent='de '+plural(c.total,'trabajo','trabajos');
+  $('#stat-cump-tri').textContent=c.total ? Math.round(c.delivered/c.total*100)+'%' : '–';
+  $('#completion-fill').style.width=(c.total ? c.delivered/c.total*100 : 0)+'%';
+  $('#nav-pending').textContent=c.pending;
+  $('#nav-pending').setAttribute('aria-label',plural(c.pending,'pendiente en el periodo','pendientes en el periodo'));
+  $('#filter-pending').textContent=c.pending;$('#filter-delivered').textContent=c.delivered;$('#filter-all').textContent=c.total;
+  $('#pendingShortcut').setAttribute('aria-label',`Ver ${plural(c.pending,'trabajo pendiente','trabajos pendientes')} de ${TRI_LABELS[TRI]}`);
+}
+
+function renderLists(){
+  const groups=groupedEntries(),visible=groups.slice(0,UI.dayLimit),entries=filteredEntries();
+  for(const b of document.querySelectorAll('[data-status]')){
+    const active=b.dataset.status===UI.status;b.classList.toggle('active',active);b.setAttribute('aria-pressed',String(active));
+  }
+  for(const b of document.querySelectorAll('[data-range]')){
+    const active=b.dataset.range===UI.range;b.classList.toggle('active',active);b.setAttribute('aria-pressed',String(active));
+  }
+  $('#clearSearch').hidden=!UI.query;
+  const specificDate=UI.range==='date'&&UI.date;
+  $('#calendarToggle').classList.toggle('active',Boolean(specificDate));
+  $('#calendarToggleLabel').textContent=specificDate ? formatDate(UI.date,{day:'numeric',month:'short'}).replace(/\./g,'') : 'Fecha';
+  $('#calendarToggle').setAttribute('aria-label',specificDate ? 'Cambiar fecha: '+prettyDate(UI.date) : 'Elegir una fecha en el calendario');
+  $('#results-title').textContent=UI.range==='all' ? `${STATE_LABELS[UI.status]} por fecha` : STATE_LABELS[UI.status];
+  $('#results-description').textContent=`${rangeLabel()} · ${plural(entries.length,'trabajo','trabajos')}${UI.query ? ` · Búsqueda: “${UI.query}”` : ''}`;
+  $('#resetFilters').hidden=UI.range==='all'&&!UI.query&&UI.status!=='delivered';
+  const outside=sourceEntries().filter(e=>e.status==='pending'&&!matchesRange(e)).length;
+  $('#other-pending').hidden=UI.range==='all'||!outside;
+  $('#other-pending-text').textContent=`Hay ${plural(outside,'pendiente en otra fecha','pendientes en otras fechas')}.`;
+  $('#day-groups').innerHTML=visible.length ? visible.map(renderDay).join('') : emptyState();
+  $('#pagination').hidden=groups.length<=PAGE_DAYS;
+  $('#page-description').textContent=`Mostrando ${visible.length} de ${plural(groups.length,'bloque de fecha','bloques de fechas')}`;
+  $('#loadMoreDays').hidden=visible.length>=groups.length;
+  for(const d of $('#day-groups').querySelectorAll('details')){
+    d.addEventListener('toggle',()=>{
+      if(!d.isConnected) return;
+      if(d.open) UI.openDays.add(d.dataset.day);else UI.openDays.delete(d.dataset.day);
+    });
+  }
+  $('#results-announcement').textContent=`${STATE_LABELS[UI.status]}. ${rangeLabel()}. ${plural(entries.length,'trabajo encontrado','trabajos encontrados')}.`;
+  renderCalendar();
+}
+
+function calendarBounds(){
+  const today=schoolNow().date;
+  const dates=sourceEntries().map(e=>e.date).filter(Boolean).sort();
+  return {min:dates.length ? dates[0].slice(0,7) : today.slice(0,7),max:today.slice(0,7)};
+}
+
+function calendarModel(month=UI.month){
+  const [y,m]=month.split('-').map(Number);
+  const days=new Date(Date.UTC(y,m,0)).getUTCDate();
+  const offset=(new Date(Date.UTC(y,m-1,1)).getUTCDay()+6)%7;
+  const today=schoolNow().date,byDate=new Map();
+  for(const e of sourceEntries()){
+    if(!e.date) continue;
+    if(!byDate.has(e.date)) byDate.set(e.date,[]);
+    byDate.get(e.date).push(e);
+  }
+  const selected=UI.range==='date' ? UI.date : UI.range==='today' ? today : '';
+  const cells=Array.from({length:days},(_,i)=>{
+    const date=`${month}-${pad(i+1)}`,counts=countsFor(byDate.get(date)||[]);
+    return {date,day:i+1,...counts,selected:date===selected,today:date===today,disabled:date>today};
+  });
+  return {offset,cells};
+}
+
+function renderCalendar(focusDate=''){
+  const bounds=calendarBounds();
+  if(!UI.month || UI.month<bounds.min || UI.month>bounds.max) UI.month=bounds.max;
+  const months=[];
+  for(let m=bounds.min;m<=bounds.max;m=addMonth(m,1)){
+    months.push(m);
+    if(months.length>1200) break;
+  }
+  $('#monthSelect').innerHTML=months.map(m=>`<option value="${m}"${m===UI.month ? ' selected' : ''}>${escapeHTML(monthLabel(m))}</option>`).join('');
+  $('#prevMonth').disabled=UI.month<=bounds.min;$('#nextMonth').disabled=UI.month>=bounds.max;
+  const {offset,cells}=calendarModel();
+  const chosen=cells.find(c=>c.date===focusDate&&!c.disabled)||cells.find(c=>c.selected&&!c.disabled)||cells.find(c=>c.today)||cells.find(c=>!c.disabled);
+  const blanks='<span aria-hidden="true"></span>'.repeat(offset);
+  $('#calendar-days').innerHTML=blanks+cells.map(c=>{
+    const style=[c.pending ? 'has-pending' : c.total ? 'complete' : '',c.today ? 'is-today' : '',c.selected ? 'selected' : ''].filter(Boolean).join(' ');
+    const mark=c.pending ? `${c.pending} p.` : c.total ? '✓' : '';
+    const description=c.disabled ? 'fecha futura' : c.total ? `${plural(c.pending,'pendiente','pendientes')}, ${plural(c.total,'trabajo publicado','trabajos publicados')}` : c.today&&publicationCutoff()!==schoolNow().date ? 'disponible desde las 12:45 p. m.' : 'sin trabajos publicados';
+    return `<button type="button" class="calendar-day ${style}" data-calendar-date="${c.date}" tabindex="${chosen?.date===c.date ? '0' : '-1'}" aria-pressed="${c.selected}"${c.today ? ' aria-current="date"' : ''} aria-label="${escapeHTML(prettyDate(c.date)+', '+description)}"${c.disabled ? ' disabled' : ''}><span>${c.day}</span><span class="calendar-mark" aria-hidden="true">${mark||'&nbsp;'}</span></button>`;
+  }).join('');
+  $('#calendar-days').setAttribute('aria-label','Días de '+monthLabel(UI.month).toLowerCase());
+  $('#calendar-scope').textContent=`Marcas del calendario: todos los trabajos publicados de ${TRI_LABELS[TRI].toLowerCase()}.`;
+  if(focusDate) $('#calendar-days').querySelector(`[data-calendar-date="${focusDate}"]`)?.focus({preventScroll:true});
+}
+
+function renderPublicationNotice(now=new Date()){
+  const before=publicationCutoff(now)!==schoolNow(now).date;
+  $('#publication-notice').textContent=before
+    ? 'Hoy: desde las 12:45 p. m., hora de Nuevo Laredo. Los días anteriores ya están disponibles.'
+    : 'Publicación diaria: desde las 12:45 p. m., hora de Nuevo Laredo. Se muestra lo registrado por el maestro.';
+}
+
+function renderAttendance(now=new Date()){
+  const {asis,id,nombre}=CURRENT,ref={id,nombre},today=schoolNow(now).date;
+  const [w0,w1]=weekRange(today);
+  const aw=asistenciaAlumno(asis.cols,asis.rows,ref,w0,w1);
+  // Hoy y los 29 días anteriores conforman un intervalo inclusivo de 30 días.
+  const a30=asistenciaAlumno(asis.cols,asis.rows,ref,shiftDay(today,-29),today);
+  const ah=asistenciaHistorica(asis.cols,asis.rows,ref);
+  for(const [suffix,a] of [['aswk',aw],['as30',a30],['asHist',ah]]){
+    $('#stat-'+suffix).textContent=a.total ? Math.round(a.present/a.total*100)+'%' : '–';
+    $('#'+suffix+'-detail').textContent=a.total ? `Asistió ${a.present} de ${a.total} días con registro` : 'Sin registros en este periodo';
+  }
+  $('#stat-faltHist').textContent=ah.total ? plural(ah.total-ah.present,'falta registrada','faltas registradas') : '';
+  const row=filaAsistencia(asis.cols,asis.rows,ref);
+  const active=row ? getActiveDateCols(asis.cols,asis.rows).map(i=>({i,date:normDate(asis.cols[i])})).filter(x=>x.date<=today).sort((a,b)=>b.date.localeCompare(a.date)).slice(0,14) : [];
+  $('#attendance-history-note').textContent=active.length ? `Últimos ${plural(active.length,'día con registro','días con registro')}.` : 'Aún no hay días registrados.';
+  $('#attendance-rows').innerHTML=active.map(x=>{
+    const present=isPresent(row[x.i]);
+    return `<div class="attendance-row"><time datetime="${x.date}">${escapeHTML(cap(formatDate(x.date,{weekday:'short',day:'numeric',month:'short'})))}</time><span class="attendance-status${present ? '' : ' absent'}">${present ? '✓ Asistió' : 'Falta registrada'}</span></div>`;
+  }).join('');
+}
+
+/* CARGA Y ACTUALIZACIÓN. Solo se conserva el ID si la familia lo pide. */
+function setStatus(selector,message,error=false){
+  const el=$(selector);el.textContent=message;el.classList.toggle('error',error);
+}
+
+function setBusy(value){
+  busy=value;
+  $('#goBtn').disabled=value;$('#refreshBtn').disabled=value;
+  $('#goBtn').querySelector('span').textContent=value ? 'Consultando…' : 'Ver el progreso';
+  $('#refreshBtn').querySelector('span').textContent=value ? 'Actualizando…' : 'Actualizar';
+  $('#refreshBtn').classList.toggle('loading',value);
+  $('#search-form').setAttribute('aria-busy',String(value));
+  $('#student-view').setAttribute('aria-busy',String(value));
+}
+
+function setSection(section){
+  UI.section=section;
+  const works=section==='works';
+  $('#works-panel').hidden=!works;$('#attendance-panel').hidden=works;
+  $('#worksTab').classList.toggle('active',works);$('#attendanceTab').classList.toggle('active',!works);
+  $('#worksTab').setAttribute('aria-pressed',String(works));$('#attendanceTab').setAttribute('aria-pressed',String(!works));
+}
+
+function navigateSection(section){
+  setSection(section);
+  const heading=$(section==='works' ? '#works-title' : '#attendance-title');
+  heading.focus({preventScroll:true});
+  heading.scrollIntoView({block:'start',behavior:'auto'});
+}
+
+function setCalendarOpen(open,returnFocus=false){
+  $('#work-board').classList.toggle('calendar-open',open);
+  $('#calendarToggle').setAttribute('aria-expanded',String(open));
+  if(returnFocus) $('#calendarToggle').focus({preventScroll:true});
+}
+
+function resetUI(){
+  TRI='M1';$('#triSelect').value='M1';
+  Object.assign(UI,{section:'works',status:'pending',range:'all',date:'',query:'',month:schoolNow().date.slice(0,7),dayLimit:PAGE_DAYS});
+  UI.openDays.clear();UI.workLimits.clear();
+  $('#workSearch').value='';
+  setCalendarOpen(false);
+  setSection('works');
+}
+
+function renderCurrent(now=new Date(),reset=false){
+  if(!CURRENT) return;
+  const {id,nombre,presets,entAlumno,loadedAt}=CURRENT;
+  CURRENT.cutoff=publicationCutoff(now);CURRENT.schoolDate=schoolNow(now).date;
+  ALL=clasificarTrabajos(presets,entAlumno,CURRENT.cutoff);
+  $('#alumno-nombre').textContent=nombre;
+  $('#student-avatar').textContent=nombre.trim().split(/\s+/).slice(0,2).map(x=>x[0]).join('').toUpperCase();
+  $('#alumno-id').textContent='ID: '+id;
+  $('#grupo-label').textContent='Grupo '+GROUP_LABEL;
+  $('#last-update').textContent='Consultado: '+timeLabel(loadedAt);
+  renderPublicationNotice(now);renderSummary();renderAttendance(now);
+  if(reset) resetResults();else renderLists();
+}
+
+async function cargarAlumnoPorID(id,refresh=false){
+  if(busy) return;
+  const generation=++loadGeneration;
+  const statusTarget=refresh ? '#view-status' : '#search-status';
+  setBusy(true);
+  setStatus(statusTarget,refresh ? 'Actualizando trabajos y asistencia…' : 'Buscando los trabajos y la asistencia…');
+  try{
+    const [asis,reg,pre,links]=await Promise.all([
+      loadBlock('asistencia'),loadBlock('registro'),loadBlock('presets'),loadLinks()
+    ]);
+    if(generation!==loadGeneration) return;
+    const entregas=parseRegistro(reg.cols,reg.rows),presets=parsePresets(pre.cols,pre.rows);
+    const entAlumno=entregas.filter(t=>norm(t.id)===norm(id));
+    const nombreDeRegistro=entAlumno.find(e=>e.nombre)?.nombre||'';
+    const row=filaAsistencia(asis.cols,asis.rows,{id,nombre:nombreDeRegistro});
+    const iNom=asis.cols.findIndex(c=>/^nombre/i.test(String(c).trim()));
+    const nombre=(row&&iNom>=0 ? String(row[iNom]||'') : '')||nombreDeRegistro;
+    if(!nombre){
+      const e=new Error('ID no encontrado');e.publicMessage='No encontramos ese ID. Revíselo o solicítelo al maestro.';throw e;
+    }
+    LINKMAP=links;
+    CURRENT={id,nombre,asis,presets,entAlumno,loadedAt:new Date(),cutoff:'',schoolDate:''};
+    if(!refresh) resetUI();
+    renderCurrent(new Date(),!refresh);
+    $('#search-card').hidden=true;$('#student-view').hidden=false;
+    setStatus('#search-status','');setStatus('#view-status',refresh ? 'La consulta está actualizada.' : '');
+    if(!refresh){
+      if($('#rememberCheck').checked){
+        if(!savePreference('familias_id',id)) setStatus('#view-status','Puede consultar sus datos, pero este navegador no permite recordar el ID.');
+        else $('#forgetBtn').hidden=false;
+      }
+      $('#alumno-nombre').focus({preventScroll:true});window.scrollTo({top:0,behavior:'auto'});
+    }
+  }catch(e){
+    if(generation!==loadGeneration) return;
+    const message=e.publicMessage || (refresh
+      ? 'No se pudo actualizar. Se conserva la última consulta. Revise su conexión e inténtelo de nuevo.'
+      : 'No pudimos consultar la libreta. Revise su conexión e inténtelo de nuevo en un momento.');
+    setStatus(statusTarget,message,true);
+    console.warn('Aula Digital:',e.message);
+  }finally{
+    if(generation===loadGeneration){setBusy(false);schedulePublicationCheck();}
   }
 }
 
-function savePreference(key, value) {
-  try {
-    localStorage.setItem(key, value);
-    return true;
+/* Recalcula con la hora de Nuevo Laredo. No publica trabajos futuros,
+   tampoco en el calendario ni en sus contadores. Al pasar el corte
+   actualiza la hoja y conserva la fecha, búsqueda y sección elegidas. */
+function schedulePublicationCheck(){
+  clearTimeout(publicationTimer);
+  if(!CURRENT) return;
+  const now=new Date(),local=schoolNow(now);
+  const remaining=((PUBLICATION_HOUR*60+PUBLICATION_MINUTE-local.hour*60-local.minute)*60-local.second)*1000-now.getMilliseconds();
+  const delay=remaining>0 ? Math.min(60000,remaining+30) : 60000;
+  publicationTimer=setTimeout(checkPublication,Math.max(50,delay));
+}
 
-  } catch {
-    return false;
+function checkPublication(){
+  if(!CURRENT) return;
+  const now=new Date();
+  const changed=CURRENT.cutoff!==publicationCutoff(now)||CURRENT.schoolDate!==schoolNow(now).date;
+  if(changed){
+    const id=CURRENT.id;renderCurrent(now);
+    if(!busy) void cargarAlumnoPorID(id,true);
+  }else{renderPublicationNotice(now);}
+  schedulePublicationCheck();
+}
+
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState==='visible') checkPublication();
+});
+
+/* PREFERENCIAS Y CONTROLES DE LA INTERFAZ. */
+function readPreference(key){try{return localStorage.getItem(key);}catch{return null;}}
+function savePreference(key,value){try{localStorage.setItem(key,value);return true;}catch{return false;}}
+
+function applyTheme(t){
+  t=t==='dark' ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-theme',t);
+  $('#themeBtn').innerHTML=icon(t==='dark' ? 'sun' : 'moon')+`<span>${t==='dark' ? 'Claro' : 'Oscuro'}</span>`;
+  $('#themeBtn').setAttribute('aria-label',t==='dark' ? 'Activar tema claro' : 'Activar tema oscuro');
+  savePreference('familias_theme',t);
+}
+applyTheme(readPreference('familias_theme')||'light');
+$('#themeBtn').onclick=()=>applyTheme(document.documentElement.getAttribute('data-theme')==='dark' ? 'light' : 'dark');
+
+const normalizeID=value=>String(value||'').trim().toUpperCase();
+const validID=value=>/^ID[A-Z0-9]{6,}$/.test(value);
+$('#search-form').addEventListener('submit',e=>{
+  e.preventDefault();if(busy) return;
+  const id=normalizeID($('#idInput').value);
+  if(!validID(id)){
+    $('#idInput').setAttribute('aria-invalid','true');
+    setStatus('#search-status','Revise el ID: debe comenzar con ID y no tener espacios intermedios.',true);
+    $('#idInput').focus();return;
   }
-}
+  $('#idInput').removeAttribute('aria-invalid');$('#idInput').value=id;
+  void cargarAlumnoPorID(id);
+});
+$('#idInput').addEventListener('input',()=>$('#idInput').removeAttribute('aria-invalid'));
+$('#forgetBtn').onclick=()=>{
+  try{
+    localStorage.removeItem('familias_id');$('#idInput').value='';$('#rememberCheck').checked=false;$('#forgetBtn').hidden=true;
+    setStatus('#search-status','El ID ya no está guardado en este dispositivo.');
+  }catch{setStatus('#search-status','No se pudo quitar el ID guardado. Puede seguir consultando.',true);}
+};
+const saved=readPreference('familias_id');
+if(saved){$('#idInput').value=saved;$('#rememberCheck').checked=true;$('#forgetBtn').hidden=false;}
 
-const themeBtn = $('#themeBtn');
-
-function applyTheme(t) {
-  t = t === 'dark' ? 'dark' : 'light';
-
-  document.documentElement.setAttribute(
-    'data-theme',
-    t
-  );
-
-  themeBtn.textContent = t === 'dark'
-    ? '☀️ Claro'
-    : '🌙 Oscuro';
-
-  savePreference('familias_theme', t);
-}
-
-applyTheme(
-  readPreference('familias_theme') || 'light'
-);
-
-themeBtn.onclick = () => {
-  const actual =
-    document.documentElement.getAttribute(
-      'data-theme'
-    );
-
-  applyTheme(
-    actual === 'dark' ? 'light' : 'dark'
-  );
+$('#refreshBtn').onclick=()=>{if(CURRENT) void cargarAlumnoPorID(CURRENT.id,true);};
+$('#backBtn').onclick=()=>{
+  loadGeneration++;CURRENT=null;LINKMAP={};ALL={faltantes:[],tarde:[],atiempo:[],presets:[]};
+  clearTimeout(publicationTimer);setBusy(false);
+  $('#student-view').hidden=true;$('#search-card').hidden=false;
+  // Quita el contenido anterior del DOM al cambiar de alumno.
+  $('#day-groups').innerHTML='';$('#attendance-rows').innerHTML='';$('#calendar-days').innerHTML='';
+  $('#alumno-nombre').textContent='Alumno';$('#alumno-id').textContent='';$('#student-avatar').textContent='';
+  setStatus('#search-status','');setStatus('#view-status','');
+  $('#idInput').focus({preventScroll:true});window.scrollTo({top:0,behavior:'auto'});
 };
 
-/* GUARDAR ID */
+$('#worksTab').onclick=()=>navigateSection('works');
+$('#attendanceTab').onclick=()=>navigateSection('attendance');
+$('#pendingShortcut').onclick=selectPending;
+$('#allPendingBtn').onclick=selectPending;
+$('#triSelect').addEventListener('change',()=>{
+  TRI=$('#triSelect').value;
+  UI.range='all';UI.date='';UI.query='';UI.month=schoolNow().date.slice(0,7);
+  $('#workSearch').value='';renderSummary();resetResults();
+});
+for(const b of document.querySelectorAll('[data-status]')) b.onclick=()=>{UI.status=b.dataset.status;resetResults();};
+for(const b of document.querySelectorAll('[data-range]')) b.onclick=()=>{UI.range=b.dataset.range;UI.date='';resetResults();};
 
-$('#saveBtn').onclick = () => {
-  const v = $('#idInput')
-    .value
-    .trim()
-    .toUpperCase();
-
-  if (!v) {
-    alert('Escriba el ID escolar.');
-    return;
-  }
-
-  const ok = savePreference(
-    'familias_id',
-    v
-  );
-
-  alert(
-    ok
-      ? 'Listo. Guardado en este dispositivo.'
-      : 'Este navegador no permite recordar el ID. Puede seguir consultándolo.'
-  );
+$('#workSearch').addEventListener('input',()=>{UI.query=$('#workSearch').value.trim();resetResults();});
+$('#workSearch').addEventListener('keydown',e=>{
+  if(e.key!=='Enter'||e.isComposing) return;
+  e.preventDefault();
+  $('#workSearch').blur();
+  $('#results-title').focus({preventScroll:true});
+  $('#results-title').scrollIntoView({block:'start',behavior:'auto'});
+});
+$('#clearSearch').onclick=()=>{UI.query='';$('#workSearch').value='';resetResults();$('#workSearch').focus();};
+$('#resetFilters').onclick=()=>{
+  UI.status='all';UI.range='all';UI.date='';UI.query='';$('#workSearch').value='';resetResults();
 };
-
-/* BUSCAR ALUMNO */
-
-$('#goBtn').onclick = async () => {
-  const id = $('#idInput')
-    .value
-    .trim()
-    .toUpperCase();
-
-  if (!/^ID[A-Z0-9]{6,}$/.test(id)) {
-    alert(
-      'ID no válido. Revise que no tenga espacios.'
-    );
-
-    return;
-  }
-
-  const btn = $('#goBtn');
-
-  btn.disabled = true;
-  btn.textContent = 'Buscando…';
-
-  $('#idInput').value = id;
-
-  $('#search-status').textContent =
-    'Consultando tareas y asistencia…';
-
-  try {
-    await cargarAlumnoPorID(id);
-
-    $('#search-status').textContent = '';
-
-  } catch (e) {
-    console.error(e);
-
-    $('#search-status').textContent =
-      'No fue posible leer los datos: ' + e.message;
-
-  } finally {
-    btn.disabled = false;
-    btn.textContent = 'Buscar alumno';
-  }
+$('#calendarToggle').onclick=()=>{
+  setCalendarOpen(!$('#work-board').classList.contains('calendar-open'));
 };
-
-/* ENTER */
-
-$('#idInput').addEventListener('keydown', e => {
-  if (
-    e.key === 'Enter' &&
-    !$('#goBtn').disabled
-  ) {
-    $('#goBtn').click();
+$('#calendarClose').onclick=()=>setCalendarOpen(false,true);
+$('#calendar-panel').addEventListener('keydown',e=>{
+  if(e.key==='Escape'&&window.matchMedia('(max-width:760px)').matches){
+    e.preventDefault();setCalendarOpen(false,true);
   }
 });
 
-/* ID GUARDADO */
+$('#monthSelect').addEventListener('change',()=>{UI.month=$('#monthSelect').value;renderCalendar();});
+$('#prevMonth').onclick=()=>{UI.month=addMonth(UI.month,-1);renderCalendar();};
+$('#nextMonth').onclick=()=>{UI.month=addMonth(UI.month,1);renderCalendar();};
+$('#calendar-days').addEventListener('click',e=>{
+  const button=e.target.closest('[data-calendar-date]');
+  if(!button||button.disabled) return;
+  UI.range='date';UI.date=button.dataset.calendarDate;
+  resetResults();
+  $('#results-title').focus({preventScroll:true});
+  if(window.matchMedia('(max-width:760px)').matches){
+    setCalendarOpen(false);
+    $('#results-title').scrollIntoView({block:'start',behavior:'auto'});
+  }
+});
+$('#calendar-days').addEventListener('keydown',e=>{
+  const button=e.target.closest('[data-calendar-date]');
+  if(!button||button.disabled) return;
+  const day=button.dataset.calendarDate,weekday=(new Date(dayNumber(day)*86400000).getUTCDay()+6)%7;
+  const moves={ArrowLeft:-1,ArrowRight:1,ArrowUp:-7,ArrowDown:7,Home:-weekday,End:6-weekday};
+  if(!(e.key in moves)) return;
+  e.preventDefault();
+  const next=shiftDay(day,moves[e.key]),bounds=calendarBounds();
+  if(next>schoolNow().date||next.slice(0,7)<bounds.min) return;
+  UI.month=next.slice(0,7);renderCalendar(next);
+});
 
-const saved = readPreference('familias_id');
-
-if (saved) {
-  $('#idInput').value = saved;
-}
-
-/* CAMBIAR ALUMNO */
-
-$('#backBtn').addEventListener('click', () => {
-  loadGeneration++;
-
-  $('#student-view').style.display = 'none';
-
-  $('#search-status').textContent = '';
-
-  $('#idInput').focus();
-
-  window.scrollTo({
-    top: 0,
-    behavior: 'smooth'
-  });
+$('#loadMoreDays').onclick=()=>{
+  const next=groupedEntries()[UI.dayLimit];UI.dayLimit+=PAGE_DAYS;renderLists();
+  if(next) $('#day-groups').querySelector(`[data-day="${next.key}"] summary`)?.focus({preventScroll:true});
+};
+$('#day-groups').addEventListener('click',e=>{
+  const button=e.target.closest('button');if(!button) return;
+  if(button.dataset.moreWorks){
+    const key=button.dataset.moreWorks;UI.workLimits.set(key,(UI.workLimits.get(key)||PAGE_WORKS)+PAGE_WORKS);
+    UI.openDays.add(key);renderLists();
+    const day=$('#day-groups').querySelector(`[data-day="${key}"]`);
+    (day?.querySelector('.more-works')||day?.querySelector('summary'))?.focus({preventScroll:true});return;
+  }
+  const action=button.dataset.emptyAction;
+  if(!action) return;
+  if(action==='clearSearch'){UI.query='';$('#workSearch').value='';}
+  if(action==='searchAll'){UI.status='all';UI.range='all';UI.date='';}
+  if(action==='allDates'){UI.range='all';UI.date='';}
+  if(action==='delivered') UI.status='delivered';
+  if(action==='allStatus') UI.status='all';
+  resetResults();
 });
 
 </script>
-
 </body>
 </html>
