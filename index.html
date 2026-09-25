@@ -192,6 +192,9 @@ button.metric{text-align:left;color:var(--ink);font:inherit;cursor:pointer}
 .attendance-row{display:flex;gap:10px;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--line);font-size:13px}.attendance-row:last-child{border:0}
 .attendance-status{padding:4px 9px;border-radius:7px;font-size:11px;font-weight:650;background:var(--good-bg);color:var(--good);white-space:nowrap}.attendance-status.absent{background:var(--pending-bg);color:var(--pending)}
 .attendance-note{max-width:750px;display:flex;align-items:flex-start;gap:12px;padding:16px 18px;background:var(--accent-soft);color:var(--accent-text);border-radius:12px;margin-top:16px;font-size:12px;line-height:1.7}
+.family-note{display:flex;align-items:flex-start;gap:10px;padding:14px 16px;margin-bottom:22px;border:1px solid var(--line);border-radius:13px;background:var(--soft);color:var(--muted);font-size:13px;line-height:1.65}
+.family-note>.icon{width:18px;height:18px;margin-top:2px;color:var(--accent-text)}
+.family-note strong{display:block;margin-bottom:3px;color:var(--ink);font-weight:700;line-height:1.4}
 .footer{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;padding-top:26px;margin-top:28px;border-top:1px solid var(--line);color:var(--muted);font-size:11px}
 .loading .refresh-icon{animation:turn 1s linear infinite}@keyframes turn{to{transform:rotate(360deg)}}
 @media(hover:hover){.day-summary:hover{background:var(--soft)}.calendar-day:not(:disabled):hover{outline:1px solid var(--accent)}button.metric:hover{box-shadow:inset 0 0 0 1px var(--pending)}}
@@ -266,6 +269,8 @@ button.metric{text-align:left;color:var(--ink);font:inherit;cursor:pointer}
     <div id="view-status" class="feedback" role="status" aria-live="polite"></div>
     <nav class="page-tabs" aria-label="Secciones de la consulta"><button id="worksTab" class="page-tab active" type="button" aria-pressed="true" aria-controls="works-panel"><svg class="icon" aria-hidden="true"><use href="#i-book"/></svg>Trabajos <span class="tab-count" id="nav-pending">0</span></button><button id="attendanceTab" class="page-tab" type="button" aria-pressed="false" aria-controls="attendance-panel"><svg class="icon" aria-hidden="true"><use href="#i-calendar"/></svg>Asistencia</button><button class="btn nav-refresh" id="refreshBtn" type="button" aria-label="Actualizar datos" title="Actualizar datos"><svg class="icon refresh-icon" aria-hidden="true"><use href="#i-refresh"/></svg><span>Actualizar</span></button></nav>
 
+    <aside class="family-note" id="attendance-guidance" aria-labelledby="attendance-guidance-title"><svg class="icon" aria-hidden="true"><use href="#i-info"/></svg><p><strong id="attendance-guidance-title">Asistencia y justificaciones</strong>Si la inasistencia ya fue justificada con el maestro, esa justificación se mantiene aunque la página muestre «No asistió». Este registro solo indica que su hijo(a) no estuvo presente ese día.</p></aside>
+
     <section id="works-panel" aria-labelledby="works-title">
       <div class="page-heading"><div><h2 id="works-title" tabindex="-1">Trabajos por día</h2><p>Empiece por los pendientes. Abra una fecha para ver sus trabajos.</p></div><div class="period-wrap"><label for="triSelect">Periodo escolar</label><select id="triSelect"><option value="M1">Trimestre 1</option><option value="M2">Trimestre 2</option><option value="M3">Trimestre 3</option><option value="ALL">Todos los trimestres</option></select></div></div>
       <p class="summary-scope" id="summary-scope"></p>
@@ -297,7 +302,7 @@ button.metric{text-align:left;color:var(--ink);font:inherit;cursor:pointer}
       <div class="page-heading"><div><h2 id="attendance-title" tabindex="-1">Cada día cuenta.</h2><p>Consulte los días de asistencia registrados por el maestro.</p></div></div>
       <div class="attendance-grid"><div class="metric"><div class="metric-top">Esta semana</div><div class="metric-number" id="stat-aswk">–</div><span class="metric-sub" id="aswk-detail"></span></div><div class="metric"><div class="metric-top">Últimos 30 días</div><div class="metric-number" id="stat-as30">–</div><span class="metric-sub" id="as30-detail"></span></div><div class="metric"><div class="metric-top">Asistencia acumulada</div><div class="metric-number" id="stat-asHist">–</div><span class="metric-sub" id="asHist-detail"></span><span class="metric-sub" id="stat-faltHist"></span></div></div>
       <div class="panel attendance-history"><h3>Los días más recientes</h3><p id="attendance-history-note">Días con registro de asistencia.</p><div id="attendance-rows"></div></div>
-      <div class="attendance-note"><svg class="icon" aria-hidden="true"><use href="#i-info"/></svg><p>Las faltas justificadas las revisa el maestro. Si tiene un comprobante o detecta un error, comuníquelo a la escuela. La asistencia se consulta por estos periodos y es independiente del trimestre de trabajos.</p></div>
+      <div class="attendance-note"><svg class="icon" aria-hidden="true"><use href="#i-info"/></svg><p>La asistencia se consulta por estos periodos y es independiente del trimestre de trabajos.</p></div>
     </section>
     <footer class="footer"><span>Aula Digital · Consulta para familias</span><span>¿Algún dato no coincide? Consulte al maestro.</span></footer>
   </section>
@@ -610,8 +615,9 @@ function asistenciaHistorica(cols,rows,ref){
   return {present:active.reduce((a,i) => a+(isPresent(row[i]) ? 1 : 0),0),total:active.length};
 }
 
-/* Asistencia de la fecha del bloque. Un dato vacío o no reconocido no se
-   presenta como falta. Las métricas de asistencia originales no se modifican. */
+/* Asistencia de la fecha del bloque. En una fecha existente, la celda vacía
+   significa que no asistió. Si falta la fecha, el alumno o una marca reconocible,
+   se muestra Sin registro. Las métricas originales no se modifican. */
 function asistenciaDelDia(date){
   const unrecorded={state:'unrecorded',label:'Sin registro'};
   if(!CURRENT?.asis || !date) return unrecorded;
@@ -620,7 +626,7 @@ function asistenciaDelDia(date){
   const index=asis.cols.findIndex(c=>normDate(c)===date);
   if(!row || index<0) return unrecorded;
   const mark=cell(row,index);
-  if(!mark) return unrecorded;
+  if(!mark) return {state:'absent',label:'No asistió'};
   if(isPresent(mark)) return {state:'present',label:'Asistió'};
   const value=norm(mark),compact=value.replace(/\s+/g,'');
   const absent=(!Number.isNaN(+value) && +value===0) ||
