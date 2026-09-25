@@ -134,6 +134,19 @@ button.metric{text-align:left;color:var(--ink);font:inherit;cursor:pointer}
 .date-tile .day-month{font-size:9px;font-weight:750;text-transform:uppercase;letter-spacing:.8px;display:block;margin-top:3px;color:var(--muted)}
 .day-title{flex:1;min-width:0}.date-heading{display:block;font-size:14px;font-weight:750;letter-spacing:-.2px}
 .day-title .day-sub{font-size:11px;color:var(--muted);display:block;margin-top:5px}
+/* Resumen de todos los trabajos publicados de esta fecha, siempre visible. */
+.day-overview{display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:8px;font-size:11px;font-weight:650;line-height:1.5}
+.day-overview>span{display:inline-flex;align-items:center;gap:4px;max-width:100%}
+.day-overview .icon{width:13px;height:13px}
+.day-overview .day-total{flex-basis:100%;color:var(--muted)}
+.day-overview .day-delivered{color:var(--good)}
+.day-overview .day-pending{color:var(--pending)}
+.day-overview .day-attendance{flex-basis:100%;align-items:flex-start;gap:6px;padding-top:7px;margin-top:3px;border-top:1px solid var(--line);font-size:12px;font-weight:500;color:var(--muted)}
+.day-attendance>.icon{margin-top:2px}
+.day-attendance strong{font-weight:650;color:var(--ink)}
+.day-attendance.present strong{color:var(--good)}
+.day-attendance.unrecorded strong{color:var(--muted)}
+@media(max-width:760px){.day-overview{font-size:12px;gap:5px 12px;margin-top:7px}.day-overview .icon{width:14px;height:14px}}
 .day-summary .chevron{width:18px;height:18px;transition:transform .15s;color:var(--muted)}
 .day-block[open] .day-summary .chevron{transform:rotate(180deg)}
 .day-count{font-size:11px;font-weight:650;padding:4px 8px;border-radius:7px;background:var(--pending-bg);color:var(--pending);white-space:nowrap}
@@ -270,7 +283,7 @@ button.metric{text-align:left;color:var(--ink);font:inherit;cursor:pointer}
         </div>
         <aside class="calendar-panel" id="calendar-panel" aria-label="Elegir un día">
           <div class="calendar-card"><div class="calendar-title-row"><h3 class="calendar-heading"><svg class="icon" aria-hidden="true"><use href="#i-calendar"/></svg>Encuentre un día</h3><button class="btn icon-only calendar-close" id="calendarClose" type="button" aria-label="Cerrar calendario"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button></div><p class="calendar-caption">Toque una fecha para consultar sus trabajos.</p><div class="month-navigation"><button id="prevMonth" class="btn icon-only" type="button" aria-label="Mes anterior" title="Mes anterior"><svg class="icon" aria-hidden="true"><use href="#i-left"/></svg></button><select id="monthSelect" class="month-select" aria-label="Mes del calendario"></select><button id="nextMonth" class="btn icon-only" type="button" aria-label="Mes siguiente" title="Mes siguiente"><svg class="icon" aria-hidden="true"><use href="#i-right"/></svg></button></div><div class="weekdays" aria-hidden="true"><span>Lun</span><span>Mar</span><span>Mié</span><span>Jue</span><span>Vie</span><span>Sáb</span><span>Dom</span></div><div class="calendar-days" id="calendar-days" role="group" aria-label="Días del mes"></div><div class="calendar-key"><span><b class="key-symbol">2 p.</b> Pendientes</span><span><b class="key-symbol done">✓</b> Todo entregado</span></div><p class="calendar-scope" id="calendar-scope"></p></div>
-          <details class="help-card"><summary><svg class="icon" aria-hidden="true"><use href="#i-info"/></svg>¿Qué significa cada estado?</summary><p><strong>Pendiente:</strong> aún no está registrado como entregado.<br><strong>Entregado a tiempo:</strong> se registró dentro de la fecha.<br><strong>Entregado fuera de fecha:</strong> ya cuenta como entregado.</p><p>Si un trabajo ya se entregó y sigue pendiente, consulte al maestro.</p></details>
+          <details class="help-card"><summary><svg class="icon" aria-hidden="true"><use href="#i-info"/></svg>¿Qué significa cada estado?</summary><p><strong>Pendiente:</strong> aún no está registrado como entregado.<br><strong>Entregado a tiempo:</strong> se registró dentro de la fecha.<br><strong>Entregado fuera de fecha:</strong> ya cuenta como entregado.</p><p>Si un trabajo ya se entregó y sigue pendiente, consulte al maestro.</p><p>Los trabajos pendientes aún no tienen una entrega registrada; consulte al maestro cómo recuperarlos en caso de inasistencia.</p><p><strong>Asistencia:</strong> corresponde a la fecha del bloque. <strong>Sin registro</strong> indica que aún no hay un dato de asistencia disponible para esa fecha.</p></details>
         </aside>
         <div class="agenda">
           <div class="results-header"><div><h3 id="results-title" tabindex="-1">Pendientes por fecha</h3><p id="results-description"></p></div><button class="text-button" id="resetFilters" type="button" hidden>Quitar filtros</button></div>
@@ -280,7 +293,7 @@ button.metric{text-align:left;color:var(--ink);font:inherit;cursor:pointer}
           <p class="sr-only" role="status" aria-live="polite" id="results-announcement"></p>
         </div>
       </div>
-      <details class="help-card section-gap" id="mobile-help"><summary><svg class="icon" aria-hidden="true"><use href="#i-info"/></svg>Un trabajo ya se entregó, ¿por qué sigue pendiente?</summary><p>Puede estar pendiente de registro. Consulte al maestro para revisar el dato. Aquí se muestra la información de la libreta digital.</p></details>
+      <details class="help-card section-gap" id="mobile-help"><summary><svg class="icon" aria-hidden="true"><use href="#i-info"/></svg>Un trabajo ya se entregó, ¿por qué sigue pendiente?</summary><p>Puede estar pendiente de registro. Consulte al maestro para revisar el dato. Aquí se muestra la información de la libreta digital.</p><p>Los trabajos pendientes aún no tienen una entrega registrada; consulte al maestro cómo recuperarlos en caso de inasistencia.</p><p><strong>Asistencia:</strong> corresponde a la fecha del bloque. <strong>Sin registro</strong> indica que aún no hay un dato de asistencia disponible para esa fecha.</p></details>
     </section>
 
     <section id="attendance-panel" aria-labelledby="attendance-title" hidden>
@@ -600,11 +613,31 @@ function asistenciaHistorica(cols,rows,ref){
   return {present:active.reduce((a,i) => a+(isPresent(row[i]) ? 1 : 0),0),total:active.length};
 }
 
+/* Asistencia de la fecha del bloque. Un dato vacío o no reconocido no se
+   presenta como falta. Las métricas de asistencia originales no se modifican. */
+function asistenciaDelDia(date){
+  const unrecorded={state:'unrecorded',label:'Sin registro'};
+  if(!CURRENT?.asis || !date) return unrecorded;
+  const {asis,id,nombre}=CURRENT;
+  const row=filaAsistencia(asis.cols,asis.rows,{id,nombre});
+  const index=asis.cols.findIndex(c=>normDate(c)===date);
+  if(!row || index<0) return unrecorded;
+  const mark=cell(row,index);
+  if(!mark) return unrecorded;
+  if(isPresent(mark)) return {state:'present',label:'Asistió'};
+  const value=norm(mark),compact=value.replace(/\s+/g,'');
+  const absent=(!Number.isNaN(+value) && +value===0) ||
+    /^0\(0%?\)$/.test(compact) ||
+    ['f','a','n','no','false','falta','ausente','inasistencia','no asistio','✗','✘','×','❌'].includes(value);
+  return absent ? {state:'absent',label:'No asistió'} : unrecorded;
+}
+
 function weekRange(date){
   const day=new Date(dayNumber(date)*86400000).getUTCDay();
   const monday=shiftDay(date,day === 0 ? -6 : 1-day);
   return [monday,shiftDay(monday,4)];
 }
+
 
 /* EXPERIENCIA PARA FAMILIAS
    Bloques diarios + calendario complementario; información de detalle a demanda.
@@ -784,6 +817,16 @@ function renderWork(entry){
 
 function renderDay(group){
   const c=countsFor(group.items),limit=UI.workLimits.get(group.key)||PAGE_WORKS;
+  // El resumen usa el día completo del periodo seleccionado, sin filtros de
+  // estado ni búsqueda. Incluye entregas tardías y respeta la publicación.
+  const daily=countsFor(sourceEntries().filter(e=>(e.date||'undated')===group.key));
+  const attendance=asistenciaDelDia(group.date);
+  const dailySummary=`<span class="day-overview" title="Todos los trabajos publicados de esta fecha en el periodo seleccionado">
+    <span class="day-total">${plural(daily.total,'trabajo en total','trabajos en total')}</span>
+    <span class="day-delivered">${icon('check')}${plural(daily.delivered,'entregado','entregados')}</span>
+    <span class="day-pending">${icon('clock')}${plural(daily.pending,'pendiente','pendientes')}</span>
+    <span class="day-attendance ${attendance.state}">${icon('calendar')}<span>Asistencia: <strong>${attendance.label}</strong></span></span>
+  </span>`;
   const visible=group.items.slice(0,limit),remaining=group.items.length-visible.length;
   let badge=plural(c.pending,'pendiente','pendientes'),badgeClass='';
   if(UI.status==='delivered'){badge=plural(c.delivered,'entregado','entregados');badgeClass='done';}
@@ -795,11 +838,12 @@ function renderDay(group){
   const day=group.date ? String(Number(group.date.slice(-2))) : '—';
   const month=group.date ? formatDate(group.date,{month:'short'}).replace('.','') : 'Fecha';
   return `<details class="day-block" data-day="${group.key}"${UI.openDays.has(group.key) ? ' open' : ''}>
-    <summary class="day-summary"><span class="date-tile" aria-hidden="true"><span class="day-number">${day}</span><span class="day-month">${escapeHTML(month)}</span></span><span class="day-title"><span class="date-heading">${escapeHTML(dayHeading(group.date))}</span><span class="day-sub">${escapeHTML(subtitle)}</span></span><span class="day-count ${badgeClass}">${badge}</span>${icon('chevron','chevron')}</summary>
+    <summary class="day-summary"><span class="date-tile" aria-hidden="true"><span class="day-number">${day}</span><span class="day-month">${escapeHTML(month)}</span></span><span class="day-title"><span class="date-heading">${escapeHTML(dayHeading(group.date))}</span><span class="day-sub">${escapeHTML(subtitle)}</span>${dailySummary}</span><span class="day-count ${badgeClass}">${badge}</span>${icon('chevron','chevron')}</summary>
     <div class="work-list">${visible.map(renderWork).join('')}</div>
     ${remaining ? `<button class="more-works" data-more-works="${group.key}" type="button">Ver ${Math.min(PAGE_WORKS,remaining)} trabajos más de este día · quedan ${remaining}</button>` : ''}
   </details>`;
 }
+
 
 function emptyState(){
   const source=sourceEntries(),inDates=source.filter(matchesRange),before=publicationCutoff()!==schoolNow().date;
@@ -954,6 +998,7 @@ function renderAttendance(now=new Date()){
     return `<div class="attendance-row"><time datetime="${x.date}">${escapeHTML(cap(formatDate(x.date,{weekday:'short',day:'numeric',month:'short'})))}</time><span class="attendance-status${present ? '' : ' absent'}">${present ? '✓ Asistió' : 'Falta registrada'}</span></div>`;
   }).join('');
 }
+
 
 /* CARGA Y ACTUALIZACIÓN. Solo se conserva el ID si la familia lo pide. */
 function setStatus(selector,message,error=false){
