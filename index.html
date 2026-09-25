@@ -402,9 +402,15 @@ function isPresent(v){
   return ['x','✓','✔','p','presente','si','s','ok','true','asistio'].includes(s);
 }
 
+// Una fecha tiene registro si alguna celda del grupo contiene un dato.
+// El 0 sí es un registro; las celdas vacías o con solo espacios no lo son.
+function hasAttendanceRecord(rows,index){
+  return rows.some(row => cell(row,index) !== '');
+}
+
 function getActiveDateCols(cols,rows){
   return cols.map((c,i) => normDate(c) ? i : -1)
-    .filter(i => i >= 0 && rows.some(r => r[i] !== '' && r[i] != null));
+    .filter(i => i >= 0 && hasAttendanceRecord(rows,i));
 }
 
 /* GOOGLE SHEETS: únicamente lecturas, con respaldo CSV. */
@@ -615,16 +621,18 @@ function asistenciaHistorica(cols,rows,ref){
   return {present:active.reduce((a,i) => a+(isPresent(row[i]) ? 1 : 0),0),total:active.length};
 }
 
-/* Asistencia de la fecha del bloque. En una fecha existente, la celda vacía
-   significa que no asistió. Si falta la fecha, el alumno o una marca reconocible,
-   se muestra Sin registro. Las métricas originales no se modifican. */
+/* Asistencia de la fecha del bloque. Si toda la fecha está vacía para el
+   grupo, se muestra Sin registro y el día no suma faltas en las métricas.
+   Cuando hay algún registro del grupo, una celda vacía o con 0 significa
+   No asistió. Si falta la fecha, el alumno o una marca reconocible,
+   se muestra Sin registro. */
 function asistenciaDelDia(date){
   const unrecorded={state:'unrecorded',label:'Sin registro'};
   if(!CURRENT?.asis || !date) return unrecorded;
   const {asis,id,nombre}=CURRENT;
   const row=filaAsistencia(asis.cols,asis.rows,{id,nombre});
   const index=asis.cols.findIndex(c=>normDate(c)===date);
-  if(!row || index<0) return unrecorded;
+  if(!row || index<0 || !hasAttendanceRecord(asis.rows,index)) return unrecorded;
   const mark=cell(row,index);
   if(!mark) return {state:'absent',label:'No asistió'};
   if(isPresent(mark)) return {state:'present',label:'Asistió'};
@@ -991,7 +999,7 @@ function renderAttendance(now=new Date()){
   $('#attendance-history-note').textContent=active.length ? `${plural(active.length,'día registrado','días registrados')} · Del más reciente al más antiguo.` : 'Aún no hay días registrados.';
   $('#attendance-rows').innerHTML=active.map(x=>{
     const present=isPresent(row[x.i]);
-    return `<div class="attendance-row"><time datetime="${x.date}">${escapeHTML(cap(formatDate(x.date,{weekday:'short',day:'numeric',month:'short'})))}</time><span class="attendance-status${present ? '' : ' absent'}">${present ? '✓ Asistió' : 'Falta registrada'}</span></div>`;
+    return `<div class="attendance-row"><time datetime="${x.date}">${escapeHTML(cap(formatDate(x.date,{weekday:'short',day:'numeric',month:'short',year:'numeric'})))}</time><span class="attendance-status${present ? '' : ' absent'}">${present ? '✓ Asistió' : 'No asistió'}</span></div>`;
   }).join('');
 }
 
