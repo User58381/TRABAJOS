@@ -301,7 +301,7 @@ button.metric{text-align:left;color:var(--ink);font:inherit;cursor:pointer}
     <section id="attendance-panel" aria-labelledby="attendance-title" hidden>
       <div class="page-heading"><div><h2 id="attendance-title" tabindex="-1">Cada día cuenta.</h2><p>Consulte los días de asistencia registrados por el maestro.</p></div></div>
       <div class="attendance-grid"><div class="metric"><div class="metric-top">Esta semana</div><div class="metric-number" id="stat-aswk">–</div><span class="metric-sub" id="aswk-detail"></span></div><div class="metric"><div class="metric-top">Últimos 30 días</div><div class="metric-number" id="stat-as30">–</div><span class="metric-sub" id="as30-detail"></span></div><div class="metric"><div class="metric-top">Asistencia acumulada</div><div class="metric-number" id="stat-asHist">–</div><span class="metric-sub" id="asHist-detail"></span><span class="metric-sub" id="stat-faltHist"></span></div></div>
-      <div class="panel attendance-history"><h3>Los días más recientes</h3><p id="attendance-history-note">Días con registro de asistencia.</p><div id="attendance-rows"></div></div>
+      <div class="panel attendance-history"><h3>Historial completo de asistencia</h3><p id="attendance-history-note">Todos los días con registro de asistencia.</p><div id="attendance-rows"></div></div>
       <div class="attendance-note"><svg class="icon" aria-hidden="true"><use href="#i-info"/></svg><p>La asistencia se consulta por estos periodos y es independiente del trimestre de trabajos.</p></div>
     </section>
     <footer class="footer"><span>Aula Digital · Consulta para familias</span><span>¿Algún dato no coincide? Consulte al maestro.</span></footer>
@@ -987,8 +987,8 @@ function renderAttendance(now=new Date()){
   }
   $('#stat-faltHist').textContent=ah.total ? plural(ah.total-ah.present,'falta registrada','faltas registradas') : '';
   const row=filaAsistencia(asis.cols,asis.rows,ref);
-  const active=row ? getActiveDateCols(asis.cols,asis.rows).map(i=>({i,date:normDate(asis.cols[i])})).filter(x=>x.date<=today).sort((a,b)=>b.date.localeCompare(a.date)).slice(0,14) : [];
-  $('#attendance-history-note').textContent=active.length ? `Últimos ${plural(active.length,'día con registro','días con registro')}.` : 'Aún no hay días registrados.';
+  const active=row ? getActiveDateCols(asis.cols,asis.rows).map(i=>({i,date:normDate(asis.cols[i])})).filter(x=>x.date<=today).sort((a,b)=>b.date.localeCompare(a.date)) : [];
+  $('#attendance-history-note').textContent=active.length ? `${plural(active.length,'día registrado','días registrados')} · Del más reciente al más antiguo.` : 'Aún no hay días registrados.';
   $('#attendance-rows').innerHTML=active.map(x=>{
     const present=isPresent(row[x.i]);
     return `<div class="attendance-row"><time datetime="${x.date}">${escapeHTML(cap(formatDate(x.date,{weekday:'short',day:'numeric',month:'short'})))}</time><span class="attendance-status${present ? '' : ' absent'}">${present ? '✓ Asistió' : 'Falta registrada'}</span></div>`;
