@@ -272,7 +272,7 @@ button.metric{text-align:left;color:var(--ink);font:inherit;cursor:pointer}
     <aside class="family-note" id="attendance-guidance" aria-labelledby="attendance-guidance-title"><svg class="icon" aria-hidden="true"><use href="#i-info"/></svg><p><strong id="attendance-guidance-title">Asistencia y justificaciones</strong>Si la inasistencia ya fue justificada con el maestro, esa justificación se mantiene aunque la página muestre «No asistió». Este registro solo indica que su hijo(a) no estuvo presente ese día.</p></aside>
 
     <section id="works-panel" aria-labelledby="works-title">
-      <div class="page-heading"><div><h2 id="works-title" tabindex="-1">Trabajos por día</h2><p>Empiece por los pendientes. Abra una fecha para ver sus trabajos.</p></div><div class="period-wrap"><label for="triSelect">Periodo escolar</label><select id="triSelect"><option value="M1">Trimestre 1</option><option value="M2">Trimestre 2</option><option value="M3">Trimestre 3</option><option value="ALL">Todos los trimestres</option></select></div></div>
+      <div class="page-heading"><div><h2 id="works-title" tabindex="-1">Trabajos por día</h2><p>Empiece por los pendientes. Abra una fecha para ver sus trabajos.</p></div><div class="period-wrap"><label for="triSelect">Periodo escolar</label><select id="triSelect"><option value="M1">Trimestre 1</option><option value="M2" selected>Trimestre 2</option><option value="M3">Trimestre 3</option><option value="ALL">Todos los trimestres</option></select></div></div>
       <p class="summary-scope" id="summary-scope"></p>
       <div class="summary"><button class="metric attention" id="pendingShortcut" type="button" title="Ver todos los pendientes del periodo"><span class="metric-top">Pendientes<svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></span><span class="metric-number" id="stat-pending">0</span><span class="metric-sub">Ver pendientes</span></button><div class="metric"><div class="metric-top">Entregados<svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></div><span class="metric-number" id="stat-delivered">0</span><span class="metric-sub" id="stat-total">de 0 trabajos</span></div><div class="metric"><div class="metric-top">Avance<svg class="icon" aria-hidden="true"><use href="#i-list"/></svg></div><span class="metric-number" id="stat-cump-tri">–</span><div class="progress-track" aria-hidden="true"><div class="progress-fill" id="completion-fill"></div></div><span class="metric-sub">Del total de trabajos</span></div></div>
       <div class="publish-note"><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg><p id="publication-notice"></p></div>
@@ -659,7 +659,8 @@ function weekRange(date){
    La clasificación por UID y el corte de publicación se conservan en el núcleo. */
 
 let ALL={faltantes:[],tarde:[],atiempo:[],presets:[]};
-let TRI='M1';
+const DEFAULT_TRI='M2';
+let TRI=DEFAULT_TRI;
 let CURRENT=null;
 let loadGeneration=0;
 let busy=false;
@@ -1041,7 +1042,7 @@ function setCalendarOpen(open,returnFocus=false){
 }
 
 function resetUI(){
-  TRI='M1';$('#triSelect').value='M1';
+  TRI=DEFAULT_TRI;$('#triSelect').value=DEFAULT_TRI;
   Object.assign(UI,{section:'works',status:'pending',range:'all',date:'',query:'',month:schoolNow().date.slice(0,7),dayLimit:PAGE_DAYS});
   UI.openDays.clear();UI.workLimits.clear();
   $('#workSearch').value='';
