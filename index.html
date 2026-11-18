@@ -150,15 +150,38 @@ button.metric{text-align:left;color:var(--ink);font:inherit;cursor:pointer}
 .day-summary .chevron{width:18px;height:18px;transition:transform .15s;color:var(--muted)}
 .day-block[open] .day-summary .chevron{transform:rotate(180deg)}
 .day-block[open] .day-summary{border-bottom:1px solid var(--line)}
-.work-list{padding:0 18px}.work-item{padding:17px 0;border-bottom:1px solid var(--line);overflow-wrap:anywhere}.work-item:last-child{border-bottom:0}
-.work-top{display:flex;gap:10px;justify-content:space-between;align-items:flex-start;flex-wrap:wrap}
-.subject{font-size:10px;font-weight:700;letter-spacing:.15px;color:var(--muted);background:var(--soft);padding:4px 7px;border-radius:6px;max-width:100%;line-height:1.5}
-.subject.language{background:var(--blue-bg);color:var(--blue)}.subject.science{background:var(--red-bg);color:var(--red)}.subject.ethics{background:var(--green-bg);color:var(--green)}.subject.community{background:var(--pink-bg);color:var(--pink)}
-.work-status{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:650;white-space:nowrap;color:var(--pending);padding:3px 0;line-height:1.5}
-.work-status .icon{width:13px;height:13px}.work-status.ontime{color:var(--good)}.work-status.late{color:var(--late)}
-.work-title{font-size:15px;font-weight:700;line-height:1.5;margin-top:9px;letter-spacing:-.2px}
-.work-meta{font-size:12px;color:var(--muted);display:flex;gap:5px 13px;flex-wrap:wrap;margin-top:4px}
-.evidence{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.evidence a{font-size:12px;padding:8px 10px;min-height:44px}.evidence .icon{width:15px;height:15px}
+.work-list{display:grid;gap:12px;padding:14px;background:var(--soft)}
+.work-item{
+  --work-ink:var(--accent-text);--work-tint:var(--accent-soft);
+  padding:15px 17px;background:var(--surface);border:1px solid var(--line);
+  border-inline-start:4px solid var(--work-ink);border-radius:13px;overflow-wrap:anywhere;
+}
+.work-item.language{--work-ink:var(--blue);--work-tint:var(--blue-bg)}
+.work-item.science{--work-ink:var(--red);--work-tint:var(--red-bg)}
+.work-item.ethics{--work-ink:var(--green);--work-tint:var(--green-bg)}
+.work-item.community{--work-ink:var(--pink);--work-tint:var(--pink-bg)}
+.work-top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 12px}
+.work-number{
+  display:inline-flex;align-items:baseline;gap:6px;max-width:100%;padding:6px 10px;
+  border-radius:8px;background:var(--work-tint);color:var(--work-ink);font-size:1rem;font-weight:750;line-height:1.2;
+}
+.work-number strong{min-width:0;font-size:1.5rem;font-weight:800;font-variant-numeric:tabular-nums}
+.work-title{font-size:1.125rem;font-weight:750;line-height:1.35;letter-spacing:-.2px}
+.work-top+.work-title{margin-top:10px}
+.work-status{
+  display:inline-flex;align-items:center;gap:5px;max-width:100%;padding:4px 8px;border-radius:7px;
+  background:var(--pending-bg);color:var(--pending);font-size:.875rem;font-weight:650;line-height:1.45;
+}
+.work-status .icon{width:15px;height:15px}
+.work-status.ontime{background:var(--good-bg);color:var(--good)}
+.work-status.late{background:var(--late-bg);color:var(--late)}
+.work-details{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;margin-top:7px;font-size:.875rem}
+.subject{color:var(--work-ink);font-weight:750}
+.work-meta{display:flex;flex-wrap:wrap;gap:3px 12px;color:var(--muted)}
+.evidence{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.evidence a{min-width:0;min-height:44px;padding:8px 12px;color:var(--accent-text);background:var(--accent-soft);font-size:.875rem}
+.evidence a:hover{border-color:var(--accent)}
+.evidence .icon{width:17px;height:17px}
 .more-works{width:100%;border:0;border-top:1px solid var(--line);min-height:48px;font-size:12px;font-weight:700;color:var(--accent-text);background:var(--soft)}
 .pagination{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-top:17px}.pagination p{font-size:12px;color:var(--muted)}
 .empty-state{padding:32px 24px;text-align:center;border:1px dashed var(--line);border-radius:16px;background:var(--surface)}
@@ -219,7 +242,7 @@ button.metric{text-align:left;color:var(--ink);font:inherit;cursor:pointer}
   .filter-button{font-size:13px;gap:5px;padding:8px 4px;min-height:46px}.filter-count{font-size:11px}.date-filters{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;margin-top:10px}.date-chip{font-size:13px;padding:8px 4px;min-width:0}.compact-label{display:inline}.wide-label{display:none}.search-row{margin-top:10px}.search-box input{font-size:16px}.search-box input::-webkit-search-cancel-button{-webkit-appearance:none}
   .results-header{gap:10px}.results-header>div{min-width:0}.results-header h3{font-size:17px}.results-header p{font-size:13px;overflow-wrap:anywhere}.results-header .text-button{font-size:12px;max-width:84px;white-space:normal}.other-pending{font-size:13px;flex-wrap:wrap;gap:2px 10px;padding:10px 12px}
   .day-summary{display:grid;grid-template-columns:44px minmax(0,1fr) 18px;grid-template-areas:"date title arrow";gap:7px 11px;padding:14px;min-height:94px}.date-tile{grid-area:date;width:44px;min-width:44px}.day-title{grid-area:title}.day-summary .chevron{grid-area:arrow;width:18px;height:18px}.date-heading{font-size:15px;line-height:1.4;overflow-wrap:anywhere}.date-tile .day-number{font-size:22px}.date-tile .day-month{font-size:10px}
-  .work-list{padding:0 15px}.work-item{padding:18px 0}.work-title{font-size:16px;line-height:1.5;margin-top:10px}.work-status,.subject{font-size:12px}.work-status{white-space:nowrap;flex-shrink:0;overflow-wrap:normal}.work-status .icon{width:15px;height:15px}.work-top{gap:7px 10px}.work-meta{font-size:13px;line-height:1.6;margin-top:6px}.evidence a{font-size:13px;min-height:46px;padding:10px 12px}.more-works{font-size:13px;padding:12px}
+  .work-list{gap:10px;padding:10px}.work-item{padding:12px}.evidence a{flex:1 1 100%;min-height:46px}.more-works{font-size:13px;padding:12px}
   .pagination{justify-content:center;flex-direction:column}.pagination .btn{width:100%;min-height:48px}.attendance-grid{grid-template-columns:1fr;gap:10px}.attendance-grid .metric{padding:20px}.attendance-grid .metric-top{font-size:14px}.attendance-grid .metric-sub{font-size:13px}.attendance-grid .metric-number{font-size:32px}.attendance-history{padding:18px}.attendance-row{font-size:14px}.attendance-status{font-size:12px}.attendance-note{font-size:13px}.help-card summary,.help-card p{font-size:13px}.footer{font-size:11px;line-height:1.7}
 }
 @media(max-width:360px){.page{padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px))}.header-inner{gap:8px}.brand{gap:8px}.header-right{gap:0}#themeBtn>span{display:none}#themeBtn{min-width:44px}.profile{grid-template-columns:34px minmax(0,1fr) auto;gap:8px;padding:12px}.avatar{width:34px;height:38px;font-size:13px}.student-info h1{font-size:16px}.page-tabs{gap:10px}.page-tab{font-size:13px}.page-heading h2{font-size:21px}.metric{padding:10px 8px}.metric-number{font-size:27px}.day-summary{gap:7px 9px;padding:12px}.calendar-card{padding:12px}.login-card{padding:20px}}
@@ -280,7 +303,7 @@ button.metric{text-align:left;color:var(--ink);font:inherit;cursor:pointer}
       <div class="board" id="work-board">
         <div class="filters">
           <div class="status-filters" role="group" aria-label="Mostrar trabajos por estado"><button type="button" class="filter-button active" data-status="pending" aria-pressed="true">Pendientes <span class="filter-count" id="filter-pending">0</span></button><button type="button" class="filter-button" data-status="delivered" aria-pressed="false">Entregados <span class="filter-count" id="filter-delivered">0</span></button><button type="button" class="filter-button" data-status="all" aria-pressed="false">Todos <span class="filter-count" id="filter-all">0</span></button></div>
-          <div class="search-row"><div class="search-box"><label class="sr-only" for="workSearch">Buscar por nombre, materia o página</label><svg class="icon" aria-hidden="true"><use href="#i-search"/></svg><input class="field" id="workSearch" type="search" placeholder="Buscar un trabajo…" autocomplete="off" enterkeyhint="search" spellcheck="false"><button class="search-clear" id="clearSearch" type="button" aria-label="Borrar búsqueda" hidden><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button></div></div>
+          <div class="search-row"><div class="search-box"><label class="sr-only" for="workSearch">Buscar por número de trabajo, tema, materia o página</label><svg class="icon" aria-hidden="true"><use href="#i-search"/></svg><input class="field" id="workSearch" type="search" placeholder="Buscar «Trabajo 11»" autocomplete="off" enterkeyhint="search" spellcheck="false"><button class="search-clear" id="clearSearch" type="button" aria-label="Borrar búsqueda" hidden><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button></div></div>
           <div class="date-filters" role="group" aria-label="Filtrar por fecha"><button class="date-chip active" data-range="all" type="button" aria-pressed="true" aria-label="Todas las fechas"><span class="wide-label">Todas las fechas</span><span class="compact-label">Todas</span></button><button class="date-chip" data-range="today" type="button" aria-pressed="false">Hoy</button><button class="date-chip" data-range="week" type="button" aria-pressed="false" aria-label="Esta semana"><span class="wide-label">Esta semana</span><span class="compact-label">Semana</span></button><button class="btn calendar-toggle" id="calendarToggle" type="button" aria-label="Elegir una fecha en el calendario" aria-expanded="false" aria-controls="calendar-panel"><svg class="icon" aria-hidden="true"><use href="#i-calendar"/></svg><span id="calendarToggleLabel">Fecha</span></button></div>
         </div>
         <aside class="calendar-panel" id="calendar-panel" aria-label="Elegir un día">
@@ -745,13 +768,41 @@ function matchesStatus(e){
   return UI.status==='all' || (UI.status==='pending' ? e.status==='pending' : e.status!=='pending');
 }
 
+// El número de la columna tiene prioridad. Algunos trabajos antiguos solo lo llevan en el título.
+const NUMBERED_WORK_TITLE=/^trabajo\s*(?:#\s*|n[.º°]+\s*)?(\d+[a-z]?)(?=\s|[:)·–—]|[.-](?!\d)|$)/i;
+
+function workNumber(value){
+  return String(value ?? '').trim()
+    .replace(/^trabajo(?=\s|#|:|$)[\s:]*/i,'')
+    .replace(/^(?:#|n[.º°]+)\s*/i,'')
+    .replace(/^0+(?=\d+[a-z]?$)/i,'');
+}
+
+function workDisplay(t){
+  const original=String(t.nombreTrabajo ?? '').trim();
+  const prefix=original.match(NUMBERED_WORK_TITLE);
+  const titleNumber=workNumber(prefix?.[1]);
+  const number=workNumber(t.numero)||titleNumber;
+  const title=prefix && norm(titleNumber)===norm(number)
+    ? original.slice(prefix[0].length).replace(/^[\s.:)·–—-]+/,'')
+    : original;
+  return {number,title};
+}
+
 function filteredEntries(){
   const query=norm(UI.query);
+  const numberMatch=query.match(NUMBERED_WORK_TITLE);
+  const numberQuery=numberMatch?.[0]===query ? workNumber(numberMatch[1]) : '';
   return sourceEntries().filter(e=>{
     if(!matchesRange(e)||!matchesStatus(e)) return false;
     if(!query) return true;
     const t=e.work;
-    if(!searchCache.has(t)) searchCache.set(t,norm([t.nombreTrabajo,t.materia,t.numero,t.origen,t.pagina,t.pagina ? 'página '+t.pagina : '',e.date,shortDate(e.date)].join(' ')));
+    if(numberQuery) return norm(workDisplay(t).number)===numberQuery;
+    if(!searchCache.has(t)){
+      const {number,title}=workDisplay(t);
+      const label=number ? 'Trabajo '+number : '';
+      searchCache.set(t,norm([t.nombreTrabajo,t.materia,t.numero,t.origen,t.pagina,t.pagina ? 'página '+t.pagina : '',e.date,shortDate(e.date),label,title].join(' ')));
+    }
     return searchCache.get(t).includes(query);
   });
 }
@@ -768,7 +819,7 @@ function groupedEntries(entries=filteredEntries()){
     return b.date.localeCompare(a.date);
   }).map(g=>({...g,items:[...g.items].sort((a,b)=>{
     const rank={pending:0,ontime:1,late:2};
-    return rank[a.status]-rank[b.status] || String(a.work.numero||'').localeCompare(String(b.work.numero||''),'es',{numeric:true});
+    return rank[a.status]-rank[b.status] || workDisplay(a.work).number.localeCompare(workDisplay(b.work).number,'es',{numeric:true});
   })}));
 }
 
@@ -814,14 +865,21 @@ function linksFor(uid,preset){
 }
 
 function renderWork(entry){
-  const t=entry.work,title=t.nombreTrabajo||`${t.materia||'Trabajo'}${t.numero ? ' '+t.numero : ''}`;
-  const meta=[t.origen,t.pagina ? 'Página '+t.pagina : '',t.numero ? 'Trabajo '+t.numero : ''];
-  if(TRI==='ALL') meta.push(TRI_LABELS[String(t.momento||'').trim().toUpperCase()]||t.momento);
+  const t=entry.work,{number,title}=workDisplay(t);
+  const meta=[t.origen,t.pagina ? 'Página '+t.pagina : ''].filter(Boolean);
+  if(TRI==='ALL'&&t.momento) meta.push(TRI_LABELS[String(t.momento).trim().toUpperCase()]||t.momento);
+  const numberLabel=number ? `<span class="work-number">Trabajo <strong>${escapeHTML(number)}</strong></span>` : '';
+  const status=`<span class="work-status ${entry.status}">${icon(entry.status==='pending' ? 'clock' : 'check')}${STATUS_TEXT[entry.status]}</span>`;
+  const heading=`<h4 class="work-title">${escapeHTML(title)||numberLabel||'Trabajo escolar'}</h4>`;
+  const hasNumberAndTitle=Boolean(number&&title);
   const links=linksFor(t.uid,t);
-  return `<article class="work-item" data-work-uid="${escapeHTML(t.uid)}">
-    <div class="work-top"><span class="subject ${subjectClass(t.materia)}">${escapeHTML(t.materia||'Trabajo escolar')}</span><span class="work-status ${entry.status}">${icon(entry.status==='pending' ? 'clock' : 'check')}${STATUS_TEXT[entry.status]}</span></div>
-    <h4 class="work-title">${escapeHTML(title)}</h4>
-    <div class="work-meta">${meta.filter(Boolean).map(v=>`<span>${escapeHTML(v)}</span>`).join('')}</div>
+  return `<article class="work-item ${subjectClass(t.materia)}" data-work-uid="${escapeHTML(t.uid)}">
+    <div class="work-top">${hasNumberAndTitle ? numberLabel : heading}${status}</div>
+    ${hasNumberAndTitle ? heading : ''}
+    ${t.materia||meta.length ? `<div class="work-details">
+      ${t.materia ? `<span class="subject">${escapeHTML(t.materia)}</span>` : ''}
+      ${meta.length ? `<div class="work-meta">${meta.map(v=>`<span>${escapeHTML(v)}</span>`).join('')}</div>` : ''}
+    </div>` : ''}
     ${links ? `<div class="evidence">${links}</div>` : ''}
     ${t.evidSheet ? `<p class="small muted" style="margin-top:8px">${escapeHTML(t.evidSheet)}</p>` : ''}
   </article>`;
@@ -859,7 +917,7 @@ function emptyState(){
     description='El maestro podrá registrar los trabajos durante la mañana. La consulta se actualizará al llegar la hora, en Nuevo Laredo.';symbol='clock';
   }else if(UI.query){
     title='No encontramos ese trabajo en esta selección.';
-    description='Pruebe con una palabra del nombre, la materia o el número de página.';
+    description='Pruebe con «Trabajo 11», el tema, la materia o la página.';
     const alreadyAll=UI.status==='all'&&UI.range==='all';
     action=alreadyAll ? 'clearSearch' : 'searchAll';button=alreadyAll ? 'Borrar búsqueda' : 'Buscar en todo el periodo';
   }else if(!source.length){
