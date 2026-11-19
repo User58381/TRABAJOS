@@ -90,12 +90,17 @@ h1,h2,h3,h4,p{margin:0}h1,h2,h3,h4{line-height:1.2}
 .page-heading h2{font-size:30px;letter-spacing:-1.1px;margin-bottom:7px}.page-heading p{font-size:14px;color:var(--muted)}
 .period-wrap{display:flex;align-items:center;gap:10px;flex-shrink:0}.period-wrap label{font-size:12px;color:var(--muted)}
 select{min-height:44px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);padding:8px 30px 8px 12px;font-size:13px;font-weight:650;max-width:100%}
-.summary-scope{font-size:11px;color:var(--muted);margin-bottom:8px}
 .summary{
   display:grid;grid-template-columns:repeat(3,minmax(0,1fr));overflow:hidden;
-  border:1px solid var(--line);border-radius:15px;background:var(--surface);
+  border:1px solid var(--line);border-radius:14px;background:var(--surface);margin-bottom:10px;
 }
-.summary .metric{display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;border:0;border-radius:0}
+.summary .metric{display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;padding:10px 12px;border:0;border-radius:0}
+.summary .metric-top{font-size:.8125rem;overflow-wrap:anywhere}
+.summary .metric-number{font-size:1.5rem;margin-top:4px;overflow-wrap:anywhere}
+.summary .metric-value{display:flex;align-items:baseline;flex-wrap:wrap;column-gap:5px}
+.summary .metric-delivered .metric-number{color:var(--good)}
+.summary .metric-total{font-size:.75rem;color:var(--muted)}
+.summary .progress-track{margin-top:5px;height:4px}
 .summary .metric+.metric{border-inline-start:1px solid var(--line)}
 .summary .metric:focus-visible{outline-offset:-4px}
 .metric{padding:18px 20px;background:var(--surface);border:1px solid var(--line);border-radius:16px;min-width:0}
@@ -107,26 +112,9 @@ button.metric{text-align:left;color:var(--ink);font:inherit;cursor:pointer}
 .metric.attention .metric-number{color:var(--pending)}
 .metric-sub{font-size:12px;color:var(--muted);display:block;margin-top:5px}
 .progress-track{height:5px;background:var(--line);border-radius:8px;overflow:hidden;margin-top:12px}.progress-fill{height:100%;width:0;background:var(--accent);border-radius:8px}
-.publish-note{display:flex;align-items:flex-start;gap:9px;color:var(--muted);font-size:12px;margin:14px 0 24px;line-height:1.6}.publish-note .icon{width:16px;height:16px;margin-top:2px}
 .board{display:grid;grid-template-columns:minmax(0,1fr) 310px;gap:24px;align-items:start}
 .agenda,.work-tools{min-width:0}
 .work-tools{display:grid;gap:10px}
-.work-overview{border:1px solid var(--line);border-radius:13px;background:var(--surface)}
-.work-overview>summary{
-  display:flex;align-items:center;gap:8px;min-height:48px;padding:10px 14px;
-  color:var(--ink);font-size:.875rem;font-weight:700;cursor:pointer;list-style:none;
-}
-.work-overview>summary::-webkit-details-marker{display:none}
-.work-overview>summary .icon{width:17px;height:17px;color:var(--accent-text)}
-.work-overview>summary .chevron{margin-left:auto}
-.work-overview[open]>summary .chevron{transform:rotate(180deg)}
-.work-overview-body{padding:0 12px 12px}
-.work-overview .metric{padding:9px 8px}
-.work-overview .metric-top .icon,.work-overview .metric:last-child .metric-sub{display:none}
-.work-overview .metric-number{font-size:1.45rem;margin-top:4px}
-.work-overview .metric-top,.work-overview .metric-sub{font-size:.75rem;overflow-wrap:anywhere}
-.work-overview .progress-track{margin-top:8px}
-.work-overview .publish-note{margin:9px 0 0}
 .status-filters{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));padding:5px;gap:4px;border:1px solid var(--line);border-radius:13px;background:var(--surface)}
 .filter-button{min-width:0;flex-wrap:wrap;min-height:44px;border:0;border-radius:9px;background:transparent;color:var(--muted);display:flex;align-items:center;justify-content:center;gap:8px;font-size:13px;font-weight:700;padding:8px}
 .filter-button.active{background:var(--navy);color:var(--on-navy)}
@@ -280,8 +268,11 @@ button.metric{text-align:left;color:var(--ink);font:inherit;cursor:pointer}
   .nav-refresh{width:44px;min-width:44px;padding:10px;margin-bottom:0}.nav-refresh>span{display:none}
   .page-heading{align-items:center;gap:12px;margin-bottom:12px}.page-heading>div:first-child{min-width:0}.page-heading h2{font-size:23px;letter-spacing:-.7px;margin:0}.page-heading p{font-size:13px;line-height:1.65;margin-top:7px}#works-panel>.page-heading p{display:none}
   .period-wrap{min-width:0;max-width:46%;flex-shrink:1}.period-wrap label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}.period-wrap select{width:100%;min-width:0;padding:9px 24px 9px 10px;font-size:16px}
-  .metric{padding:10px;border-radius:13px}.metric-top{font-size:12px;overflow-wrap:anywhere}.metric-top>.icon{display:none}.metric-number{font-size:27px;margin-top:3px}.metric-sub{font-size:12px;line-height:1.45}.summary-scope{font-size:11px;margin-bottom:9px}.progress-track{margin-top:7px}
+  .metric{padding:10px;border-radius:13px}.metric-top{font-size:12px;overflow-wrap:anywhere}.metric-top>.icon{display:none}.metric-number{font-size:27px;margin-top:3px}.metric-sub{font-size:12px;line-height:1.45}.progress-track{margin-top:7px}
   .board{grid-template-columns:minmax(0,1fr);gap:18px}
+  .summary .metric{padding:8px}
+  .summary .metric-top{font-size:.75rem}
+  .summary .metric-number{font-size:1.375rem}
   .calendar-toggle{padding:8px 9px;font-size:.875rem}
   .calendar-card{padding:12px}.calendar-day{min-height:44px;font-size:14px}.calendar-mark{font-size:10px}.weekdays span{font-size:12px}.calendar-caption{font-size:13px}.calendar-key,.calendar-scope{font-size:12px}.month-select{font-size:16px}
   .status-filters{padding:3px;gap:3px}
@@ -348,6 +339,19 @@ button.metric{text-align:left;color:var(--ink);font:inherit;cursor:pointer}
       </div>
       <div class="board" id="work-board">
         <div class="agenda">
+          <div class="summary" id="work-summary" role="group" aria-label="Resumen del periodo escolar">
+            <button class="metric attention" id="pendingShortcut" type="button">
+              <span class="metric-top">Pendientes</span><span class="metric-number" id="stat-pending">0</span>
+            </button>
+            <div class="metric metric-delivered">
+              <span class="metric-top">Entregados</span>
+              <div class="metric-value"><span class="metric-number" id="stat-delivered">0</span> <span class="metric-total" id="stat-total">de 0</span> <span class="sr-only">trabajos</span></div>
+            </div>
+            <div class="metric">
+              <span class="metric-top">Avance</span><span class="metric-number" id="stat-cump-tri">–</span>
+              <div class="progress-track" aria-hidden="true"><div class="progress-fill" id="completion-fill"></div></div>
+            </div>
+          </div>
           <div class="search-box"><label class="sr-only" for="workSearch">Buscar por número de trabajo, tema, materia o página</label><svg class="icon" aria-hidden="true"><use href="#i-search"/></svg><input class="field" id="workSearch" type="search" placeholder="Buscar por número o tema" autocomplete="off" enterkeyhint="search" spellcheck="false"><button class="search-clear" id="clearSearch" type="button" aria-label="Borrar búsqueda" hidden><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button></div>
           <div class="status-filters" id="status-filters" role="group" aria-label="Mostrar trabajos por estado"><button type="button" class="filter-button active" data-status="pending" aria-pressed="true">Pendientes <span class="filter-count" id="filter-pending">0</span></button><button type="button" class="filter-button" data-status="delivered" aria-pressed="false">Entregados <span class="filter-count" id="filter-delivered">0</span></button><button type="button" class="filter-button" data-status="all" aria-pressed="false">Todos <span class="filter-count" id="filter-all">0</span></button></div>
           <div class="results-header">
@@ -364,14 +368,10 @@ button.metric{text-align:left;color:var(--ink);font:inherit;cursor:pointer}
           <div class="pagination" id="pagination" hidden><p id="page-description"></p><button class="btn" id="loadMoreDays" type="button">Ver más fechas<svg class="icon" aria-hidden="true"><use href="#i-chevron"/></svg></button></div>
           <p class="sr-only" role="status" aria-live="polite" id="results-announcement"></p>
         </div>
-        <aside class="work-tools" aria-label="Resumen y ayuda">
-          <details class="work-overview" id="work-summary">
-            <summary><svg class="icon" aria-hidden="true"><use href="#i-list"/></svg>Resumen del periodo<svg class="icon chevron" aria-hidden="true"><use href="#i-chevron"/></svg></summary>
-            <div class="work-overview-body">
-              <p class="summary-scope" id="summary-scope"></p>
-              <div class="summary"><button class="metric attention" id="pendingShortcut" type="button" title="Ver todos los pendientes del periodo"><span class="metric-top">Pendientes<svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></span><span class="metric-number" id="stat-pending">0</span><span class="metric-sub">Ver pendientes</span></button><div class="metric"><div class="metric-top">Entregados<svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></div><span class="metric-number" id="stat-delivered">0</span><span class="metric-sub" id="stat-total">de 0 trabajos</span></div><div class="metric"><div class="metric-top">Avance<svg class="icon" aria-hidden="true"><use href="#i-list"/></svg></div><span class="metric-number" id="stat-cump-tri">–</span><div class="progress-track" aria-hidden="true"><div class="progress-fill" id="completion-fill"></div></div><span class="metric-sub">Del total de trabajos</span></div></div>
-              <div class="publish-note"><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg><p id="publication-notice"></p></div>
-            </div>
+        <aside class="work-tools" aria-label="Horario y ayuda">
+          <details class="help-card">
+            <summary><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg>Horario de publicación<svg class="icon chevron" aria-hidden="true"><use href="#i-chevron"/></svg></summary>
+            <p id="publication-notice"></p>
           </details>
           <details class="help-card"><summary><svg class="icon" aria-hidden="true"><use href="#i-info"/></svg>Ayuda sobre trabajos y asistencia<svg class="icon chevron" aria-hidden="true"><use href="#i-chevron"/></svg></summary><p><strong>Pendiente:</strong> aún no está registrado como entregado.<br><strong>Entregado a tiempo:</strong> se registró dentro de la fecha.<br><strong>Entregado fuera de fecha:</strong> ya cuenta como entregado.</p><p>Si un trabajo ya se entregó y sigue pendiente, consulte al maestro.</p><p>Los trabajos pendientes aún no tienen una entrega registrada; consulte al maestro cómo recuperarlos en caso de inasistencia.</p><p><strong>Asistencia:</strong> corresponde a la fecha del bloque. <strong>Sin registro</strong> indica que aún no hay un dato de asistencia disponible para esa fecha. Si ya justificó una inasistencia con el maestro, la justificación se mantiene.</p></details>
         </aside>
@@ -1006,10 +1006,9 @@ function emptyState(){
 
 function renderSummary(){
   const c=countsFor(sourceEntries());
-  $('#summary-scope').textContent=`Resumen de ${TRI_LABELS[TRI].toLowerCase()} · trabajos publicados`;
   $('#stat-pending').textContent=c.pending;
   $('#stat-delivered').textContent=c.delivered;
-  $('#stat-total').textContent='de '+plural(c.total,'trabajo','trabajos');
+  $('#stat-total').textContent='de '+c.total;
   $('#stat-cump-tri').textContent=c.total ? Math.round(c.delivered/c.total*100)+'%' : '–';
   $('#completion-fill').style.width=(c.total ? c.delivered/c.total*100 : 0)+'%';
   $('#nav-pending').textContent=c.pending;
@@ -1175,7 +1174,6 @@ function resetUI(){
   Object.assign(UI,{section:'works',status:'pending',range:'all',date:'',query:'',month:schoolNow().date.slice(0,7),dayLimit:PAGE_DAYS});
   UI.openDays.clear();UI.workLimits.clear();
   $('#workSearch').value='';
-  $('#work-summary').open=false;
   setCalendarOpen(false);
   setSection('works');
 }
