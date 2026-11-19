@@ -113,7 +113,7 @@ button.metric{text-align:left;color:var(--ink);font:inherit;cursor:pointer}
 .metric-sub{font-size:12px;color:var(--muted);display:block;margin-top:5px}
 .progress-track{height:5px;background:var(--line);border-radius:8px;overflow:hidden;margin-top:12px}.progress-fill{height:100%;width:0;background:var(--accent);border-radius:8px}
 .board{display:grid;grid-template-columns:minmax(0,1fr) 310px;gap:24px;align-items:start}
-.agenda,.work-tools{min-width:0}
+.agenda,.work-filters,.work-results,.work-tools{min-width:0}
 .work-tools{display:grid;gap:10px}
 .status-filters{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));padding:5px;gap:4px;border:1px solid var(--line);border-radius:13px;background:var(--surface)}
 .filter-button{min-width:0;flex-wrap:wrap;min-height:44px;border:0;border-radius:9px;background:transparent;color:var(--muted);display:flex;align-items:center;justify-content:center;gap:8px;font-size:13px;font-weight:700;padding:8px}
@@ -286,6 +286,77 @@ button.metric{text-align:left;color:var(--ink);font:inherit;cursor:pointer}
   .pagination{justify-content:center;flex-direction:column}.pagination .btn{width:100%;min-height:48px}.attendance-grid{grid-template-columns:1fr;gap:10px}.attendance-grid .metric{padding:20px}.attendance-grid .metric-top{font-size:14px}.attendance-grid .metric-sub{font-size:13px}.attendance-grid .metric-number{font-size:32px}.attendance-history{padding:18px}.attendance-row{font-size:14px}.attendance-status{font-size:12px}.attendance-note{font-size:13px}.help-card summary,.help-card p{font-size:13px}.footer{font-size:11px;line-height:1.7}
 }
 @media(max-width:360px){html{--page-gutter-left:max(12px,env(safe-area-inset-left,0px));--page-gutter-right:max(12px,env(safe-area-inset-right,0px))}.header-inner{gap:8px}.brand{gap:8px}.header-right{gap:0}#themeBtn>span{display:none}#themeBtn{min-width:44px}.profile{grid-template-columns:34px minmax(0,1fr) auto;gap:8px;padding:10px}.avatar{width:34px;height:38px;font-size:13px}.student-info h1{font-size:16px}.page-tabs{gap:4px}.page-tab{font-size:13px;padding-inline:6px}.page-heading h2{font-size:21px}.period-wrap select{padding-right:8px}.results-header{gap:6px}.results-header h3{font-size:1rem}.calendar-toggle{padding-inline:7px;gap:4px;font-size:.8125rem}.calendar-toggle .icon{width:14px;height:14px}.metric{padding:10px 8px}.metric-number{font-size:27px}.day-summary{gap:7px;padding:9px}.calendar-card{padding:12px}.login-card{padding:20px}}
+@media(min-width:60rem){
+  .header-inner,.page{max-width:90rem}
+  .page{padding:22px clamp(24px,3vw,42px) 40px}
+  .profile{padding:15px 20px}
+  .page-tabs{margin:14px 0 18px}
+  .page-heading{margin-bottom:14px}
+  .page-heading h2{font-size:1.75rem;margin-bottom:0}
+
+  .board{
+    --sidebar-width:clamp(17.75rem,24vw,21rem);
+    grid-template-columns:minmax(0,1fr) var(--sidebar-width);
+    grid-template-areas:"overview overview" "filters tools" "results tools";
+    grid-template-rows:auto max-content 1fr;
+    column-gap:22px;row-gap:0;
+  }
+  .board:has(.calendar-panel:not([hidden])){
+    grid-template-areas:"overview overview" "filters calendar" "results calendar" "results tools";
+    grid-template-rows:auto max-content auto 1fr;
+  }
+  .agenda{display:contents}
+  .summary{grid-area:overview;margin-bottom:16px}
+  .summary .metric{padding:11px 16px}
+  .summary .metric-top{font-size:.875rem}
+  .summary .metric-number{font-size:1.65rem;font-variant-numeric:tabular-nums}
+  .summary .metric-total{font-size:.875rem}
+  .summary .progress-track{max-width:15rem}
+
+  .work-filters{
+    grid-area:filters;display:grid;align-items:start;
+    grid-template-columns:minmax(0,1fr) minmax(18.5rem,1fr);gap:10px;
+  }
+  .work-filters .search-box{margin:0}
+  .work-filters .search-box:has(~.status-filters[hidden]){grid-column:1/-1}
+  .work-filters .search-box input{min-height:54px}
+  .work-filters .search-box>.icon{top:18px}
+  .work-filters .search-clear{top:5px}
+  .work-filters .status-filters{padding:4px}
+  .work-filters .filter-button{font-size:.875rem;padding-inline:4px}
+  .work-filters .results-header{grid-column:1/-1;margin:0 0 12px}
+  .work-filters .results-header h3{font-size:1.125rem}
+  .work-filters .results-header p{font-size:.875rem}
+
+  .calendar-panel{grid-area:calendar;max-width:none;margin:0 0 10px}
+  .calendar-panel .calendar-card{padding:13px}
+  .calendar-panel .calendar-heading{font-size:.9375rem}
+  .calendar-panel .calendar-caption{font-size:.8125rem}
+  .calendar-panel .date-chip{font-size:.8125rem;padding-inline:8px}
+  .calendar-panel .calendar-day{min-height:44px}
+  .calendar-panel .calendar-key,.calendar-panel .calendar-scope{font-size:.75rem}
+  .work-tools{grid-area:tools}
+  .work-results{grid-area:results;container-type:inline-size}
+  .work-results .work-item{display:flex;flex-direction:column;min-width:0;padding:14px 16px}
+  .work-results .work-list{gap:12px;padding-top:12px}
+  .work-results .work-top{min-height:31px}
+  .work-results .evidence{margin-top:auto;padding-top:10px}
+  @container(min-width:35rem){
+    .work-results .work-list{grid-template-columns:repeat(2,minmax(0,1fr))}
+  }
+
+  #attendance-panel{
+    display:grid;align-items:start;column-gap:22px;row-gap:12px;
+    grid-template-columns:minmax(0,1fr) clamp(17.75rem,24vw,21rem);
+    grid-template-areas:"heading heading" "stats stats" "history notice" "history context";
+    grid-template-rows:auto auto max-content 1fr;
+  }
+  #attendance-panel>.page-heading{grid-area:heading;margin:0}
+  #attendance-panel .attendance-grid{grid-area:stats;margin:0 0 4px}
+  #attendance-panel .attendance-history{grid-area:history;max-width:none;margin:0;min-width:0}
+  #attendance-panel .family-note{grid-area:notice;margin:0}
+  #attendance-panel .attendance-note{grid-area:context;margin:0}
+}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 </style>
 </head>
@@ -352,21 +423,25 @@ button.metric{text-align:left;color:var(--ink);font:inherit;cursor:pointer}
               <div class="progress-track" aria-hidden="true"><div class="progress-fill" id="completion-fill"></div></div>
             </div>
           </div>
-          <div class="search-box"><label class="sr-only" for="workSearch">Buscar por número de trabajo, tema, materia o página</label><svg class="icon" aria-hidden="true"><use href="#i-search"/></svg><input class="field" id="workSearch" type="search" placeholder="Buscar por número o tema" autocomplete="off" enterkeyhint="search" spellcheck="false"><button class="search-clear" id="clearSearch" type="button" aria-label="Borrar búsqueda" hidden><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button></div>
-          <div class="status-filters" id="status-filters" role="group" aria-label="Mostrar trabajos por estado"><button type="button" class="filter-button active" data-status="pending" aria-pressed="true">Pendientes <span class="filter-count" id="filter-pending">0</span></button><button type="button" class="filter-button" data-status="delivered" aria-pressed="false">Entregados <span class="filter-count" id="filter-delivered">0</span></button><button type="button" class="filter-button" data-status="all" aria-pressed="false">Todos <span class="filter-count" id="filter-all">0</span></button></div>
-          <div class="results-header">
-            <div><h3 id="results-title" tabindex="-1">Pendientes por fecha</h3><p id="results-description"></p></div>
-            <button class="btn calendar-toggle" id="calendarToggle" type="button" aria-label="Elegir fecha" aria-expanded="false" aria-controls="calendar-panel"><svg class="icon" aria-hidden="true"><use href="#i-calendar"/></svg><span id="calendarToggleLabel">Elegir fecha</span></button>
+          <div class="work-filters">
+            <div class="search-box"><label class="sr-only" for="workSearch">Buscar por número de trabajo, tema, materia o página</label><svg class="icon" aria-hidden="true"><use href="#i-search"/></svg><input class="field" id="workSearch" type="search" placeholder="Buscar por número o tema" autocomplete="off" enterkeyhint="search" spellcheck="false"><button class="search-clear" id="clearSearch" type="button" aria-label="Borrar búsqueda" hidden><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button></div>
+            <div class="status-filters" id="status-filters" role="group" aria-label="Mostrar trabajos por estado"><button type="button" class="filter-button active" data-status="pending" aria-pressed="true">Pendientes <span class="filter-count" id="filter-pending">0</span></button><button type="button" class="filter-button" data-status="delivered" aria-pressed="false">Entregados <span class="filter-count" id="filter-delivered">0</span></button><button type="button" class="filter-button" data-status="all" aria-pressed="false">Todos <span class="filter-count" id="filter-all">0</span></button></div>
+            <div class="results-header">
+              <div><h3 id="results-title" tabindex="-1">Pendientes por fecha</h3><p id="results-description"></p></div>
+              <button class="btn calendar-toggle" id="calendarToggle" type="button" aria-label="Elegir fecha" aria-expanded="false" aria-controls="calendar-panel"><svg class="icon" aria-hidden="true"><use href="#i-calendar"/></svg><span id="calendarToggleLabel">Elegir fecha</span></button>
+            </div>
           </div>
           <div class="calendar-panel" id="calendar-panel" aria-label="Elegir un día" hidden>
             <div class="calendar-card"><div class="calendar-title-row"><h3 class="calendar-heading"><svg class="icon" aria-hidden="true"><use href="#i-calendar"/></svg>Calendario de trabajos</h3><button class="btn icon-only calendar-close" id="calendarClose" type="button" aria-label="Cerrar calendario"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button></div><p class="calendar-caption">Toque una fecha para consultar sus trabajos.</p>
               <div class="date-filters" role="group" aria-label="Filtrar por fecha"><button class="date-chip active" data-range="all" type="button" aria-pressed="true" aria-label="Todas las fechas">Todas las fechas</button><button class="date-chip" data-range="today" type="button" aria-pressed="false">Hoy</button><button class="date-chip" data-range="week" type="button" aria-pressed="false" aria-label="Esta semana">Esta semana</button></div>
               <div class="month-navigation"><button id="prevMonth" class="btn icon-only" type="button" aria-label="Mes anterior" title="Mes anterior"><svg class="icon" aria-hidden="true"><use href="#i-left"/></svg></button><select id="monthSelect" class="month-select" aria-label="Mes del calendario"></select><button id="nextMonth" class="btn icon-only" type="button" aria-label="Mes siguiente" title="Mes siguiente"><svg class="icon" aria-hidden="true"><use href="#i-right"/></svg></button></div><div class="weekdays" aria-hidden="true"><span>Lun</span><span>Mar</span><span>Mié</span><span>Jue</span><span>Vie</span><span>Sáb</span><span>Dom</span></div><div class="calendar-days" id="calendar-days" role="group" aria-label="Días del mes"></div><div class="calendar-key"><span><b class="key-symbol">2 p.</b> Pendientes</span><span><b class="key-symbol done">✓</b> Todo entregado</span></div><p class="calendar-scope" id="calendar-scope"></p></div>
           </div>
-          <div id="other-pending" class="other-pending" hidden><span id="other-pending-text"></span><button id="allPendingBtn" class="text-button" type="button">Ver todos los pendientes</button></div>
-          <div id="day-groups" class="day-groups"></div>
-          <div class="pagination" id="pagination" hidden><p id="page-description"></p><button class="btn" id="loadMoreDays" type="button">Ver más fechas<svg class="icon" aria-hidden="true"><use href="#i-chevron"/></svg></button></div>
-          <p class="sr-only" role="status" aria-live="polite" id="results-announcement"></p>
+          <div class="work-results">
+            <div id="other-pending" class="other-pending" hidden><span id="other-pending-text"></span><button id="allPendingBtn" class="text-button" type="button">Ver todos los pendientes</button></div>
+            <div id="day-groups" class="day-groups"></div>
+            <div class="pagination" id="pagination" hidden><p id="page-description"></p><button class="btn" id="loadMoreDays" type="button">Ver más fechas<svg class="icon" aria-hidden="true"><use href="#i-chevron"/></svg></button></div>
+            <p class="sr-only" role="status" aria-live="polite" id="results-announcement"></p>
+          </div>
         </div>
         <aside class="work-tools" aria-label="Horario y ayuda">
           <details class="help-card">
