@@ -273,7 +273,7 @@ button.metric{text-align:left;color:var(--ink);font:inherit;cursor:pointer}
   .summary .metric{padding:8px}
   .summary .metric-top{font-size:.75rem}
   .summary .metric-number{font-size:1.375rem}
-  .calendar-toggle{padding:8px 9px;font-size:.875rem}
+  .calendar-toggle{padding:8px;gap:5px;font-size:.875rem}
   .calendar-card{padding:12px}.calendar-day{min-height:44px;font-size:14px}.calendar-mark{font-size:10px}.weekdays span{font-size:12px}.calendar-caption{font-size:13px}.calendar-key,.calendar-scope{font-size:12px}.month-select{font-size:16px}
   .status-filters{padding:3px;gap:3px}
   .filter-button{font-size:13px;gap:4px;padding:6px 3px;min-height:44px}
@@ -285,7 +285,7 @@ button.metric{text-align:left;color:var(--ink);font:inherit;cursor:pointer}
   .evidence a{flex:1 1 100%;justify-content:flex-start}
   .pagination{justify-content:center;flex-direction:column}.pagination .btn{width:100%;min-height:48px}.attendance-grid{grid-template-columns:1fr;gap:10px}.attendance-grid .metric{padding:20px}.attendance-grid .metric-top{font-size:14px}.attendance-grid .metric-sub{font-size:13px}.attendance-grid .metric-number{font-size:32px}.attendance-history{padding:18px}.attendance-row{font-size:14px}.attendance-status{font-size:12px}.attendance-note{font-size:13px}.help-card summary,.help-card p{font-size:13px}.footer{font-size:11px;line-height:1.7}
 }
-@media(max-width:360px){html{--page-gutter-left:max(12px,env(safe-area-inset-left,0px));--page-gutter-right:max(12px,env(safe-area-inset-right,0px))}.header-inner{gap:8px}.brand{gap:8px}.header-right{gap:0}#themeBtn>span{display:none}#themeBtn{min-width:44px}.profile{grid-template-columns:34px minmax(0,1fr) auto;gap:8px;padding:10px}.avatar{width:34px;height:38px;font-size:13px}.student-info h1{font-size:16px}.page-tabs{gap:4px}.page-tab{font-size:13px;padding-inline:6px}.page-heading h2{font-size:21px}.metric{padding:10px 8px}.metric-number{font-size:27px}.day-summary{gap:7px;padding:9px}.calendar-card{padding:12px}.login-card{padding:20px}}
+@media(max-width:360px){html{--page-gutter-left:max(12px,env(safe-area-inset-left,0px));--page-gutter-right:max(12px,env(safe-area-inset-right,0px))}.header-inner{gap:8px}.brand{gap:8px}.header-right{gap:0}#themeBtn>span{display:none}#themeBtn{min-width:44px}.profile{grid-template-columns:34px minmax(0,1fr) auto;gap:8px;padding:10px}.avatar{width:34px;height:38px;font-size:13px}.student-info h1{font-size:16px}.page-tabs{gap:4px}.page-tab{font-size:13px;padding-inline:6px}.page-heading h2{font-size:21px}.period-wrap select{padding-right:8px}.results-header{gap:6px}.results-header h3{font-size:1rem}.calendar-toggle{padding-inline:7px;gap:4px;font-size:.8125rem}.calendar-toggle .icon{width:14px;height:14px}.metric{padding:10px 8px}.metric-number{font-size:27px}.day-summary{gap:7px;padding:9px}.calendar-card{padding:12px}.login-card{padding:20px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 </style>
 </head>
@@ -356,10 +356,10 @@ button.metric{text-align:left;color:var(--ink);font:inherit;cursor:pointer}
           <div class="status-filters" id="status-filters" role="group" aria-label="Mostrar trabajos por estado"><button type="button" class="filter-button active" data-status="pending" aria-pressed="true">Pendientes <span class="filter-count" id="filter-pending">0</span></button><button type="button" class="filter-button" data-status="delivered" aria-pressed="false">Entregados <span class="filter-count" id="filter-delivered">0</span></button><button type="button" class="filter-button" data-status="all" aria-pressed="false">Todos <span class="filter-count" id="filter-all">0</span></button></div>
           <div class="results-header">
             <div><h3 id="results-title" tabindex="-1">Pendientes por fecha</h3><p id="results-description"></p></div>
-            <button class="btn calendar-toggle" id="calendarToggle" type="button" aria-label="Elegir una fecha en el calendario" aria-expanded="false" aria-controls="calendar-panel"><svg class="icon" aria-hidden="true"><use href="#i-calendar"/></svg><span id="calendarToggleLabel">Fecha</span></button>
+            <button class="btn calendar-toggle" id="calendarToggle" type="button" aria-label="Elegir fecha" aria-expanded="false" aria-controls="calendar-panel"><svg class="icon" aria-hidden="true"><use href="#i-calendar"/></svg><span id="calendarToggleLabel">Elegir fecha</span></button>
           </div>
           <div class="calendar-panel" id="calendar-panel" aria-label="Elegir un día" hidden>
-            <div class="calendar-card"><div class="calendar-title-row"><h3 class="calendar-heading"><svg class="icon" aria-hidden="true"><use href="#i-calendar"/></svg>Encuentre un día</h3><button class="btn icon-only calendar-close" id="calendarClose" type="button" aria-label="Cerrar calendario"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button></div><p class="calendar-caption">Toque una fecha para consultar sus trabajos.</p>
+            <div class="calendar-card"><div class="calendar-title-row"><h3 class="calendar-heading"><svg class="icon" aria-hidden="true"><use href="#i-calendar"/></svg>Calendario de trabajos</h3><button class="btn icon-only calendar-close" id="calendarClose" type="button" aria-label="Cerrar calendario"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button></div><p class="calendar-caption">Toque una fecha para consultar sus trabajos.</p>
               <div class="date-filters" role="group" aria-label="Filtrar por fecha"><button class="date-chip active" data-range="all" type="button" aria-pressed="true" aria-label="Todas las fechas">Todas las fechas</button><button class="date-chip" data-range="today" type="button" aria-pressed="false">Hoy</button><button class="date-chip" data-range="week" type="button" aria-pressed="false" aria-label="Esta semana">Esta semana</button></div>
               <div class="month-navigation"><button id="prevMonth" class="btn icon-only" type="button" aria-label="Mes anterior" title="Mes anterior"><svg class="icon" aria-hidden="true"><use href="#i-left"/></svg></button><select id="monthSelect" class="month-select" aria-label="Mes del calendario"></select><button id="nextMonth" class="btn icon-only" type="button" aria-label="Mes siguiente" title="Mes siguiente"><svg class="icon" aria-hidden="true"><use href="#i-right"/></svg></button></div><div class="weekdays" aria-hidden="true"><span>Lun</span><span>Mar</span><span>Mié</span><span>Jue</span><span>Vie</span><span>Sáb</span><span>Dom</span></div><div class="calendar-days" id="calendar-days" role="group" aria-label="Días del mes"></div><div class="calendar-key"><span><b class="key-symbol">2 p.</b> Pendientes</span><span><b class="key-symbol done">✓</b> Todo entregado</span></div><p class="calendar-scope" id="calendar-scope"></p></div>
           </div>
@@ -1031,9 +1031,13 @@ function renderLists(){
   }
   $('#clearSearch').hidden=!searching;
   const specificDate=UI.range==='date'&&UI.date;
-  $('#calendarToggle').classList.toggle('active',UI.range!=='all');
-  $('#calendarToggleLabel').textContent=specificDate ? formatDate(UI.date,{day:'numeric',month:'short'}).replace(/\./g,'') : 'Fecha';
-  $('#calendarToggle').setAttribute('aria-label',specificDate ? 'Cambiar fecha: '+prettyDate(UI.date) : 'Filtrar por fecha');
+  const dateFiltered=UI.range!=='all';
+  const dateLabel=specificDate
+    ? formatDate(UI.date,{day:'numeric',month:'short'}).replace(/\./g,'')
+    : ({today:'Hoy',week:'Esta semana'}[UI.range]||'Elegir fecha');
+  $('#calendarToggle').classList.toggle('active',dateFiltered);
+  $('#calendarToggleLabel').textContent=dateLabel;
+  $('#calendarToggle').setAttribute('aria-label',dateFiltered ? `${dateLabel}, cambiar fecha` : dateLabel);
   const title=searching ? 'Resultados de búsqueda' : UI.range==='all' ? `${STATE_LABELS[UI.status]} por fecha` : STATE_LABELS[UI.status];
   const scope=searching ? `${TRI_LABELS[TRI]} · Todas las fechas y estados` : rangeLabel();
   $('#results-title').textContent=title;
